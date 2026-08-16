@@ -1,0 +1,11 @@
+{
+  "subtitle": "退订通知邮件",
+  "title": "退订通知邮件",
+  "description": "确认后你将不再收到此类通知邮件。",
+  "confirmLabel": "确认退订",
+  "pendingLabel": "正在退订…",
+  "invalidDescription": "该退订链接无效，可能缺少参数或已被改动。",
+  "invalidTokenDescription": "该退订链接无效或已过期，你可能已经退订过这类通知。",
+  "successDescription": "已成功退订，你将不再收到此类通知邮件。",
+  "errorGeneric": "退订请求失败，请稍后重试"
+}

@@ -1,0 +1,72 @@
+{
+  "status": {
+    "pending": "待审核",
+    "published": "已发布",
+    "spam": "垃圾",
+    "deleted": "已删除",
+    "active": "启用",
+    "disabled": "停用",
+    "admin": "管理员",
+    "user": "用户",
+    "unknown": "未知"
+  },
+  "commentStatus": {
+    "all": "全部状态",
+    "pending": "待审核",
+    "published": "已发布",
+    "spam": "垃圾评论",
+    "deleted": "已删除"
+  },
+  "commentStatusTarget": {
+    "pending": "移入待审核",
+    "published": "发布评论",
+    "spam": "标记垃圾",
+    "deleted": "软删除"
+  },
+  "sort": {
+    "desc": "最新优先",
+    "asc": "最早优先"
+  },
+  "privacyMode": {
+    "none": "不记录",
+    "coarse": "粗略记录",
+    "full": "完整记录",
+    "unknown": "未知",
+    "notRecorded": "未记录"
+  },
+  "commentSort": {
+    "asc": "升序（旧到新）",
+    "desc": "降序（新到旧）"
+  },
+  "userDeleteMode": {
+    "soft": "软删除（可恢复账号）",
+    "hard": "硬删除（不可恢复）"
+  },
+  "captchaProviderType": {
+    "turnstile": "Cloudflare Turnstile",
+    "recaptcha": "Google reCAPTCHA",
+    "hcaptcha": "hCaptcha",
+    "cap": "CAP"
+  },
+  "commentMode": {
+    "anonymous": "允许匿名评论",
+    "authenticated": "仅认证用户"
+  },
+  "moderation": {
+    "review": "人工审核",
+    "direct": "直接发布"
+  },
+  "userDeleteModeShort": {
+    "soft": "软删除",
+    "hard": "永久删除"
+  },
+  "siteStatus": {
+    "active": "启用",
+    "disabled": "停用"
+  },
+  "threadStatus": {
+    "all": "全部状态",
+    "enabled": "已开启",
+    "disabled": "已关闭"
+  }
+}

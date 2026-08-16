@@ -1,0 +1,72 @@
+{
+  "status": {
+    "pending": "Pending",
+    "published": "Published",
+    "spam": "Spam",
+    "deleted": "Deleted",
+    "active": "Active",
+    "disabled": "Disabled",
+    "admin": "Admin",
+    "user": "User",
+    "unknown": "Unknown"
+  },
+  "commentStatus": {
+    "all": "All statuses",
+    "pending": "Pending review",
+    "published": "Published",
+    "spam": "Spam",
+    "deleted": "Deleted"
+  },
+  "commentStatusTarget": {
+    "pending": "Move to pending",
+    "published": "Publish comment",
+    "spam": "Mark as spam",
+    "deleted": "Soft delete"
+  },
+  "sort": {
+    "desc": "Newest first",
+    "asc": "Oldest first"
+  },
+  "privacyMode": {
+    "none": "Do not record",
+    "coarse": "Coarse record",
+    "full": "Full record",
+    "unknown": "Unknown",
+    "notRecorded": "Not recorded"
+  },
+  "commentSort": {
+    "asc": "Ascending (oldest to newest)",
+    "desc": "Descending (newest to oldest)"
+  },
+  "userDeleteMode": {
+    "soft": "Soft delete (recoverable account)",
+    "hard": "Hard delete (permanent)"
+  },
+  "captchaProviderType": {
+    "turnstile": "Cloudflare Turnstile",
+    "recaptcha": "Google reCAPTCHA",
+    "hcaptcha": "hCaptcha",
+    "cap": "CAP"
+  },
+  "commentMode": {
+    "anonymous": "Allow anonymous comments",
+    "authenticated": "Authenticated users only"
+  },
+  "moderation": {
+    "review": "Manual review",
+    "direct": "Publish directly"
+  },
+  "userDeleteModeShort": {
+    "soft": "Soft delete",
+    "hard": "Permanently delete"
+  },
+  "siteStatus": {
+    "active": "Active",
+    "disabled": "Disabled"
+  },
+  "threadStatus": {
+    "all": "All statuses",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  }
+}

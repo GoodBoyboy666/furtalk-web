@@ -1,0 +1,11 @@
+{
+  "subtitle": "Unsubscribe from notification emails",
+  "title": "Unsubscribe from notification emails",
+  "description": "After confirming, you will stop receiving this type of notification email.",
+  "confirmLabel": "Confirm unsubscribe",
+  "pendingLabel": "Unsubscribing…",
+  "invalidDescription": "This unsubscribe link is invalid: a parameter may be missing or altered.",
+  "invalidTokenDescription": "This unsubscribe link is invalid or has expired. You may have already unsubscribed from this type of notification.",
+  "successDescription": "You have been unsubscribed and will no longer receive this type of notification email.",
+  "errorGeneric": "The unsubscribe request failed. Please try again later."
+}

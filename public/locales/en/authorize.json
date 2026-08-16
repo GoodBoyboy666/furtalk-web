@@ -1,0 +1,15 @@
+{
+  "title": "Comment widget authorization",
+  "cardTitle": "Authorize the comment widget",
+  "description": "After confirming, this site will post comments as your account.",
+  "invalidParams": "Invalid authorization request parameters",
+  "needsOpener": "This page must be opened from the comment widget",
+  "handshakePending": "Handshaking with the comment widget...",
+  "contextLoading": "Loading authorization information...",
+  "contextLoadFailed": "Failed to load authorization information. Please try again later.",
+  "site": "Site: {{siteName}}",
+  "scopeDescription": "After authorizing, this site can post and reply to comments and manage your published comments as your current account. The authorization code is single-use and valid for 60 seconds.",
+  "issueFailed": "Authorization failed. Please try again.",
+  "issuePending": "Completing authorization...",
+  "grant": "Authorize"
+}

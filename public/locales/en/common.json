@@ -1,0 +1,97 @@
+{
+  "app": {
+    "title": "Furtalk Admin Console",
+    "name": "Furtalk",
+    "console": "Admin Console"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "auto": "System",
+    "toggleLabel": "Toggle theme",
+    "selectTitle": "Select theme mode",
+    "autoTitle": "Follow system (auto)",
+    "lightTitle": "Light mode",
+    "darkTitle": "Dark mode"
+  },
+  "language": {
+    "toggleLabel": "Switch language",
+    "selectTitle": "Select interface language",
+    "zhCN": "简体中文",
+    "en": "English"
+  },
+  "navigation": {
+    "workspace": "Workspace",
+    "overview": "Overview",
+    "comments": "Comment management",
+    "threads": "Thread management",
+    "sites": "Site management",
+    "users": "User management",
+    "settings": "System settings",
+    "personalCenter": "Account center",
+    "profile": "Profile",
+    "security": "Security",
+    "myComments": "My comments",
+    "adminConsole": "Admin Console"
+  },
+  "accountMenu": {
+    "label": "Account menu",
+    "openNavigation": "Open navigation",
+    "logout": "Sign out",
+    "nicknameFallback": "No nickname set"
+  },
+  "action": {
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "create": "Create",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "confirmDelete": "Confirm delete",
+    "confirmAction": "Confirm",
+    "nextPage": "Next page",
+    "back": "Back",
+    "close": "Close",
+    "add": "Add",
+    "search": "Search",
+    "restore": "Restore",
+    "reset": "Reset"
+  },
+  "state": {
+    "loading": "Loading...",
+    "loadingError": "Failed to load. Please try again.",
+    "noData": "No data",
+    "openingAccountCenter": "Opening account center...",
+    "adjustFilters": "Adjust the filters and try again"
+  },
+  "session": {
+    "verifying": "Verifying sign-in status...",
+    "returningToLogin": "Returning to sign-in...",
+    "verificationFailed": "Unable to verify sign-in status",
+    "goingToAccount": "Going to account center..."
+  },
+  "error": {
+    "generic": "Request failed. Please try again later.",
+    "unknown": "Unknown"
+  },
+  "placeholder": {
+    "notProvided": "Not recorded",
+    "dash": "-"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}}",
+    "pageSize": "Items per page",
+    "pageSizeOption": "{{count}} per page",
+    "total": "{{count}} items"
+  },
+  "notFound": {
+    "title": "404",
+    "heading": "Lost in the comments?",
+    "description": "This comment went somewhere it shouldn't — the page you're looking for doesn't exist.",
+    "backHome": "Back to home"
+  }
+}

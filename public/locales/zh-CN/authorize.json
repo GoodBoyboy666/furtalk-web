@@ -1,0 +1,15 @@
+{
+  "title": "评论组件授权",
+  "cardTitle": "授权评论组件",
+  "description": "确认后该网站将以你的账号身份发表评论。",
+  "invalidParams": "授权请求参数无效",
+  "needsOpener": "此页面需要从评论组件打开",
+  "handshakePending": "正在与评论组件握手…",
+  "contextLoading": "正在加载授权信息…",
+  "contextLoadFailed": "授权信息加载失败，请稍后重试",
+  "site": "站点：{{siteName}}",
+  "scopeDescription": "授权后，该网站可以以当前账号身份发表评论、回复，并管理你发布的评论。授权码仅一次性使用，60 秒内有效。",
+  "issueFailed": "授权失败，请重试",
+  "issuePending": "正在完成授权…",
+  "grant": "授权"
+}
