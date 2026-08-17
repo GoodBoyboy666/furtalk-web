@@ -1,6 +1,8 @@
 import {
   createFileRoute,
   Link,
+  Outlet,
+  useMatch,
   useNavigate,
   useSearch,
 } from '@tanstack/react-router'
@@ -68,6 +70,16 @@ export const Route = createFileRoute('/account/comments')({
 })
 
 export function CommentsPage() {
+  const detail = useMatch({
+    from: '/account/comments/$commentId',
+    shouldThrow: false,
+  })
+  if (detail) return <Outlet />
+  return <CommentsList />
+}
+
+// CommentsList 仅在没有详情子路由匹配时挂载，避免列表与详情同时渲染。
+function CommentsList() {
   const { t } = useTranslation('account')
   const navigate = useNavigate()
   const search = useSearch({ from: Route.id })

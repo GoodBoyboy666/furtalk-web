@@ -70,6 +70,19 @@ describe('authApi.passwordLogin', () => {
   })
 })
 
+describe('authApi.revokeSessions', () => {
+  it('POSTs the revoke-all endpoint with the current CSRF cookie', async () => {
+    setDocumentCookie('__Host-furtalk_csrf=csrf-token')
+    const captured = installAdapter(undefined, 204)
+
+    await authApi.revokeSessions()
+
+    expect(captured[0].method).toBe('post')
+    expect(captured[0].url).toBe('/me/sessions/revoke')
+    expect(captured[0].headers.get('X-CSRF-Token')).toBe('csrf-token')
+  })
+})
+
 describe('captchaApi.config', () => {
   it('GETs /captcha/config with the action query parameter', async () => {
     const captured = installAdapter({ required: false })

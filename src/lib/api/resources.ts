@@ -96,6 +96,7 @@ export const authApi = {
     current_password?: string
     new_password: string
   }) => api.post('/me/password', payload),
+  revokeSessions: () => api.post('/me/sessions/revoke'),
   passwordResetCode: (payload: { email: string; captcha_token?: string }) =>
     api.post('/auth/password/reset-codes', payload),
   passwordResetConfirm: (payload: {

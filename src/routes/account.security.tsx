@@ -1,9 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Fingerprint,
   KeyRound,
   Loader2,
+  LogOut,
   Mail,
   Pencil,
   Save,
@@ -55,6 +56,7 @@ export const Route = createFileRoute('/account/security')({
 
 export function SecurityPage() {
   const { t } = useTranslation('account')
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const me = useQuery({ queryKey: ['me'], queryFn: authApi.me })
   const identities = useQuery({
@@ -73,6 +75,7 @@ export function SecurityPage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [revokeConfirm, setRevokeConfirm] = useState(false)
 
   const hasPassword = me.data?.has_password ?? false
   const passwordMutation = useMutation({
@@ -147,6 +150,19 @@ export function SecurityPage() {
     onError: (error) => {
       setUnbinding(null)
       toast.error(unbindErrorMessage(error, t))
+    },
+  })
+  const revokeSessions = useMutation({
+    mutationFn: authApi.revokeSessions,
+    onSuccess: () => {
+      toast.success(t('sessionsRevoked'))
+      setRevokeConfirm(false)
+      queryClient.clear()
+      void navigate({ to: '/login' })
+    },
+    onError: (error) => {
+      setRevokeConfirm(false)
+      toast.error(passwordErrorMessage(error, t))
     },
   })
 
@@ -417,6 +433,36 @@ export function SecurityPage() {
             )}
           </CardContent>
         </Card>
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="text-base">{t('revokeSessions')}</CardTitle>
+            <CardDescription>{t('revokeSessionsDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            {revokeSessions.isError ? (
+              <p
+                role="alert"
+                className="m-0 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              >
+                {passwordErrorMessage(revokeSessions.error, t)}
+              </p>
+            ) : null}
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-fit"
+              disabled={revokeSessions.isPending}
+              onClick={() => setRevokeConfirm(true)}
+            >
+              {revokeSessions.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <LogOut />
+              )}
+              {t('revokeSessions')}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
       <Dialog
         open={!!renaming}
@@ -488,6 +534,34 @@ export function SecurityPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AlertDialog
+        open={revokeConfirm}
+        onOpenChange={(value) => !value && setRevokeConfirm(false)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('revokeSessionsTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('revokeSessionsHint')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t('action.cancel', { ns: 'common' })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={revokeSessions.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => revokeSessions.mutate()}
+            >
+              {revokeSessions.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : null}
+              {t('confirmRevokeSessions')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
@@ -495,7 +569,7 @@ export function SecurityPage() {
 function passwordErrorMessage(error: unknown, t: (key: string) => string) {
   return error instanceof ApiError
     ? error.message
-    : error instanceof Error
+    : error instanceof Error && error.message
       ? error.message
       : t('operationFailed')
 }

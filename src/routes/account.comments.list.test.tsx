@@ -17,6 +17,8 @@ const searchMock = vi.hoisted(() => ({
 vi.mock('@tanstack/react-router', () => ({
   createFileRoute: () => () => ({ component: null }),
   Link: ({ children }: { children: React.ReactNode }) => <a>{children}</a>,
+  Outlet: () => null,
+  useMatch: () => undefined,
   useSearch: searchMock.useSearch,
   useNavigate: searchMock.useNavigate,
 }))

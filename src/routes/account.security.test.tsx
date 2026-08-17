@@ -18,10 +18,13 @@ const apiMocks = vi.hoisted(() => ({
   deletePasskey: vi.fn(),
   renamePasskey: vi.fn(),
   changePassword: vi.fn(),
+  revokeSessions: vi.fn(),
+  navigate: vi.fn(),
 }))
 
 vi.mock('@tanstack/react-router', () => ({
   createFileRoute: () => () => ({ component: null }),
+  useNavigate: () => apiMocks.navigate,
 }))
 vi.mock('@/lib/api/resources', () => ({
   authApi: apiMocks,
@@ -58,11 +61,14 @@ function renderSecurity(overrides: Partial<Me> = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <SecurityPage />
-    </QueryClientProvider>,
-  )
+  return {
+    queryClient,
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <SecurityPage />
+      </QueryClientProvider>,
+    ),
+  }
 }
 
 beforeEach(() => {
@@ -80,6 +86,7 @@ beforeEach(() => {
   apiMocks.finishPasskeyRegistration.mockResolvedValue(undefined)
   apiMocks.renamePasskey.mockResolvedValue(undefined)
   apiMocks.changePassword.mockResolvedValue(undefined)
+  apiMocks.revokeSessions.mockResolvedValue(undefined)
 })
 
 afterEach(() => {
@@ -310,6 +317,66 @@ describe('SecurityPage third-party provider bind/unbind contract', () => {
     await user.click(await screen.findByRole('button', { name: '确认解绑' }))
     await waitFor(() => {
       expect(apiMocks.deleteIdentity).toHaveBeenCalledWith('7')
+    })
+  })
+})
+
+describe('SecurityPage revoke-all sessions contract', () => {
+  it('requires confirmation and clearly warns that the current device will sign out', async () => {
+    renderSecurity()
+    const user = userEvent.setup()
+
+    await user.click(
+      await screen.findByRole('button', { name: '注销全部会话' }),
+    )
+
+    expect(apiMocks.revokeSessions).not.toHaveBeenCalled()
+    expect(
+      screen.getByText(
+        '所有设备上的登录会话都会失效，当前设备也会退出。确定继续吗？',
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '确认注销全部会话' }))
+    await waitFor(() => {
+      expect(apiMocks.revokeSessions).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('clears the query cache and navigates to login after success', async () => {
+    const { queryClient } = renderSecurity()
+    const clear = vi.spyOn(queryClient, 'clear')
+    const user = userEvent.setup()
+
+    await user.click(
+      await screen.findByRole('button', { name: '注销全部会话' }),
+    )
+    await user.click(screen.getByRole('button', { name: '确认注销全部会话' }))
+
+    await waitFor(() => {
+      expect(apiMocks.navigate).toHaveBeenCalledWith({ to: '/login' })
+    })
+    expect(clear).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the failure and allows the action to be retried', async () => {
+    apiMocks.revokeSessions
+      .mockRejectedValueOnce(new Error('网络暂时不可用'))
+      .mockResolvedValueOnce(undefined)
+    renderSecurity()
+    const user = userEvent.setup()
+
+    await user.click(
+      await screen.findByRole('button', { name: '注销全部会话' }),
+    )
+    await user.click(screen.getByRole('button', { name: '确认注销全部会话' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('网络暂时不可用')
+    expect(apiMocks.navigate).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: '注销全部会话' }))
+    await user.click(screen.getByRole('button', { name: '确认注销全部会话' }))
+    await waitFor(() => {
+      expect(apiMocks.revokeSessions).toHaveBeenCalledTimes(2)
     })
   })
 })
