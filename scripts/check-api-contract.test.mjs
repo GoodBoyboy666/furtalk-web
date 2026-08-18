@@ -59,7 +59,7 @@ describe('extractStaticPath', () => {
   })
 
   it('extracts identifier placeholders from template literals', () => {
-    const source = "api.get(`/admin/comments/${id}`)"
+    const source = 'api.get(`/admin/comments/${id}`)'
     const operations = collectOperations(swagger)
     const result = checkSource('fake.ts', source, operations, 'fake.ts')
     expect(result.issues).toHaveLength(0)

@@ -181,7 +181,9 @@ export function main() {
   return 0
 }
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+const isMain =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 if (isMain) {
   process.exit(main())
 }

@@ -107,24 +107,26 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-10">
+    <main className="relative flex min-h-screen items-center justify-center ambient-auth-bg bg-background/80 px-4 py-12">
       <FadeIn className="w-full max-w-md">
-        <div className="mb-8 flex items-center justify-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Shield className="size-5" />
+        <div className="mb-8 flex items-center justify-center gap-3.5">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+            <Shield className="size-5.5" />
           </div>
           <div>
-            <p className="m-0 text-lg font-semibold">
+            <p className="m-0 text-xl font-bold tracking-tight">
               {t('app.name', { ns: 'common' })}
             </p>
-            <p className="m-0 text-xs text-muted-foreground">
+            <p className="m-0 text-xs font-medium text-muted-foreground">
               {t('resetSubtitle')}
             </p>
           </div>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('resetTitle')}</CardTitle>
+        <Card className="border-border/80 bg-card/95 shadow-md backdrop-blur-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-semibold tracking-tight">
+              {t('resetTitle')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {stage === 'request' ? (

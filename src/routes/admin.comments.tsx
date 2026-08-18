@@ -170,7 +170,7 @@ function CommentsList() {
   return (
     <>
       <PageHeader title={t('commentsTitle')} />
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:items-center">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground" />
           <Input
@@ -183,7 +183,7 @@ function CommentsList() {
               }
             }}
             placeholder={t('searchHint')}
-            className="pl-9"
+            className="pl-9 bg-card"
           />
         </div>
         <Button
@@ -203,7 +203,7 @@ function CommentsList() {
           }}
           items={selectItems(commentStatusOptions, t)}
         >
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="w-full sm:w-40 bg-card">
             <SelectValue placeholder={t('commentStatus.all', { ns: 'enums' })}>
               {commentStatusLabel}
             </SelectValue>
@@ -226,7 +226,7 @@ function CommentsList() {
           }}
           items={selectItems(adminSortOptions, t)}
         >
-          <SelectTrigger className="w-full sm:w-36">
+          <SelectTrigger className="w-full sm:w-36 bg-card">
             <SelectValue placeholder={t('sort.desc', { ns: 'enums' })}>
               {adminSortLabel}
             </SelectValue>
@@ -242,7 +242,7 @@ function CommentsList() {
           </SelectContent>
         </Select>
       </div>
-      <div className="overflow-hidden rounded-lg border bg-background">
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         {query.isPending ? (
           <StateFade kind="loading">
             <div className="p-8 text-center text-sm text-muted-foreground">

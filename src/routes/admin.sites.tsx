@@ -362,18 +362,20 @@ function SiteCard({
     setOriginEditValue(item.origin)
   }
   return (
-    <Card>
-      <CardHeader className="flex-row items-start justify-between">
+    <Card className="h-full border-border/80 bg-card subtle-card-hover">
+      <CardHeader className="flex-row items-start justify-between border-b border-border/60 pb-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
-            <Globe2 className="size-4 text-muted-foreground" />
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Globe2 className="size-4.5" />
           </div>
           <div className="min-w-0">
-            <CardTitle className="truncate text-base">{site.name}</CardTitle>
-            <p className="mt-1 truncate text-xs text-muted-foreground">
+            <CardTitle className="truncate text-base font-semibold">
+              {site.name}
+            </CardTitle>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">
               {site.canonical_url}
             </p>
-            <p className="m-0 mt-0.5 break-all text-xs text-muted-foreground">
+            <p className="m-0 mt-0.5 break-all font-mono text-[11px] text-muted-foreground/80">
               ID: {site.id}
             </p>
           </div>

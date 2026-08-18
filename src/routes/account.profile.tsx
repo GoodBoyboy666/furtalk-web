@@ -65,11 +65,13 @@ export function ProfilePage() {
         description={t('profileDescription')}
       />
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t('basicInfo')}</CardTitle>
+        <Card className="border-border/80 bg-card shadow-xs">
+          <CardHeader className="border-b border-border/60 pb-3">
+            <CardTitle className="text-base font-semibold">
+              {t('basicInfo')}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4">
+          <CardContent className="grid gap-4 pt-4">
             <div className="grid gap-2">
               <Label htmlFor="email">{t('emailReadonly')}</Label>
               <Input id="email" value={me.data.email} readOnly disabled />
@@ -101,13 +103,13 @@ export function ProfilePage() {
             </Button>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className="border-border/80 bg-card shadow-xs">
+          <CardHeader className="border-b border-border/60 pb-3">
+            <CardTitle className="text-base font-semibold">
               {t('notificationPreferences')}
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4">
+          <CardContent className="grid gap-4 pt-4">
             <Preference
               label={t('moderationAlert')}
               checked={notice.moderation_enabled}
@@ -147,8 +149,8 @@ function Preference({
   onChange: (value: boolean) => void
 }) {
   return (
-    <div className="flex items-center justify-between">
-      <Label>{label}</Label>
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-border/50 bg-muted/20 p-3.5 transition-colors hover:bg-muted/40">
+      <Label className="cursor-pointer font-medium">{label}</Label>
       <Switch checked={checked} onCheckedChange={onChange} />
     </div>
   )

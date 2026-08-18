@@ -132,7 +132,7 @@ export function UsersPage() {
               setPage(1)
             }}
             placeholder={t('searchUserHint')}
-            className="pl-9"
+            className="pl-9 bg-card"
           />
         </div>
         <Select
@@ -143,7 +143,7 @@ export function UsersPage() {
           }}
           items={selectItems(adminSortOptions, t)}
         >
-          <SelectTrigger className="w-36">
+          <SelectTrigger className="w-36 bg-card">
             <SelectValue placeholder={t('sort.desc', { ns: 'enums' })}>
               {adminSortLabel}
             </SelectValue>
@@ -159,12 +159,12 @@ export function UsersPage() {
           </SelectContent>
         </Select>
         {users.isSuccess ? (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm font-medium text-muted-foreground">
             {t('userCount', { count: users.data.total })}
           </span>
         ) : null}
       </div>
-      <div className="overflow-hidden rounded-lg border bg-background">
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         {users.isPending ? (
           <StateFade kind="loading">
             <div className="p-8 text-center text-sm text-muted-foreground">

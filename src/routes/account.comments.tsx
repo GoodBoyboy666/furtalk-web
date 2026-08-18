@@ -136,14 +136,14 @@ function CommentsList() {
   return (
     <>
       <PageHeader title={t('commentsTitle')} />
-      <div className="mb-4 flex flex-col gap-3 rounded-lg border bg-background p-3 sm:flex-row sm:items-center">
+      <div className="mb-4 flex flex-col gap-3 rounded-xl border border-border/80 bg-card p-3.5 shadow-xs sm:flex-row sm:items-center">
         <Select
           value={siteId ?? 'all'}
           onValueChange={(value) =>
             setFilter({ site_id: value && value !== 'all' ? value : undefined })
           }
         >
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger className="w-full sm:w-48 bg-card">
             <SelectValue placeholder={t('allSites')}>
               {(value) => siteLabel(value, sites.data?.sites ?? [], t)}
             </SelectValue>
@@ -165,7 +165,7 @@ function CommentsList() {
             setFilter({ status: value && value !== 'all' ? value : undefined })
           }
         >
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="w-full sm:w-40 bg-card">
             <SelectValue placeholder={t('allSites')}>
               {commentStatusLabel}
             </SelectValue>
@@ -181,7 +181,7 @@ function CommentsList() {
           </SelectContent>
         </Select>
       </div>
-      <div className="overflow-hidden rounded-lg border bg-background">
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         {list.isPending ? (
           <StateFade kind="loading">
             <div className="p-8 text-center text-sm text-muted-foreground">

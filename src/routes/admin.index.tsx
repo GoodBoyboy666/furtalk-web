@@ -64,25 +64,27 @@ function OverviewPage() {
           const Icon = card.icon
           return (
             <StaggerItem key={card.label} className="h-full">
-              <Link to={card.to} className="group no-underline">
-                <Card className="h-full transition-colors group-hover:border-primary/40">
-                  <CardHeader className="flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
+              <Link to={card.to} className="group block h-full no-underline">
+                <Card className="h-full subtle-card-hover border-border/80 bg-card">
+                  <CardHeader className="flex-row items-center justify-between pb-3">
+                    <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       {card.label}
                     </CardTitle>
-                    <Icon className="size-4 text-muted-foreground" />
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-muted/70 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                      <Icon className="size-4" />
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-semibold">
+                    <div className="text-3xl font-bold tracking-tight">
                       {card.value === null ? (
-                        <Skeleton className="h-9 w-16" />
+                        <Skeleton className="h-9 w-16 rounded-md" />
                       ) : (
                         card.value
                       )}
                     </div>
-                    <p className="mt-2 mb-0 flex items-center gap-1 text-xs text-muted-foreground">
-                      {card.hint}
-                      <ArrowUpRight className="size-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    <p className="mt-2.5 mb-0 flex items-center gap-1 text-xs text-muted-foreground">
+                      <span>{card.hint}</span>
+                      <ArrowUpRight className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                     </p>
                   </CardContent>
                 </Card>
@@ -92,50 +94,50 @@ function OverviewPage() {
         })}
       </Stagger>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <Card>
-          <CardHeader className="flex-row items-center justify-between">
+        <Card className="border-border/80">
+          <CardHeader className="flex-row items-center justify-between border-b border-border/60 pb-4">
             <div>
-              <CardTitle className="text-base">
+              <CardTitle className="text-base font-semibold">
                 {t('pendingQueueTitle')}
               </CardTitle>
-              <p className="mt-1 mb-0 text-sm text-muted-foreground">
+              <p className="mt-0.5 mb-0 text-xs text-muted-foreground">
                 {t('pendingQueueHint')}
               </p>
             </div>
             <Link
               to="/admin/comments"
-              className="text-sm text-primary no-underline hover:underline"
+              className="text-xs font-medium text-primary no-underline hover:underline"
             >
               {t('viewAll')}
             </Link>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-4">
             {comments.isError ? (
               <p className="text-sm text-destructive">
                 {t('commentsLoadFailed')}
               </p>
             ) : commentItems.length === 0 ? (
-              <div className="flex items-center gap-3 rounded-md border border-dashed p-5 text-sm text-muted-foreground">
-                <FileCheck2 className="size-5" />
-                {t('noPendingComments')}
+              <div className="flex items-center justify-center gap-3 rounded-xl border border-dashed border-border/80 bg-muted/20 p-6 text-sm text-muted-foreground">
+                <FileCheck2 className="size-5 text-emerald-500" />
+                <span>{t('noPendingComments')}</span>
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-border/60">
                 {commentItems.map((comment) => (
                   <Link
                     key={comment.id}
                     to="/admin/comments/$commentId"
                     params={{ commentId: comment.id }}
-                    className="block py-4 no-underline first:pt-0 last:pb-0"
+                    className="block rounded-lg p-3 no-underline transition-colors hover:bg-muted/50 first:pt-3 last:pb-3"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
+                        <p className="truncate text-sm font-semibold text-foreground">
                           {comment.author_nickname ||
                             comment.author_email ||
                             t('anonymousUser')}
                         </p>
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                           {comment.body}
                         </p>
                       </div>
@@ -147,11 +149,13 @@ function OverviewPage() {
             )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t('quickLinks')}</CardTitle>
+        <Card className="border-border/80">
+          <CardHeader className="border-b border-border/60 pb-4">
+            <CardTitle className="text-base font-semibold">
+              {t('quickLinks')}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-2">
+          <CardContent className="grid gap-2.5 pt-4">
             {[
               { to: '/admin/comments', label: t('reviewComments') },
               { to: '/admin/sites', label: t('configureSites') },
@@ -161,10 +165,10 @@ function OverviewPage() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="flex items-center justify-between rounded-md border px-3 py-2.5 text-sm no-underline transition hover:bg-muted"
+                className="group flex items-center justify-between rounded-xl border border-border/70 bg-card p-3 text-sm font-medium no-underline transition-all hover:border-border hover:bg-muted/50 hover:shadow-xs"
               >
                 <span>{item.label}</span>
-                <ArrowUpRight className="size-4 text-muted-foreground" />
+                <ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
               </Link>
             ))}
           </CardContent>

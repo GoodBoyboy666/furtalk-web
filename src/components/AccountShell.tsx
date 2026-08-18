@@ -31,7 +31,7 @@ function AccountNav({ onNavigate }: { onNavigate?: () => void }) {
     select: (state) => state.location.pathname,
   })
   return (
-    <nav className="flex flex-wrap items-center gap-1">
+    <nav className="inline-flex flex-wrap items-center gap-1 rounded-xl border border-border/60 bg-muted/40 p-1">
       {accountNavigation.map((item) => {
         const active = pathname === item.to || pathname.startsWith(item.to)
         return (
@@ -39,7 +39,11 @@ function AccountNav({ onNavigate }: { onNavigate?: () => void }) {
             key={item.to}
             to={item.to}
             onClick={onNavigate}
-            className={`rounded-md px-3 py-1.5 text-sm transition ${active ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+            className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all ${
+              active
+                ? 'bg-background text-foreground shadow-xs'
+                : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+            }`}
           >
             {t(item.labelKey)}
           </Link>
@@ -112,8 +116,8 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   const initials = initialsFrom(user.nickname, user.email)
   const isAdmin = user.role === 'admin'
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
+    <div className="min-h-screen bg-muted/20">
+      <header className="glass-header">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -142,11 +146,11 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
               </SheetContent>
             </Sheet>
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <UserRound className="size-4" />
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
+                <UserRound className="size-4.5" />
               </div>
               <div className="min-w-0">
-                <p className="m-0 truncate text-sm font-semibold">
+                <p className="m-0 truncate text-sm font-semibold tracking-tight">
                   {user.nickname || t('navigation.personalCenter')}
                 </p>
                 <p className="m-0 truncate text-xs text-muted-foreground">
@@ -191,13 +195,13 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
         </div>
-        <div className="hidden border-t px-4 sm:block sm:px-6">
-          <div className="mx-auto flex h-12 max-w-5xl items-center justify-between gap-3">
+        <div className="hidden border-t border-border/60 px-4 sm:block sm:px-6">
+          <div className="mx-auto flex h-13 max-w-5xl items-center justify-between gap-3">
             <AccountNav />
             {isAdmin ? (
               <Link
                 to="/admin"
-                className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground no-underline transition hover:bg-muted hover:text-foreground"
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground no-underline transition hover:bg-muted hover:text-foreground"
               >
                 <LayoutDashboard className="size-3.5" />
                 {t('navigation.adminConsole')}
@@ -206,7 +210,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto min-h-[calc(100vh-7rem)] max-w-5xl p-4 sm:p-6">
+      <main className="mx-auto min-h-[calc(100vh-7.5rem)] max-w-5xl p-4 sm:p-6">
         {children}
       </main>
     </div>

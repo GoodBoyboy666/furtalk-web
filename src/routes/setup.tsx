@@ -242,23 +242,23 @@ export function SetupPage() {
   })
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-10">
+    <main className="relative flex min-h-screen items-center justify-center ambient-auth-bg bg-background/80 px-4 py-12">
       <FadeIn className="w-full max-w-md">
-        <div className="mb-8 flex items-center justify-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Shield className="size-5" />
+        <div className="mb-8 flex items-center justify-center gap-3.5">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+            <Shield className="size-5.5" />
           </div>
           <div>
-            <p className="m-0 text-lg font-semibold">
+            <p className="m-0 text-xl font-bold tracking-tight">
               {t('app.name', { ns: 'common' })}
             </p>
-            <p className="m-0 text-xs text-muted-foreground">
+            <p className="m-0 text-xs font-medium text-muted-foreground">
               {t('setupSubtitle')}
             </p>
           </div>
         </div>
         {status.isPending ? (
-          <Card>
+          <Card className="border-border/80 bg-card/95 shadow-md backdrop-blur-sm">
             <CardContent className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
               <Loader2 className="animate-spin" />
               {t('checkingStatus')}

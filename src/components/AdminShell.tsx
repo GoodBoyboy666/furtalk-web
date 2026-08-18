@@ -61,7 +61,7 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
     select: (state) => state.location.pathname,
   })
   return (
-    <nav className="grid gap-1">
+    <nav className="grid gap-1.5">
       {navigation.map((item) => {
         const Icon = item.icon
         const active =
@@ -72,12 +72,16 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
             key={item.to}
             to={item.to}
             onClick={onNavigate}
-            className={`group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition ${active ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+            className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+              active
+                ? 'bg-primary text-primary-foreground shadow-xs'
+                : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+            }`}
           >
-            <Icon className="size-4" />
-            <span>{t(item.labelKey)}</span>
+            <Icon className="size-4 shrink-0 transition-transform group-hover:scale-105" />
+            <span className="truncate">{t(item.labelKey)}</span>
             {active ? (
-              <ChevronRight className="ml-auto size-3.5 opacity-70" />
+              <ChevronRight className="ml-auto size-3.5 opacity-80" />
             ) : null}
           </Link>
         )
@@ -165,28 +169,30 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const user = session.data
   const initials = initialsFrom(user.nickname, user.email)
   return (
-    <div className="min-h-screen bg-muted/30">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r bg-background lg:block">
+    <div className="min-h-screen bg-muted/20">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-border/70 bg-sidebar/95 backdrop-blur-md lg:block">
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center gap-3 border-b px-6">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Shield className="size-4" />
+          <div className="flex h-16 items-center gap-3 border-b border-border/60 px-5">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
+              <Shield className="size-4.5" />
             </div>
             <div>
-              <p className="m-0 text-sm font-semibold">{t('app.name')}</p>
-              <p className="m-0 text-xs text-muted-foreground">
+              <p className="m-0 text-sm font-semibold tracking-tight">
+                {t('app.name')}
+              </p>
+              <p className="m-0 text-[11px] font-medium text-muted-foreground">
                 {t('app.console')}
               </p>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-3 py-5">
-            <p className="mb-2 px-3 text-[11px] font-semibold tracking-[0.08em] text-muted-foreground">
+          <div className="flex-1 overflow-y-auto px-3.5 py-4">
+            <p className="mb-2 px-3 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground/80">
               {t('navigation.workspace')}
             </p>
             <NavItems />
           </div>
-          <div className="border-t p-3">
-            <div className="flex items-center gap-3 rounded-md bg-muted/50 p-3">
+          <div className="border-t border-border/60 p-3">
+            <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/40 p-2.5 transition-colors">
               <UserAvatar
                 avatarUrl={user.avatar_url}
                 name={user.nickname || user.email}
@@ -206,7 +212,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur sm:px-6">
+        <header className="glass-header flex h-16 items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger

@@ -216,7 +216,7 @@ export function ThreadsPage() {
           }}
           items={selectItems(statusOptions, t)}
         >
-          <SelectTrigger className="w-full sm:w-40">
+          <SelectTrigger className="w-full sm:w-40 bg-card">
             <SelectValue placeholder={t('threadStatus.all', { ns: 'enums' })} />
           </SelectTrigger>
           <SelectContent>
@@ -237,7 +237,7 @@ export function ThreadsPage() {
           }}
           items={selectItems(adminSortOptions, t)}
         >
-          <SelectTrigger className="w-full sm:w-36">
+          <SelectTrigger className="w-full sm:w-36 bg-card">
             <SelectValue placeholder={t('sort.desc', { ns: 'enums' })}>
               {adminSortLabel}
             </SelectValue>
@@ -264,7 +264,7 @@ export function ThreadsPage() {
               }
             }}
             placeholder={t('searchThreadsHint')}
-            className="pl-9"
+            className="pl-9 bg-card"
           />
         </div>
         <Button
@@ -277,7 +277,7 @@ export function ThreadsPage() {
           {t('action.search', { ns: 'common' })}
         </Button>
       </div>
-      <div className="overflow-hidden rounded-lg border bg-background">
+      <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         {!siteId ? (
           <div className="p-4">
             <EmptyState title={t('chooseSite')} description={t('noSiteHint')} />

@@ -501,8 +501,8 @@ function SettingSwitch({
   onCheckedChange: (value: boolean) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <Label className="cursor-pointer">{label}</Label>
+    <div className="flex items-center justify-between gap-4 rounded-lg border border-border/50 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
+      <Label className="cursor-pointer font-medium">{label}</Label>
       <Switch checked={checked} onCheckedChange={onCheckedChange} />
     </div>
   )
