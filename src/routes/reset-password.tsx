@@ -180,29 +180,37 @@ export function ResetPasswordPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="reset-password">{t('newPassword')}</Label>
-                  <Input
-                    id="reset-password"
-                    type="password"
-                    autoComplete="new-password"
-                    className="pl-9"
-                    placeholder={t('newPasswordPlaceholder')}
-                    value={newPassword}
-                    onChange={(event) => setNewPassword(event.target.value)}
-                    required
-                  />
+                  <div className="relative">
+                    <KeyRound className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                    <Input
+                      id="reset-password"
+                      type="password"
+                      autoComplete="new-password"
+                      className="pl-9"
+                      placeholder={t('newPasswordPlaceholder')}
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="reset-confirm">{t('confirmPassword')}</Label>
-                  <Input
-                    id="reset-confirm"
-                    type="password"
-                    autoComplete="new-password"
-                    className="pl-9"
-                    placeholder={t('confirmPasswordPlaceholder')}
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    required
-                  />
+                  <div className="relative">
+                    <KeyRound className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                    <Input
+                      id="reset-confirm"
+                      type="password"
+                      autoComplete="new-password"
+                      className="pl-9"
+                      placeholder={t('confirmPasswordPlaceholder')}
+                      value={confirmPassword}
+                      onChange={(event) =>
+                        setConfirmPassword(event.target.value)
+                      }
+                      required
+                    />
+                  </div>
                 </div>
                 {error ? (
                   <p className="m-0 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">

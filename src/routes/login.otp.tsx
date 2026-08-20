@@ -16,6 +16,7 @@ import { FadeIn } from '@/components/motion'
 import {
   InputOTP,
   InputOTPGroup,
+  InputOTPSeparator,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
 import { Label } from '@/components/ui/label'
@@ -270,26 +271,49 @@ export function LoginOtpPage() {
               ) : null}
               <div className="grid gap-2">
                 <Label htmlFor="otp-code">{t('code')}</Label>
-                <InputOTP
-                  id="otp-code"
-                  maxLength={6}
-                  value={code}
-                  onChange={(value) => setCode(value)}
-                  inputMode="numeric"
-                  pattern={REGEXP_ONLY_DIGITS}
-                  autoComplete="one-time-code"
-                  aria-invalid={error ? 'true' : undefined}
-                  containerClassName="w-full"
-                >
-                  <InputOTPGroup className="w-full">
-                    <InputOTPSlot index={0} className="h-12 flex-1 text-base" />
-                    <InputOTPSlot index={1} className="h-12 flex-1 text-base" />
-                    <InputOTPSlot index={2} className="h-12 flex-1 text-base" />
-                    <InputOTPSlot index={3} className="h-12 flex-1 text-base" />
-                    <InputOTPSlot index={4} className="h-12 flex-1 text-base" />
-                    <InputOTPSlot index={5} className="h-12 flex-1 text-base" />
-                  </InputOTPGroup>
-                </InputOTP>
+                <div className="flex justify-center py-2">
+                  <InputOTP
+                    id="otp-code"
+                    maxLength={6}
+                    value={code}
+                    onChange={(value) => setCode(value)}
+                    inputMode="numeric"
+                    pattern={REGEXP_ONLY_DIGITS}
+                    autoComplete="one-time-code"
+                    aria-invalid={error ? 'true' : undefined}
+                    containerClassName="gap-2 sm:gap-3"
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot
+                        index={0}
+                        className="size-11 text-lg font-semibold sm:size-12"
+                      />
+                      <InputOTPSlot
+                        index={1}
+                        className="size-11 text-lg font-semibold sm:size-12"
+                      />
+                      <InputOTPSlot
+                        index={2}
+                        className="size-11 text-lg font-semibold sm:size-12"
+                      />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup>
+                      <InputOTPSlot
+                        index={3}
+                        className="size-11 text-lg font-semibold sm:size-12"
+                      />
+                      <InputOTPSlot
+                        index={4}
+                        className="size-11 text-lg font-semibold sm:size-12"
+                      />
+                      <InputOTPSlot
+                        index={5}
+                        className="size-11 text-lg font-semibold sm:size-12"
+                      />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
               </div>
               <Button
                 type="button"
