@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import {
   AUTH_PRESETS,
+  CUSTOM_AUTH_PRESET,
   authPresetLabel,
   findAuthPreset,
   resolveAuthPreset,
@@ -443,8 +444,14 @@ function ProviderFormDialog({
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
   const isEdit = !!provider
-  const [preset, setPreset] = useState<AuthPreset>(() =>
-    provider ? resolveAuthPreset(provider) : AUTH_PRESETS[0],
+  // 新建时隐藏已配置的固定预设，自定义 OIDC 始终可选；编辑时锁定当前预设/key。
+  const availablePresets = provider
+    ? [resolveAuthPreset(provider)]
+    : AUTH_PRESETS.filter(
+        (option) => option.custom || !configuredKeys?.has(option.value),
+      )
+  const [preset, setPreset] = useState<AuthPreset>(
+    () => availablePresets[0] ?? CUSTOM_AUTH_PRESET,
   )
   const [customKey, setCustomKey] = useState(() => {
     if (provider) {
@@ -517,13 +524,6 @@ function ProviderFormDialog({
         error instanceof Error ? error.message : t('providerSaveFailed'),
       ),
   })
-
-  // 新建时隐藏已配置的固定预设，自定义 OIDC 始终可选；编辑时锁定当前预设/key。
-  const availablePresets = isEdit
-    ? [preset]
-    : AUTH_PRESETS.filter(
-        (option) => option.custom || !configuredKeys?.has(option.value),
-      )
 
   const clientIdLabel = t(preset.clientIdLabelKey ?? 'clientId')
   const secretLabel = t(preset.secretLabelKey)
@@ -731,21 +731,24 @@ function CaptchaProviderFormDialog({
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
   const isEdit = !!provider
+
+  // 新建时隐藏已配置的固定类型；编辑时保留全部并锁定当前类型。
+  const availableTypes = provider
+    ? captchaProviderTypes
+    : captchaProviderTypes.filter(
+        (option) => !configuredTypes?.has(option.value),
+      )
+
   const [type, setType] = useState(
-    readPublicString(provider, 'provider') || 'turnstile',
+    () =>
+      readPublicString(provider, 'provider') ||
+      (availableTypes[0]?.value ?? 'turnstile'),
   )
   const [siteKey, setSiteKey] = useState(readPublicString(provider, 'site_key'))
   const [secretKey, setSecretKey] = useState('')
   const [endpoint, setEndpoint] = useState(
     readPublicString(provider, 'endpoint'),
   )
-
-  // 新建时隐藏已配置的固定类型；编辑时保留全部并锁定当前类型。
-  const availableTypes = isEdit
-    ? captchaProviderTypes
-    : captchaProviderTypes.filter(
-        (option) => !configuredTypes?.has(option.value),
-      )
 
   const save = useMutation({
     mutationFn: async () => {

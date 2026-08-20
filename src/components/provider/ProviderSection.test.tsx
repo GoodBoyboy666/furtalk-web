@@ -558,6 +558,85 @@ describe('ProviderSection create-option filtering', () => {
     })
     expect(createButton).toBeEnabled()
   })
+
+  it('defaults to the next available preset (Google) when GitHub is already configured', async () => {
+    apiMocks.list.mockResolvedValue({
+      providers: [
+        {
+          provider_key: 'github',
+          kind: 'oauth',
+          enabled: true,
+          configured: true,
+          public_config: { client_id: 'c' },
+        },
+      ],
+    })
+    renderSection()
+    const user = userEvent.setup()
+    await user.click(
+      await screen.findByRole('button', { name: '新建登录入口' }),
+    )
+    const trigger = await screen.findByRole('combobox')
+    expect(trigger).toHaveTextContent('Google')
+    expect(trigger).not.toHaveTextContent('GitHub')
+  })
+
+  it('defaults to custom OIDC when all fixed auth presets are already configured', async () => {
+    apiMocks.list.mockResolvedValue({
+      providers: [
+        'github',
+        'google',
+        'gitlab',
+        'gitea',
+        'mastodon',
+        'microsoft',
+        'twitter',
+        'discord',
+        'apple',
+        'line',
+      ].map((key) => ({
+        provider_key: key,
+        kind:
+          key === 'github' ||
+          key === 'mastodon' ||
+          key === 'twitter' ||
+          key === 'discord'
+            ? 'oauth'
+            : 'oidc',
+        enabled: true,
+        configured: true,
+        public_config: { client_id: 'c' },
+      })),
+    })
+    renderSection()
+    const user = userEvent.setup()
+    await user.click(
+      await screen.findByRole('button', { name: '新建登录入口' }),
+    )
+    const trigger = await screen.findByRole('combobox')
+    expect(trigger).toHaveTextContent('自定义 OIDC')
+  })
+
+  it('defaults to the next available captcha type (Google reCAPTCHA) when Turnstile is already configured', async () => {
+    apiMocks.list.mockResolvedValue({
+      providers: [
+        {
+          provider_key: 'turnstile',
+          kind: 'captcha',
+          configured: true,
+          public_config: { provider: 'turnstile', site_key: '0x4AAAAAAA' },
+        },
+      ],
+    })
+    renderSection()
+    const user = userEvent.setup()
+    await user.click(
+      await screen.findByRole('button', { name: '新建验证码提供商' }),
+    )
+    const trigger = await screen.findByRole('combobox')
+    expect(trigger).toHaveTextContent('Google reCAPTCHA')
+    expect(trigger).not.toHaveTextContent('Cloudflare Turnstile')
+  })
 })
 
 describe('ProviderSection preset-driven create/edit contract', () => {
