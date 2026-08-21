@@ -134,7 +134,7 @@ export function SecurityPage() {
   })
   const oauthStart = useMutation({
     mutationFn: async (key: string) => {
-      // 绑定流程在 OAuth 回调完成后由后端跳回本页。
+      // 绑定流程在 OAuth 回调完成后由前端回调页跳回本页。
       const start = await authApi.oauthStart(key, 'bind', '/account/security')
       window.location.href = start.auth_url
     },

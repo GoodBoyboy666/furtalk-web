@@ -293,6 +293,19 @@ export type OAuthStartResponse = {
   auth_url: string
 }
 
+/** OAuthCompletePayload 是登录完成端点的请求；handoff 与直接回调参数互斥。 */
+export type OAuthCompletePayload = {
+  handoff?: string
+  state?: string
+  code?: string
+  error?: string
+}
+
+/** OAuthCompleteResponse 是登录完成端点的成功响应，redirect 为站内回跳地址。 */
+export type OAuthCompleteResponse = {
+  redirect: string
+}
+
 export type CaptchaConfig = {
   provider: string
   site_key: string

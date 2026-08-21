@@ -203,7 +203,7 @@ export function LoginPage() {
   const oauthStart = useMutation({
     mutationFn: async (key: string) => {
       const start = await authApi.oauthStart(key, 'login', redirect)
-      // 同窗口导航到授权页；授权成功后由后端回调跳回业务回跳地址。
+      // 同窗口导航到授权页；授权成功后由前端回调页调用完成接口再跳回业务回跳地址。
       window.location.href = start.auth_url
     },
     onError: (cause) =>

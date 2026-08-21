@@ -61,18 +61,21 @@ export class ApiError extends Error {
   code?: string
   status?: number
   requestId?: string
+  details?: Record<string, unknown>
 
   constructor(
     message: string,
     status?: number,
     code?: string,
     requestId?: string,
+    details?: Record<string, unknown>,
   ) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
     this.requestId = requestId
+    this.details = details
   }
 }
 
@@ -86,6 +89,7 @@ export function normalizeApiError(error: unknown): ApiError {
     response ? response.status : undefined,
     body?.code,
     body?.request_id,
+    body?.details,
   )
 }
 

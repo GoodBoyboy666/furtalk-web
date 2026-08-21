@@ -32,6 +32,7 @@ import { Route as LoginIndexRouteImport } from './routes/login.index'
 import { Route as LoginOtpRouteImport } from './routes/login.otp'
 import { Route as AccountCommentsCommentIdRouteImport } from './routes/account.comments.$commentId'
 import { Route as AdminCommentsCommentIdRouteImport } from './routes/admin.comments.$commentId'
+import { Route as OauthCallbackProviderRouteImport } from './routes/oauth.callback.$provider'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -149,6 +150,11 @@ const AdminCommentsCommentIdRoute = AdminCommentsCommentIdRouteImport.update({
   path: '/$commentId',
   getParentRoute: () => AdminCommentsRoute,
 } as any)
+const OauthCallbackProviderRoute = OauthCallbackProviderRouteImport.update({
+  id: '/oauth/callback/$provider',
+  path: '/oauth/callback/$provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/login/': typeof LoginIndexRoute
   '/account/comments/$commentId': typeof AccountCommentsCommentIdRoute
   '/admin/comments/$commentId': typeof AdminCommentsCommentIdRoute
+  '/oauth/callback/$provider': typeof OauthCallbackProviderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginIndexRoute
   '/account/comments/$commentId': typeof AccountCommentsCommentIdRoute
   '/admin/comments/$commentId': typeof AdminCommentsCommentIdRoute
+  '/oauth/callback/$provider': typeof OauthCallbackProviderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/login/': typeof LoginIndexRoute
   '/account/comments/$commentId': typeof AccountCommentsCommentIdRoute
   '/admin/comments/$commentId': typeof AdminCommentsCommentIdRoute
+  '/oauth/callback/$provider': typeof OauthCallbackProviderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/login/'
     | '/account/comments/$commentId'
     | '/admin/comments/$commentId'
+    | '/oauth/callback/$provider'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/account/comments/$commentId'
     | '/admin/comments/$commentId'
+    | '/oauth/callback/$provider'
   id:
     | '__root__'
     | '/'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/login/'
     | '/account/comments/$commentId'
     | '/admin/comments/$commentId'
+    | '/oauth/callback/$provider'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SetupRoute: typeof SetupRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  OauthCallbackProviderRoute: typeof OauthCallbackProviderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -475,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCommentsCommentIdRouteImport
       parentRoute: typeof AdminCommentsRoute
     }
+    '/oauth/callback/$provider': {
+      id: '/oauth/callback/$provider'
+      path: '/oauth/callback/$provider'
+      fullPath: '/oauth/callback/$provider'
+      preLoaderRoute: typeof OauthCallbackProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -561,6 +581,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SetupRoute: SetupRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  OauthCallbackProviderRoute: OauthCallbackProviderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

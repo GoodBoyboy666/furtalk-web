@@ -22,6 +22,8 @@ import type {
   MeCommentList,
   MeCommentSite,
   NotificationPreferences,
+  OAuthCompletePayload,
+  OAuthCompleteResponse,
   OAuthStartResponse,
   PasskeyOptionsResponse,
   Provider,
@@ -74,6 +76,10 @@ export const authApi = {
       .get<OAuthStartResponse>(`/auth/oauth/${key}/start`, {
         params: { purpose, redirect },
       })
+      .then((response) => response.data),
+  oauthComplete: (key: string, payload: OAuthCompletePayload) =>
+    api
+      .post<OAuthCompleteResponse>(`/auth/oauth/${key}/complete`, payload)
       .then((response) => response.data),
   passkeyRegistrationOptions: () =>
     api
