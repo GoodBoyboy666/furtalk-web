@@ -31,7 +31,10 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { StateFade } from '@/components/motion'
 import { ListPagination } from '@/components/ListPagination'
 import { meCommentsApi } from '@/lib/api/resources'
-import { commentStatusLabel, commentStatusOptions } from '@/lib/comment-status'
+import {
+  commentStatusLabel,
+  ownerCommentStatusOptions,
+} from '@/lib/comment-status'
 import { usePageSize } from '@/lib/pagination'
 import { formatDateTime } from '@/lib/format'
 
@@ -61,7 +64,9 @@ export const Route = createFileRoute('/account/comments')({
         ? search.site_id
         : undefined,
     status:
-      typeof search.status === 'string' && search.status !== 'all'
+      typeof search.status === 'string' &&
+      search.status !== 'all' &&
+      ownerCommentStatusOptions.some((option) => option.value === search.status)
         ? search.status
         : undefined,
     page: parseCommentsPage(search.page),
@@ -172,7 +177,7 @@ function CommentsList() {
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {commentStatusOptions.map((option) => (
+              {ownerCommentStatusOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {t(option.key)}
                 </SelectItem>

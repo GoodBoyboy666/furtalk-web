@@ -122,7 +122,6 @@ export function CommentDetailPage() {
       </StateFade>
     )
   const item = comment.data
-  const isDeleted = item.status === 'deleted'
   const canReply = item.status === 'published'
   const deleteMode = item.user_delete_mode
 
@@ -226,42 +225,25 @@ export function CommentDetailPage() {
               </CardContent>
             </Card>
           ) : null}
-          {isDeleted ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {t('deletedComment')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="m-0 text-sm text-muted-foreground">
-                  {t('deletedCommentHint')}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {t('deleteComment')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="m-0 text-sm text-muted-foreground">
-                  {t('deleteCommentHint')}
-                </p>
-                <Button
-                  variant="destructive"
-                  className="mt-3 w-full"
-                  disabled={remove.isPending}
-                  onClick={() => setConfirm(true)}
-                >
-                  <Trash2 />
-                  {t('deleteThisComment')}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{t('deleteComment')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="m-0 text-sm text-muted-foreground">
+                {t('deleteCommentHint')}
+              </p>
+              <Button
+                variant="destructive"
+                className="mt-3 w-full"
+                disabled={remove.isPending}
+                onClick={() => setConfirm(true)}
+              >
+                <Trash2 />
+                {t('deleteThisComment')}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
       <AlertDialog

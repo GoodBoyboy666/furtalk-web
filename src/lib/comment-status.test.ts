@@ -6,6 +6,7 @@ import {
   commentStatusTargetLabel,
   commentStatusTargets,
   otherCommentStatusTargets,
+  ownerCommentStatusOptions,
 } from './comment-status'
 
 describe('commentStatusOptions', () => {
@@ -16,6 +17,26 @@ describe('commentStatusOptions', () => {
     expect(commentStatusOptions.find((o) => o.value === 'pending')?.key).toBe(
       'enums:commentStatus.pending',
     )
+  })
+})
+
+describe('ownerCommentStatusOptions', () => {
+  it('keeps the full administrator list including deleted', () => {
+    expect(commentStatusOptions.map((o) => o.value)).toEqual([
+      'all',
+      'pending',
+      'published',
+      'spam',
+      'deleted',
+    ])
+  })
+
+  it('exposes the owner-visible projection without deleted', () => {
+    const values = (ownerCommentStatusOptions as { value: string }[]).map(
+      (o) => o.value,
+    )
+    expect(values).toEqual(['all', 'pending', 'published', 'spam'])
+    expect(values).not.toContain('deleted')
   })
 })
 

@@ -92,8 +92,6 @@
   "publishReply": "发布回复",
   "replyPublished": "回复已发布",
   "replyFailed": "回复失败，请稍后重试",
-  "deletedComment": "已删除评论",
-  "deletedCommentHint": "已删除的评论只读，不可回复或再次删除。",
   "deleteComment": "删除",
   "deleteCommentHint": "删除方式管理员决定。",
   "deleteThisComment": "删除这条评论",

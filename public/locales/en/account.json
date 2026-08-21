@@ -92,8 +92,6 @@
   "publishReply": "Publish reply",
   "replyPublished": "Reply published",
   "replyFailed": "Failed to reply. Please try again later.",
-  "deletedComment": "Deleted comment",
-  "deletedCommentHint": "Deleted comments are read-only and cannot be replied to or deleted again.",
   "deleteComment": "Delete",
   "deleteCommentHint": "The deletion method is determined by the administrator.",
   "deleteThisComment": "Delete this comment",

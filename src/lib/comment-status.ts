@@ -10,6 +10,13 @@ export const commentStatusOptions = [
   { value: 'deleted', key: 'enums:commentStatus.deleted' },
 ] as const
 
+// ownerCommentStatusOptions 是普通用户评论列表可见的状态筛选投影：
+// 软删除（deleted）对普通用户不可见，因此从管理端完整列表派生并移除 deleted。
+// 管理端继续使用完整的 commentStatusOptions。
+export const ownerCommentStatusOptions = commentStatusOptions.filter(
+  (option) => option.value !== 'deleted',
+)
+
 // commentStatusLabel 把稳定枚举值映射为翻译后的标签；
 // 空值或未知值回落到占位文案。
 export function commentStatusLabel(value: string | null | undefined) {

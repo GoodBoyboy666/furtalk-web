@@ -123,12 +123,17 @@ describe('CommentDetailPage delete policy confirmation', () => {
     ).toBeTruthy()
   })
 
-  it('renders read-only state for deleted comments', async () => {
-    renderDetail({ status: 'deleted', user_delete_mode: 'soft' })
-    expect(
-      await screen.findByText('已删除的评论只读，不可回复或再次删除。'),
-    ).toBeTruthy()
-    expect(screen.queryByRole('button', { name: '删除这条评论' })).toBeNull()
+  it('shows the not-found state when the comment is unavailable', async () => {
+    apiMocks.get.mockRejectedValue(new Error('not found'))
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CommentDetailPage />
+      </QueryClientProvider>,
+    )
+    expect(await screen.findByText('评论不存在或加载失败。')).toBeTruthy()
   })
 })
 
@@ -192,9 +197,17 @@ describe('CommentDetailPage reply gating', () => {
     expect(apiMocks.reply).not.toHaveBeenCalled()
   })
 
-  it('hides the reply form for deleted comments', async () => {
-    renderDetail({ status: 'deleted' })
-    expect(await screen.findByText(/已删除的评论只读/)).toBeTruthy()
+  it('shows the not-found state for unreachable (deleted) comments', async () => {
+    apiMocks.get.mockRejectedValue(new Error('not found'))
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CommentDetailPage />
+      </QueryClientProvider>,
+    )
+    expect(await screen.findByText('评论不存在或加载失败。')).toBeTruthy()
     expect(screen.queryByLabelText('回复正文')).toBeNull()
   })
 })
