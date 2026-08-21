@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CaptchaDialog } from '@/components/CaptchaDialog'
+import { ProviderIcon } from '@/components/provider/ProviderIcon'
 import { authApi, captchaApi } from '@/lib/api/resources'
 import { ApiError } from '@/lib/api/client'
 import { resolvePostLoginTarget } from '@/lib/redirect'
@@ -448,22 +449,37 @@ export function LoginPage() {
                   </span>
                   <Separator className="flex-1" />
                 </div>
-                <div className="grid gap-2">
-                  {publicProviders.data.providers.map((provider) => (
-                    <Button
-                      key={provider.key}
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      disabled={busy || oauthStart.isPending}
-                      onClick={() => oauthStart.mutate(provider.key)}
-                    >
-                      {oauthStart.isPending ? (
-                        <Loader2 className="animate-spin" />
-                      ) : null}
-                      {t('providerLogin', { provider: provider.name })}
-                    </Button>
-                  ))}
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {publicProviders.data.providers.map((provider) => {
+                    const isPending =
+                      oauthStart.isPending &&
+                      oauthStart.variables === provider.key
+                    const label = t('providerLogin', {
+                      provider: provider.name,
+                    })
+                    return (
+                      <Button
+                        key={provider.key}
+                        type="button"
+                        variant="outline"
+                        size="icon-lg"
+                        className="rounded-full"
+                        aria-label={label}
+                        title={label}
+                        disabled={busy || oauthStart.isPending}
+                        onClick={() => oauthStart.mutate(provider.key)}
+                      >
+                        {isPending ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <ProviderIcon
+                            providerKey={provider.key}
+                            className="size-4.5"
+                          />
+                        )}
+                      </Button>
+                    )
+                  })}
                 </div>
               </>
             ) : null}

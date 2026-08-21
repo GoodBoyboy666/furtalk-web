@@ -3,7 +3,6 @@ import {
   FlaskConical,
   Loader2,
   Pencil,
-  PlugZap,
   Plus,
   ShieldCheck,
   Trash2,
@@ -41,6 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { ProviderIcon } from './ProviderIcon'
 import {
   AUTH_PRESETS,
   CUSTOM_AUTH_PRESET,
@@ -161,7 +161,10 @@ export function ProviderSection() {
             >
               <div className="flex min-w-0 items-center gap-3">
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
-                  <PlugZap className="size-4 text-muted-foreground" />
+                  <ProviderIcon
+                    providerKey={provider.provider_key}
+                    className="size-4 text-muted-foreground"
+                  />
                 </div>
                 <div className="min-w-0">
                   <p className="m-0 truncate text-sm font-medium">

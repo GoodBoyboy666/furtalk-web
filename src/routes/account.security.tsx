@@ -40,6 +40,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { PageHeader } from '@/components/PageHeader'
+import { ProviderIcon } from '@/components/provider/ProviderIcon'
 import { StateFade, Stagger, StaggerItem } from '@/components/motion'
 import { authApi } from '@/lib/api/resources'
 import { ApiError } from '@/lib/api/client'
@@ -372,7 +373,10 @@ export function SecurityPage() {
                     <StaggerItem key={identity.id}>
                       <div className="flex items-center justify-between rounded-md border px-3 py-3">
                         <div className="flex min-w-0 items-center gap-3">
-                          <Mail className="size-4 shrink-0 text-muted-foreground" />
+                          <ProviderIcon
+                            providerKey={identity.provider}
+                            className="size-4 shrink-0 text-muted-foreground"
+                          />
                           <div className="min-w-0">
                             <p className="m-0 truncate text-sm font-medium">
                               {identity.provider}
@@ -416,7 +420,12 @@ export function SecurityPage() {
                     >
                       {oauthStart.isPending ? (
                         <Loader2 className="animate-spin" />
-                      ) : null}
+                      ) : (
+                        <ProviderIcon
+                          providerKey={provider.key}
+                          className="size-4"
+                        />
+                      )}
                       {t('bindProvider', { provider: provider.name })}
                     </Button>
                   ))}
