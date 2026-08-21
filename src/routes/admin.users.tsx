@@ -201,7 +201,10 @@ export function UsersPage() {
                         className="size-8 shrink-0"
                       />
                       <div className="min-w-0">
-                        <p className="m-0 text-sm font-medium">
+                        <p
+                          className="m-0 truncate text-sm font-medium"
+                          title={user.nickname || t('nicknameFallback')}
+                        >
                           {user.nickname || t('nicknameFallback')}
                         </p>
                         <p className="m-0 truncate text-xs text-muted-foreground">
@@ -218,7 +221,7 @@ export function UsersPage() {
                   </TableCell>
                   <TableCell>
                     <StatusBadge
-                      value={user.email_verified ? 'published' : 'pending'}
+                      value={user.email_verified ? 'verified' : 'unverified'}
                     />
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">

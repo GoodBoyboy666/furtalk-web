@@ -302,28 +302,52 @@ export function ThreadsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[44%]">{t('threadTitle')}</TableHead>
-                <TableHead>{t('threadSite')}</TableHead>
-                <TableHead>{t('discoveredAt')}</TableHead>
-                <TableHead>{t('updatedAt')}</TableHead>
-                <TableHead className="w-32">{t('commentArea')}</TableHead>
-                <TableHead className="w-10" />
+                <TableHead className="w-[40%] min-w-[200px]">
+                  {t('threadTitle')}
+                </TableHead>
+                <TableHead className="w-[22%] min-w-[140px]">
+                  {t('threadSite')}
+                </TableHead>
+                <TableHead className="whitespace-nowrap">
+                  {t('discoveredAt')}
+                </TableHead>
+                <TableHead className="whitespace-nowrap">
+                  {t('updatedAt')}
+                </TableHead>
+                <TableHead className="w-28 whitespace-nowrap">
+                  {t('commentArea')}
+                </TableHead>
+                <TableHead className="w-12 text-right" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {list.data.threads.map((thread) => (
                 <TableRow key={thread.id}>
-                  <TableCell>
-                    <p className="m-0 line-clamp-2 text-sm font-medium text-foreground">
+                  <TableCell className="max-w-xs sm:max-w-sm md:max-w-md whitespace-normal">
+                    <p
+                      className="m-0 truncate text-sm font-medium text-foreground"
+                      title={threadTitle(thread)}
+                    >
                       {threadTitle(thread)}
                     </p>
-                    <span className="text-xs text-muted-foreground">
+                    <p
+                      className="m-0 truncate text-xs text-muted-foreground"
+                      title={thread.page_key}
+                    >
                       {thread.page_key}
-                    </span>
+                    </p>
                   </TableCell>
-                  <TableCell>
-                    <p className="m-0 text-sm">{thread.site_name}</p>
-                    <p className="m-0 max-w-48 truncate text-xs text-muted-foreground">
+                  <TableCell className="max-w-48 whitespace-normal">
+                    <p
+                      className="m-0 truncate text-sm"
+                      title={thread.site_name}
+                    >
+                      {thread.site_name}
+                    </p>
+                    <p
+                      className="m-0 truncate text-xs text-muted-foreground"
+                      title={thread.page_url ?? '-'}
+                    >
                       {thread.page_url ?? '-'}
                     </p>
                   </TableCell>
@@ -333,7 +357,7 @@ export function ThreadsPage() {
                   <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                     {formatDateTime(thread.updated_at)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={thread.comments_enabled}
@@ -358,7 +382,7 @@ export function ThreadsPage() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-right whitespace-nowrap">
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         render={

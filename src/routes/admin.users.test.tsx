@@ -323,6 +323,21 @@ describe('UsersPage list states', () => {
       await screen.findByText('用户列表加载失败，请稍后重试。'),
     ).toBeInTheDocument()
   })
+
+  it('renders verified and unverified email badges accurately', async () => {
+    const unverifiedUser: AdminUser = {
+      ...user,
+      id: '8',
+      email: 'unverified@example.com',
+      email_verified: false,
+    }
+    apiMocks.list.mockResolvedValue({ users: [user, unverifiedUser], total: 2 })
+    renderUsers()
+    expect(await screen.findByText('已验证')).toBeInTheDocument()
+    expect(await screen.findByText('未验证')).toBeInTheDocument()
+    expect(screen.queryByText('待审核')).not.toBeInTheDocument()
+    expect(screen.queryByText('已发布')).not.toBeInTheDocument()
+  })
 })
 
 describe('UsersPage delete dialog', () => {

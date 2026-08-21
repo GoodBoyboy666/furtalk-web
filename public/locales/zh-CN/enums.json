@@ -8,6 +8,8 @@
     "disabled": "停用",
     "admin": "管理员",
     "user": "用户",
+    "verified": "已验证",
+    "unverified": "未验证",
     "unknown": "未知"
   },
   "commentStatus": {

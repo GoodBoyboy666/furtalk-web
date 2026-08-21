@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AccountShell } from './AccountShell'
@@ -85,5 +86,54 @@ describe('AccountShell language placement', () => {
     const language = await screen.findByTestId('language-toggle')
     const theme = screen.getByTestId('theme-toggle')
     expect(language.nextElementSibling).toBe(theme)
+  })
+})
+
+describe('AccountShell branding', () => {
+  it('renders the Furtalk brand name on the left navbar', async () => {
+    renderShell()
+    expect(await screen.findByText('Furtalk')).toBeInTheDocument()
+    expect(screen.getByText('个人中心')).toBeInTheDocument()
+  })
+})
+
+describe('AccountShell account dropdown', () => {
+  it('opens dropdown menu on avatar click showing username, email and logout', async () => {
+    renderShell()
+    const trigger = await screen.findByRole('button', { name: '账户菜单' })
+    await userEvent.click(trigger)
+
+    expect(await screen.findByText('User')).toBeInTheDocument()
+    expect(screen.getByText('user@example.com')).toBeInTheDocument()
+    expect(
+      screen.getByRole('menuitem', { name: '退出登录' }),
+    ).toBeInTheDocument()
+    // Normal user does not have admin console option
+    expect(
+      screen.queryByRole('menuitem', { name: '管理控制台' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('includes admin console in dropdown for admin users', async () => {
+    apiMocks.me.mockResolvedValue({ ...userMe, role: 'admin' })
+    renderShell()
+    const trigger = await screen.findByRole('button', { name: '账户菜单' })
+    await userEvent.click(trigger)
+
+    expect(
+      await screen.findByRole('menuitem', { name: '管理控制台' }),
+    ).toBeInTheDocument()
+  })
+
+  it('does not render redundant admin console link in subnav', async () => {
+    apiMocks.me.mockResolvedValue({ ...userMe, role: 'admin' })
+    renderShell()
+    await screen.findByText('Furtalk')
+    // There should not be an inline link named 管理控制台 in the subnav
+    const subnavLinks = screen.getAllByRole('link')
+    const adminLink = subnavLinks.find((l) =>
+      l.textContent.includes('管理控制台'),
+    )
+    expect(adminLink).toBeUndefined()
   })
 })

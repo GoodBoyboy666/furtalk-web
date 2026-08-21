@@ -11,6 +11,8 @@ const labelKeys: Record<string, string> = {
   disabled: 'enums:status.disabled',
   admin: 'enums:status.admin',
   user: 'enums:status.user',
+  verified: 'enums:status.verified',
+  unverified: 'enums:status.unverified',
 }
 
 const statusStyles: Partial<Record<string, { dot: string; badge: string }>> = {
@@ -23,6 +25,16 @@ const statusStyles: Partial<Record<string, { dot: string; badge: string }>> = {
     dot: 'bg-emerald-500',
     badge:
       'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
+  },
+  verified: {
+    dot: 'bg-emerald-500',
+    badge:
+      'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
+  },
+  unverified: {
+    dot: 'bg-amber-500',
+    badge:
+      'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25',
   },
   pending: {
     dot: 'bg-amber-500 animate-pulse',

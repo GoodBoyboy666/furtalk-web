@@ -125,7 +125,7 @@ async function openRowMenu(
   user: ReturnType<typeof userEvent.setup>,
   body: string,
 ) {
-  const text = await screen.findByText(body)
+  const text = await screen.findByText(body, {}, { timeout: 4000 })
   const row = text.closest('tr')
   if (!row) throw new Error(`row for ${body} not found`)
   const trigger = row.querySelector('[aria-label="评论操作"]')

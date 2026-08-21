@@ -263,23 +263,32 @@ function CommentsList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[38%]">{t('content')}</TableHead>
-                <TableHead>{t('author')}</TableHead>
-                <TableHead>{t('status')}</TableHead>
-                <TableHead>{t('time')}</TableHead>
-                <TableHead className="w-12" />
+                <TableHead className="w-[42%] min-w-[200px]">
+                  {t('content')}
+                </TableHead>
+                <TableHead className="w-[24%] min-w-[140px]">
+                  {t('author')}
+                </TableHead>
+                <TableHead className="whitespace-nowrap">
+                  {t('status')}
+                </TableHead>
+                <TableHead className="whitespace-nowrap">{t('time')}</TableHead>
+                <TableHead className="w-12 text-right" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {query.data.comments.map((comment) => (
                 <TableRow key={comment.id}>
-                  <TableCell>
+                  <TableCell className="max-w-xs sm:max-w-md lg:max-w-lg whitespace-normal">
                     <Link
                       to="/admin/comments/$commentId"
                       params={{ commentId: comment.id }}
-                      className="block max-w-lg no-underline"
+                      className="block max-w-full no-underline"
                     >
-                      <p className="m-0 line-clamp-2 text-sm font-medium text-foreground">
+                      <p
+                        className="m-0 truncate text-sm font-medium text-foreground"
+                        title={comment.body}
+                      >
                         {comment.body}
                       </p>
                       <span className="text-xs text-muted-foreground">
@@ -287,8 +296,8 @@ function CommentsList() {
                       </span>
                     </Link>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
+                  <TableCell className="max-w-48 whitespace-normal">
+                    <div className="flex items-center gap-2 min-w-0">
                       <UserAvatar
                         avatarUrl={comment.avatar_url}
                         name={comment.author_nickname || comment.author_email}
@@ -298,23 +307,29 @@ function CommentsList() {
                         )}
                         className="size-7 shrink-0"
                       />
-                      <div className="min-w-0">
-                        <p className="m-0 text-sm">
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="m-0 truncate text-sm"
+                          title={comment.author_nickname || t('anonymous')}
+                        >
                           {comment.author_nickname || t('anonymous')}
                         </p>
-                        <p className="m-0 max-w-40 truncate text-xs text-muted-foreground">
+                        <p
+                          className="m-0 truncate text-xs text-muted-foreground"
+                          title={comment.author_email}
+                        >
                           {comment.author_email}
                         </p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <StatusBadge value={comment.status} />
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                     {formatDateTime(comment.created_at)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-right whitespace-nowrap">
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         render={

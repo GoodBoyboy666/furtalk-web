@@ -95,7 +95,7 @@ function OverviewPage() {
       </Stagger>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <Card className="border-border/80">
-          <CardHeader className="flex-row items-center justify-between border-b border-border/60 pb-4">
+          <CardHeader className="flex-row items-center justify-between border-b border-border/60 pb-3">
             <div>
               <CardTitle className="text-base font-semibold">
                 {t('pendingQueueTitle')}
@@ -111,7 +111,7 @@ function OverviewPage() {
               {t('viewAll')}
             </Link>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent>
             {comments.isError ? (
               <p className="text-sm text-destructive">
                 {t('commentsLoadFailed')}
@@ -137,7 +137,10 @@ function OverviewPage() {
                             comment.author_email ||
                             t('anonymousUser')}
                         </p>
-                        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                        <p
+                          className="mt-1 truncate text-xs leading-relaxed text-muted-foreground"
+                          title={comment.body}
+                        >
                           {comment.body}
                         </p>
                       </div>
@@ -150,12 +153,12 @@ function OverviewPage() {
           </CardContent>
         </Card>
         <Card className="border-border/80">
-          <CardHeader className="border-b border-border/60 pb-4">
+          <CardHeader className="border-b border-border/60 pb-3">
             <CardTitle className="text-base font-semibold">
               {t('quickLinks')}
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-2.5 pt-4">
+          <CardContent className="grid gap-2">
             {[
               { to: '/admin/comments', label: t('reviewComments') },
               { to: '/admin/sites', label: t('configureSites') },

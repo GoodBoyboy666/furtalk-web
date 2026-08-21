@@ -8,6 +8,8 @@
     "disabled": "Disabled",
     "admin": "Admin",
     "user": "User",
+    "verified": "Verified",
+    "unverified": "Unverified",
     "unknown": "Unknown"
   },
   "commentStatus": {

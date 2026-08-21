@@ -71,7 +71,7 @@ export function ProfilePage() {
               {t('basicInfo')}
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 pt-4">
+          <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">{t('emailReadonly')}</Label>
               <Input id="email" value={me.data.email} readOnly disabled />
@@ -109,7 +109,7 @@ export function ProfilePage() {
               {t('notificationPreferences')}
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 pt-4">
+          <CardContent className="grid gap-4">
             <Preference
               label={t('moderationAlert')}
               checked={notice.moderation_enabled}

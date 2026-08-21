@@ -210,22 +210,31 @@ function CommentsList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[42%]">{t('content')}</TableHead>
-                <TableHead>{t('site')}</TableHead>
-                <TableHead>{t('status')}</TableHead>
-                <TableHead>{t('time')}</TableHead>
+                <TableHead className="w-[50%] min-w-[200px]">
+                  {t('content')}
+                </TableHead>
+                <TableHead className="w-[20%] min-w-[120px]">
+                  {t('site')}
+                </TableHead>
+                <TableHead className="whitespace-nowrap">
+                  {t('status')}
+                </TableHead>
+                <TableHead className="whitespace-nowrap">{t('time')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {list.data.comments.map((comment) => (
                 <TableRow key={comment.id}>
-                  <TableCell>
+                  <TableCell className="max-w-xs sm:max-w-md lg:max-w-lg whitespace-normal">
                     <Link
                       to="/account/comments/$commentId"
                       params={{ commentId: comment.id }}
-                      className="block max-w-lg no-underline"
+                      className="block max-w-full no-underline"
                     >
-                      <p className="m-0 line-clamp-2 text-sm font-medium text-foreground">
+                      <p
+                        className="m-0 truncate text-sm font-medium text-foreground"
+                        title={comment.body}
+                      >
                         {comment.body}
                       </p>
                       <span className="text-xs text-muted-foreground">
@@ -233,12 +242,15 @@ function CommentsList() {
                       </span>
                     </Link>
                   </TableCell>
-                  <TableCell className="max-w-40">
-                    <span className="block truncate text-sm">
+                  <TableCell className="max-w-40 whitespace-normal">
+                    <span
+                      className="block truncate text-sm"
+                      title={comment.site_name || '-'}
+                    >
                       {comment.site_name || '-'}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <StatusBadge value={comment.status} />
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-xs text-muted-foreground">

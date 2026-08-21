@@ -1,9 +1,16 @@
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { LayoutDashboard, Loader2, LogOut, Menu, UserRound } from 'lucide-react'
+import { LayoutDashboard, LogOut, Menu, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Sheet,
   SheetContent,
@@ -137,7 +144,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
                 <SheetHeader className="border-b px-6 py-5">
                   <SheetTitle className="flex items-center gap-2">
                     <UserRound className="size-4" />
-                    {t('navigation.personalCenter')}
+                    {t('app.name')}
                   </SheetTitle>
                 </SheetHeader>
                 <div className="p-3">
@@ -145,68 +152,93 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
                 </div>
               </SheetContent>
             </Sheet>
-            <div className="flex min-w-0 items-center gap-3">
+            <Link
+              to="/account/profile"
+              className="flex min-w-0 items-center gap-3 text-foreground no-underline"
+            >
               <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
                 <UserRound className="size-4.5" />
               </div>
-              <div className="min-w-0">
-                <p className="m-0 truncate text-sm font-semibold tracking-tight">
-                  {user.nickname || t('navigation.personalCenter')}
+              <div>
+                <p className="m-0 text-sm font-semibold tracking-tight">
+                  {t('app.name')}
                 </p>
-                <p className="m-0 truncate text-xs text-muted-foreground">
-                  {user.email}
+                <p className="m-0 text-[11px] font-medium text-muted-foreground">
+                  {t('navigation.personalCenter')}
                 </p>
               </div>
-            </div>
+            </Link>
           </div>
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <ThemeToggle />
-            {isAdmin ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden sm:inline-flex"
-                onClick={() => void navigate({ to: '/admin' })}
-              >
-                <LayoutDashboard className="size-3.5" />
-                {t('navigation.adminConsole')}
-              </Button>
-            ) : null}
-            <UserAvatar
-              avatarUrl={user.avatar_url}
-              name={user.nickname || user.email}
-              fallback={initials}
-              className="size-7"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground"
-              onClick={() => logout.mutate()}
-              disabled={logout.isPending}
-              aria-label={t('accountMenu.logout')}
-            >
-              {logout.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <LogOut className="size-4" />
-              )}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 rounded-full p-0"
+                    aria-label={t('accountMenu.label')}
+                  >
+                    <UserAvatar
+                      avatarUrl={user.avatar_url}
+                      name={user.nickname || user.email}
+                      fallback={initials}
+                      className="size-8"
+                    />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="flex items-center gap-2.5 px-3 py-2">
+                  <UserAvatar
+                    avatarUrl={user.avatar_url}
+                    name={user.nickname || user.email}
+                    fallback={initials}
+                    className="size-8 shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="m-0 truncate text-sm font-medium"
+                      title={user.nickname || t('accountMenu.nicknameFallback')}
+                    >
+                      {user.nickname || t('accountMenu.nicknameFallback')}
+                    </p>
+                    <p
+                      className="m-0 truncate text-xs text-muted-foreground"
+                      title={user.email}
+                    >
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+                {isAdmin ? (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => void navigate({ to: '/admin' })}
+                    >
+                      <LayoutDashboard className="mr-2 size-4" />
+                      {t('navigation.adminConsole')}
+                    </DropdownMenuItem>
+                  </>
+                ) : null}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  disabled={logout.isPending}
+                  onClick={() => logout.mutate()}
+                >
+                  <LogOut className="mr-2 size-4" />
+                  {t('accountMenu.logout')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <div className="hidden border-t border-border/60 px-4 sm:block sm:px-6">
-          <div className="mx-auto flex h-13 max-w-5xl items-center justify-between gap-3">
+          <div className="mx-auto flex h-13 max-w-5xl items-center gap-3">
             <AccountNav />
-            {isAdmin ? (
-              <Link
-                to="/admin"
-                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground no-underline transition hover:bg-muted hover:text-foreground"
-              >
-                <LayoutDashboard className="size-3.5" />
-                {t('navigation.adminConsole')}
-              </Link>
-            ) : null}
           </div>
         </div>
       </header>
