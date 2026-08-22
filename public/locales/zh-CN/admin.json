@@ -87,6 +87,8 @@
   "pageKey": "页面标识",
   "pageTitle": "页面标题",
   "pageTitleClearHint": "留空将清空标题",
+  "pageUrl": "页面 URL",
+  "pageUrlClearHint": "留空将清空 URL，非空须为绝对 http(s) 地址",
   "deleteThreadTitle": "删除这个评论区？",
   "deleteThreadHint": "该操作不可撤销：评论区及其全部评论会被永久删除。",
   "threadTitle": "页面",

@@ -87,6 +87,8 @@
   "pageKey": "Page key",
   "pageTitle": "Page title",
   "pageTitleClearHint": "Leave empty to clear the title",
+  "pageUrl": "Page URL",
+  "pageUrlClearHint": "Leave empty to clear the URL; non-empty must be an absolute http(s) address",
   "deleteThreadTitle": "Delete this thread?",
   "deleteThreadHint": "This cannot be undone: the thread and all of its comments are permanently deleted.",
   "threadTitle": "Page",

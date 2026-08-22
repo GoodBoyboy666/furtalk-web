@@ -269,8 +269,10 @@ describe('ThreadsPage edit dialog', () => {
 
     const keyInput = await screen.findByLabelText('页面标识')
     const titleInput = screen.getByLabelText('页面标题')
+    const urlInput = screen.getByLabelText('页面 URL')
     expect(keyInput).toHaveValue('open-page')
     expect(titleInput).toHaveValue('Open Page')
+    expect(urlInput).toHaveValue('https://site.example/open')
 
     await user.clear(keyInput)
     await user.type(keyInput, 'renamed-page')
@@ -282,6 +284,7 @@ describe('ThreadsPage edit dialog', () => {
       expect(apiMocks.threadsApi.update).toHaveBeenCalledWith('9', '1', {
         page_key: 'renamed-page',
         page_title: 'Renamed Title',
+        page_url: 'https://site.example/open',
       })
     })
     const { toast } = await import('sonner')
@@ -304,6 +307,44 @@ describe('ThreadsPage edit dialog', () => {
       expect(apiMocks.threadsApi.update).toHaveBeenCalledWith('9', '2', {
         page_key: 'closed-page',
         page_title: null,
+        page_url: null,
+      })
+    })
+  })
+
+  it('edits the page URL and clears it when blank', async () => {
+    renderThreads()
+    const user = userEvent.setup()
+    await openThreadMenu(user, 0)
+    await user.click(screen.getAllByRole('menuitem', { name: /编辑/ })[0])
+
+    const urlInput = await screen.findByLabelText('页面 URL')
+    expect(urlInput).toHaveValue('https://site.example/open')
+
+    await user.clear(urlInput)
+    await user.type(urlInput, 'https://site.example/renamed')
+    await user.click(screen.getByRole('button', { name: '保存' }))
+
+    await waitFor(() => {
+      expect(apiMocks.threadsApi.update).toHaveBeenCalledWith('9', '1', {
+        page_key: 'open-page',
+        page_title: 'Open Page',
+        page_url: 'https://site.example/renamed',
+      })
+    })
+    apiMocks.threadsApi.update.mockClear()
+
+    await openThreadMenu(user, 0)
+    await user.click(screen.getAllByRole('menuitem', { name: /编辑/ })[0])
+    const urlInput2 = await screen.findByLabelText('页面 URL')
+    await user.clear(urlInput2)
+    await user.click(screen.getByRole('button', { name: '保存' }))
+
+    await waitFor(() => {
+      expect(apiMocks.threadsApi.update).toHaveBeenCalledWith('9', '1', {
+        page_key: 'open-page',
+        page_title: 'Open Page',
+        page_url: null,
       })
     })
   })

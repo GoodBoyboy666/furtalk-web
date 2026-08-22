@@ -107,6 +107,8 @@ export type AdminThreadUpdatePayload = {
   page_key?: string
   /** 可选；省略保持现状，显式 null/空白清空，非空值覆盖。 */
   page_title?: string | null
+  /** 可选；省略保持现状，显式 null/空白清空，非空值覆盖。 */
+  page_url?: string | null
   comments_enabled?: boolean
 }
 

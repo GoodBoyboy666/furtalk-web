@@ -71,6 +71,7 @@ type editState = {
   thread: AdminThread
   pageKey: string
   pageTitle: string
+  pageUrl: string
 } | null
 
 export function ThreadsPage() {
@@ -144,14 +145,17 @@ export function ThreadsPage() {
       threadId,
       pageKey,
       pageTitle,
+      pageUrl,
     }: {
       threadId: string
       pageKey: string
       pageTitle: string
+      pageUrl: string
     }) =>
       threadsApi.update(siteId!, threadId, {
         page_key: pageKey.trim(),
         page_title: pageTitle.trim() === '' ? null : pageTitle.trim(),
+        page_url: pageUrl.trim() === '' ? null : pageUrl.trim(),
       }),
     onSuccess: () => {
       toast.success(t('pageInfoUpdated'))
@@ -402,6 +406,7 @@ export function ThreadsPage() {
                               thread,
                               pageKey: thread.page_key,
                               pageTitle: thread.page_title ?? '',
+                              pageUrl: thread.page_url ?? '',
                             })
                           }
                         >
@@ -469,6 +474,17 @@ export function ThreadsPage() {
                   }
                 />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="thread-page-url">{t('pageUrl')}</Label>
+                <Input
+                  id="thread-page-url"
+                  value={editing.pageUrl}
+                  placeholder={t('pageUrlClearHint')}
+                  onChange={(event) =>
+                    setEditing({ ...editing, pageUrl: event.target.value })
+                  }
+                />
+              </div>
             </div>
           ) : null}
           <DialogFooter>
@@ -485,6 +501,7 @@ export function ThreadsPage() {
                   threadId: editing.thread.id,
                   pageKey: editing.pageKey,
                   pageTitle: editing.pageTitle,
+                  pageUrl: editing.pageUrl,
                 })
               }
             >
