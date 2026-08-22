@@ -49,9 +49,9 @@ const fullItems: SettingItem[] = [
     value: 'turnstile',
   },
   {
-    key: 'owo_catalog_url',
+    key: 'emoji_catalog_url',
     type: 'string',
-    value: 'https://cdn.example/owo.json',
+    value: 'https://cdn.example/emoji.json',
   },
 ]
 
@@ -72,7 +72,7 @@ describe('decodeSettings', () => {
       email_domain_blacklist: ['blocked.com'],
       gravatar_base_url: 'https://avatars.example.com/avatar',
       captcha_provider: 'turnstile',
-      owo_catalog_url: 'https://cdn.example/owo.json',
+      emoji_catalog_url: 'https://cdn.example/emoji.json',
     })
   })
 
@@ -91,7 +91,7 @@ describe('decodeSettings', () => {
     expect(decoded.email_domain_whitelist).toEqual([])
     expect(decoded.email_domain_blacklist).toEqual([])
     expect(decoded.gravatar_base_url).toBe(defaultSettings.gravatar_base_url)
-    expect(decoded.owo_catalog_url).toBe(defaultSettings.owo_catalog_url)
+    expect(decoded.emoji_catalog_url).toBe(defaultSettings.emoji_catalog_url)
   })
 
   it('does not mutate the shared default object via nested fields', () => {
@@ -221,24 +221,24 @@ describe('diffSettings', () => {
     ])
   })
 
-  it('encodes an owo_catalog_url change alone', () => {
+  it('encodes an emoji_catalog_url change alone', () => {
     const draft: typeof defaultSettings = {
       ...defaultSettings,
-      owo_catalog_url: 'https://cdn.example/owo.json',
+      emoji_catalog_url: 'https://cdn.example/emoji.json',
     }
     expect(diffSettings(defaultSettings, draft)).toEqual([
       {
-        key: 'owo_catalog_url',
+        key: 'emoji_catalog_url',
         type: 'string',
-        value: 'https://cdn.example/owo.json',
+        value: 'https://cdn.example/emoji.json',
       },
     ])
   })
 
-  it('omits owo_catalog_url when unchanged', () => {
+  it('omits emoji_catalog_url when unchanged', () => {
     const draft: typeof defaultSettings = {
       ...defaultSettings,
-      owo_catalog_url: '',
+      emoji_catalog_url: '',
     }
     expect(diffSettings(defaultSettings, draft)).toEqual([])
   })

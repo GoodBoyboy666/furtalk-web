@@ -44,7 +44,7 @@ export type Settings = {
   email_domain_blacklist: string[]
   gravatar_base_url: string
   captcha_provider: string
-  owo_catalog_url: string
+  emoji_catalog_url: string
 }
 
 // 已知顶层设置 key，保存时只对它们做变化比较。
@@ -62,7 +62,7 @@ export const knownSettingKeys = [
   'email_domain_blacklist',
   'gravatar_base_url',
   'captcha_provider',
-  'owo_catalog_url',
+  'emoji_catalog_url',
 ] as const
 
 export type KnownSettingKey = (typeof knownSettingKeys)[number]
@@ -82,7 +82,7 @@ export const defaultSettings: Settings = {
   email_domain_blacklist: [],
   gravatar_base_url: 'https://www.gravatar.com/avatar',
   captcha_provider: '',
-  owo_catalog_url: '',
+  emoji_catalog_url: '',
 }
 
 // settingType 是每个已知 key 的固定公开类型。
@@ -100,7 +100,7 @@ const settingType: Record<KnownSettingKey, SettingType> = {
   email_domain_blacklist: 'json',
   gravatar_base_url: 'string',
   captcha_provider: 'string',
-  owo_catalog_url: 'string',
+  emoji_catalog_url: 'string',
 }
 
 // decodeSettings 把公开设置项列表转换为类型化表单状态。
@@ -155,8 +155,8 @@ export function decodeSettings(items: SettingItem[]): Settings {
       case 'captcha_provider':
         out.captcha_provider = item.value as string
         break
-      case 'owo_catalog_url':
-        out.owo_catalog_url = item.value as string
+      case 'emoji_catalog_url':
+        out.emoji_catalog_url = item.value as string
         break
     }
   }

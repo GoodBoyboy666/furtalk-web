@@ -208,16 +208,18 @@ export function SettingsPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="owo-catalog-url">{t('owoCatalogUrl')}</Label>
+              <Label htmlFor="emoji-catalog-url">{t('emojiCatalogUrl')}</Label>
               <Input
-                id="owo-catalog-url"
+                id="emoji-catalog-url"
                 type="url"
-                placeholder="https://example.com/owo.json"
-                value={draft.owo_catalog_url}
-                onChange={(event) => set('owo_catalog_url', event.target.value)}
+                placeholder="https://example.com/emoji.json"
+                value={draft.emoji_catalog_url}
+                onChange={(event) =>
+                  set('emoji_catalog_url', event.target.value)
+                }
               />
               <p className="m-0 text-xs text-muted-foreground">
-                {t('owoCatalogUrlHint')}
+                {t('emojiCatalogUrlHint')}
               </p>
             </div>
           </CardContent>

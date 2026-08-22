@@ -58,7 +58,7 @@ const defaultItems: SettingItem[] = [
     value: 'https://www.gravatar.com/avatar',
   },
   { key: 'captcha_provider', type: 'string', value: '' },
-  { key: 'owo_catalog_url', type: 'string', value: '' },
+  { key: 'emoji_catalog_url', type: 'string', value: '' },
 ]
 
 function renderSettings(items: SettingItem[] = defaultItems) {
@@ -258,29 +258,29 @@ describe('SettingsPage expression catalog URL control', () => {
 
   it('round-trips an existing catalog URL on reload', async () => {
     renderSettings([
-      ...defaultItems.filter((item) => item.key !== 'owo_catalog_url'),
+      ...defaultItems.filter((item) => item.key !== 'emoji_catalog_url'),
       {
-        key: 'owo_catalog_url',
+        key: 'emoji_catalog_url',
         type: 'string',
-        value: 'https://cdn.example/owo.json',
+        value: 'https://cdn.example/emoji.json',
       },
     ])
     const input = await screen.findByLabelText('表情目录地址')
-    expect(input).toHaveValue('https://cdn.example/owo.json')
+    expect(input).toHaveValue('https://cdn.example/emoji.json')
   })
 
-  it('submits a diff-only owo_catalog_url patch after editing', async () => {
+  it('submits a diff-only emoji_catalog_url patch after editing', async () => {
     renderSettings()
     const input = await screen.findByLabelText('表情目录地址')
     const user = userEvent.setup()
-    await user.type(input, 'https://cdn.example/owo.json')
+    await user.type(input, 'https://cdn.example/emoji.json')
     await user.click(screen.getByRole('button', { name: '保存设置' }))
     await waitFor(() => {
       expect(apiMocks.settingsApi.patch).toHaveBeenCalledWith([
         {
-          key: 'owo_catalog_url',
+          key: 'emoji_catalog_url',
           type: 'string',
-          value: 'https://cdn.example/owo.json',
+          value: 'https://cdn.example/emoji.json',
         },
       ])
     })
@@ -288,11 +288,11 @@ describe('SettingsPage expression catalog URL control', () => {
 
   it('submits a diff-only clear patch when the URL is emptied', async () => {
     renderSettings([
-      ...defaultItems.filter((item) => item.key !== 'owo_catalog_url'),
+      ...defaultItems.filter((item) => item.key !== 'emoji_catalog_url'),
       {
-        key: 'owo_catalog_url',
+        key: 'emoji_catalog_url',
         type: 'string',
-        value: 'https://cdn.example/owo.json',
+        value: 'https://cdn.example/emoji.json',
       },
     ])
     const input = await screen.findByLabelText('表情目录地址')
@@ -302,7 +302,7 @@ describe('SettingsPage expression catalog URL control', () => {
     await waitFor(() => {
       expect(apiMocks.settingsApi.patch).toHaveBeenCalledWith([
         {
-          key: 'owo_catalog_url',
+          key: 'emoji_catalog_url',
           type: 'string',
           value: '',
         },
