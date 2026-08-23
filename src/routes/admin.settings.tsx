@@ -23,6 +23,7 @@ import {
   captchaProviderTypeLabel,
   ProviderSection,
 } from '@/components/provider/ProviderSection'
+import { SpamProviderSection } from '@/components/provider/SpamProviderSection'
 import { providersApi, settingsApi } from '@/lib/api/resources'
 import {
   commentSortOptions,
@@ -444,6 +445,16 @@ export function SettingsPage() {
           </CardHeader>
           <CardContent>
             <ProviderSection />
+          </CardContent>
+        </Card>
+        <Card className="xl:col-span-7">
+          <CardHeader>
+            <CardTitle className="text-base">
+              {t('spamDetectionTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SpamProviderSection />
           </CardContent>
         </Card>
       </div>

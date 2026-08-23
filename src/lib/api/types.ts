@@ -243,20 +243,21 @@ export type SettingsResponse = {
 export type Provider = {
   provider_key: string
   kind: string
-  /** 仅 OAuth/OIDC 返回；CAPTCHA 提供商没有启用语义。 */
+  /** 仅 OAuth/OIDC/Spam 返回；CAPTCHA 提供商没有启用语义。 */
   enabled?: boolean
   configured: boolean
   public_config: Record<string, unknown>
 }
 
 /** ProviderKind 与后端 domain.ProviderKind 一致。 */
-export const PROVIDER_KINDS = ['captcha', 'oauth', 'oidc'] as const
+export const PROVIDER_KINDS = ['captcha', 'oauth', 'oidc', 'spam'] as const
 export type ProviderKind = (typeof PROVIDER_KINDS)[number]
 
 /**
  * ProviderUpsertPayload 是 Provider 新增/更新请求。
  * CAPTCHA 不允许携带 enabled；新建 OAuth/OIDC 必须提供机密字段
  * （client_secret 或 Apple private_key），编辑已配置项省略或留空表示保留现有机密。
+ * Spam 必须携带 enabled，只接受固定 key（spam.local / spam.akismet / spam.aliyun / spam.tencent）。
  */
 export type ProviderUpsertPayload = {
   kind: ProviderKind
@@ -276,11 +277,26 @@ export type ProviderUpsertPayload = {
     key_id?: string
     /** Apple 专用：P-256 .p8 私钥；新建必填，编辑留空保留。 */
     private_key?: string
-    /** CAPTCHA 专用。 */
+    /** CAPTCHA 专用；Spam 腾讯云凭据组的 SecretKey 也复用该字段。 */
     provider?: string
     site_key?: string
     secret_key?: string
     endpoint?: string
+    /** Spam 本地词库专用：绝对路径与昵称检测开关。 */
+    file_path?: string
+    check_nickname?: boolean
+    /** Spam 二元渠道（本地/Akismet）命中动作。 */
+    action?: string
+    /** Spam Akismet 专用：API key；新建必填，编辑留空保留。 */
+    api_key?: string
+    /** Spam 云渠道专用：区域与可选业务策略。 */
+    region?: string
+    biz_type?: string
+    /** Spam 阿里云专用：AccessKey 凭据组。 */
+    access_key_id?: string
+    access_key_secret?: string
+    /** Spam 腾讯云专用：SecretId；SecretKey 复用上面的 secret_key 字段。 */
+    secret_id?: string
   }
 }
 
