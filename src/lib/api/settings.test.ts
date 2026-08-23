@@ -299,10 +299,11 @@ describe('privacy mode options', () => {
 })
 
 describe('comment sort options', () => {
-  it('exposes the asc|desc contract with stable keys', () => {
+  it('exposes the asc|desc|hot contract with stable keys', () => {
     expect(commentSortOptions).toEqual([
       { value: 'asc', key: 'enums:commentSort.asc' },
       { value: 'desc', key: 'enums:commentSort.desc' },
+      { value: 'hot', key: 'enums:commentSort.hot' },
     ])
   })
 })

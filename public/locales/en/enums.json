@@ -38,7 +38,8 @@
   },
   "commentSort": {
     "asc": "Ascending (oldest to newest)",
-    "desc": "Descending (newest to oldest)"
+    "desc": "Descending (newest to oldest)",
+    "hot": "Hot (by Like count)"
   },
   "userDeleteMode": {
     "soft": "Soft delete (recoverable account)",

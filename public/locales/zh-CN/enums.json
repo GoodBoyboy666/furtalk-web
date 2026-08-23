@@ -38,7 +38,8 @@
   },
   "commentSort": {
     "asc": "升序（旧到新）",
-    "desc": "降序（新到旧）"
+    "desc": "降序（新到旧）",
+    "hot": "最热（按点赞数）"
   },
   "userDeleteMode": {
     "soft": "软删除（可恢复账号）",

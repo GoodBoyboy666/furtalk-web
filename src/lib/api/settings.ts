@@ -25,6 +25,7 @@ export function privacyModeLabel(value: string | null | undefined) {
 export const commentSortOptions = [
   { value: 'asc', key: 'enums:commentSort.asc' },
   { value: 'desc', key: 'enums:commentSort.desc' },
+  { value: 'hot', key: 'enums:commentSort.hot' },
 ] as const
 
 export type CommentSort = (typeof commentSortOptions)[number]['value']

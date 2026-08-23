@@ -247,6 +247,37 @@ describe('SettingsPage comment sort control', () => {
     })
     expect(trigger).toHaveTextContent('降序（新到旧）')
   })
+
+  it('offers the hot option and saves it as the default', async () => {
+    renderSettings()
+    await screen.findByText('评论默认排序')
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('combobox', { name: '评论默认排序' }))
+    await user.click(
+      await screen.findByRole('option', { name: '最热（按点赞数）' }),
+    )
+    await user.click(screen.getByRole('button', { name: '保存设置' }))
+    await waitFor(() => {
+      expect(apiMocks.settingsApi.patch).toHaveBeenCalledWith([
+        {
+          key: 'comment_sort',
+          type: 'string',
+          value: 'hot',
+        },
+      ])
+    })
+  })
+
+  it('round-trips an existing hot default on reload', async () => {
+    renderSettings([
+      ...defaultItems.filter((item) => item.key !== 'comment_sort'),
+      { key: 'comment_sort', type: 'string', value: 'hot' },
+    ])
+    const trigger = await screen.findByRole('combobox', {
+      name: '评论默认排序',
+    })
+    expect(trigger).toHaveTextContent('最热（按点赞数）')
+  })
 })
 
 describe('SettingsPage expression catalog URL control', () => {
