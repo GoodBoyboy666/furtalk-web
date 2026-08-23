@@ -62,6 +62,7 @@ export type AdminComment = {
   avatar_url: string
   body: string
   status: string
+  is_pinned: boolean
   depth: number
   /** 被回复作者的 id；根评论为 nil，被回复者注销后也为 nil。 */
   reply_to_user_id: string | null

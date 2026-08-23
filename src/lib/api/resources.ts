@@ -154,6 +154,14 @@ export const commentsApi = {
     api
       .patch(`/admin/comments/${id}`, { body })
       .then((response) => response.data),
+  pin: (id: string) =>
+    api
+      .put<AdminComment>(`/admin/comments/${id}/pin`)
+      .then((response) => response.data),
+  unpin: (id: string) =>
+    api
+      .delete<AdminComment>(`/admin/comments/${id}/pin`)
+      .then((response) => response.data),
   publish: (id: string) => api.post(`/admin/comments/${id}/publish`),
   pending: (id: string) => api.post(`/admin/comments/${id}/pending`),
   spam: (id: string) => api.post(`/admin/comments/${id}/spam`),

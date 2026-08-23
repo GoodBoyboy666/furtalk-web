@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CommentDetailPage } from './admin.comments.$commentId'
@@ -11,6 +11,8 @@ const apiMocks = vi.hoisted(() => ({
   pending: vi.fn(),
   publish: vi.fn(),
   spam: vi.fn(),
+  pin: vi.fn(),
+  unpin: vi.fn(),
   remove: vi.fn(),
 }))
 
@@ -45,6 +47,7 @@ function comment(partial: Partial<AdminComment> = {}): AdminComment {
     reply_to_nickname: 'Replied',
     body: 'hello world',
     status: 'published',
+    is_pinned: false,
     depth: 1,
     created_at: '2026-08-11T00:00:00Z',
     published_at: '2026-08-11T00:00:00Z',
@@ -75,6 +78,8 @@ function renderDetail(overrides: Partial<AdminComment> = {}) {
 beforeEach(() => {
   cleanup()
   vi.clearAllMocks()
+  apiMocks.pin.mockResolvedValue(comment({ is_pinned: true }))
+  apiMocks.unpin.mockResolvedValue(comment({ is_pinned: false }))
 })
 
 describe('CommentDetailPage complete data', () => {
@@ -205,5 +210,17 @@ describe('CommentDetailPage responsive layout', () => {
     const grid = card?.querySelector('[data-slot="card-content"]')
     expect(grid?.className).toContain('grid')
     expect(grid?.className).toContain('sm:grid-cols-2')
+  })
+})
+
+describe('CommentDetailPage pin action', () => {
+  it('pins a published root from the status actions card', async () => {
+    renderDetail()
+    expect(await screen.findByText('hello world')).toBeInTheDocument()
+    await screen.findByRole('button', { name: '置顶评论' })
+    screen.getByRole('button', { name: '置顶评论' }).click()
+    await waitFor(() => {
+      expect(apiMocks.pin).toHaveBeenCalledWith('1')
+    })
   })
 })

@@ -73,6 +73,7 @@ function comment(
     reply_to_nickname: null,
     body: 'hello world',
     status: 'published',
+    is_pinned: false,
     depth: 0,
     created_at: '2026-08-11T00:00:00Z',
     published_at: '2026-08-11T00:00:00Z',

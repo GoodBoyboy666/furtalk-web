@@ -5,6 +5,7 @@ import {
   Check,
   Clock,
   Loader2,
+  Pin,
   ShieldAlert,
   Trash2,
 } from 'lucide-react'
@@ -93,6 +94,19 @@ export function CommentDetailPage() {
       void queryClient.invalidateQueries({ queryKey: ['comment', commentId] })
       void queryClient.invalidateQueries({ queryKey: ['comments'] })
     },
+  })
+  const pinAction = useMutation({
+    mutationFn: (pinned: boolean) =>
+      pinned ? commentsApi.pin(commentId) : commentsApi.unpin(commentId),
+    onSuccess: (_, pinned) => {
+      toast.success(pinned ? t('commentPinned') : t('commentUnpinned'))
+      void queryClient.invalidateQueries({ queryKey: ['comment', commentId] })
+      void queryClient.invalidateQueries({ queryKey: ['comments'] })
+    },
+    onError: (error) =>
+      toast.error(
+        error instanceof Error ? error.message : t('operationFailed'),
+      ),
   })
   if (comment.isPending)
     return (
@@ -235,6 +249,12 @@ export function CommentDetailPage() {
                 value={<StatusBadge value={item.status} />}
               />
               <Info
+                label={t('pinStatus')}
+                value={
+                  item.is_pinned ? t('commentPinned') : t('commentNotPinned')
+                }
+              />
+              <Info
                 label={t('createdAt')}
                 value={formatDateTime(item.created_at, {
                   year: 'numeric',
@@ -271,6 +291,21 @@ export function CommentDetailPage() {
               <CardTitle className="text-base">{t('statusActions')}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2">
+              {item.parent_id === null &&
+              (item.is_pinned || item.status === 'published') ? (
+                <Button
+                  variant="outline"
+                  disabled={pinAction.isPending}
+                  onClick={() => pinAction.mutate(!item.is_pinned)}
+                >
+                  {pinAction.isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <Pin />
+                  )}
+                  {item.is_pinned ? t('unpinComment') : t('pinComment')}
+                </Button>
+              ) : null}
               {otherCommentStatusTargets(item.status).map((target) => (
                 <Button
                   key={target.value}

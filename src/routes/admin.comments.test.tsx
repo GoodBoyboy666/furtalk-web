@@ -13,6 +13,8 @@ const apiMocks = vi.hoisted(() => ({
     pending: vi.fn(),
     publish: vi.fn(),
     spam: vi.fn(),
+    pin: vi.fn(),
+    unpin: vi.fn(),
     restore: vi.fn(),
     remove: vi.fn(),
   },
@@ -70,6 +72,7 @@ function comment(
     reply_to_nickname: null,
     body: 'hello world',
     status: 'published',
+    is_pinned: false,
     depth: 0,
     created_at: '2026-08-11T00:00:00Z',
     published_at: '2026-08-11T00:00:00Z',
@@ -130,6 +133,12 @@ beforeEach(() => {
   apiMocks.commentsApi.pending.mockResolvedValue(undefined)
   apiMocks.commentsApi.publish.mockResolvedValue(undefined)
   apiMocks.commentsApi.spam.mockResolvedValue(undefined)
+  apiMocks.commentsApi.pin.mockResolvedValue(
+    comment({ id: '1', is_pinned: true }),
+  )
+  apiMocks.commentsApi.unpin.mockResolvedValue(
+    comment({ id: '1', is_pinned: false }),
+  )
   apiMocks.commentsApi.remove.mockResolvedValue({
     deleted_root_id: '1',
     hard: false,
@@ -307,6 +316,17 @@ describe('CommentsPage detail navigation', () => {
 })
 
 describe('CommentsPage four-state matrix', () => {
+  it('pins a published root from the row actions', async () => {
+    renderComments()
+    const user = userEvent.setup()
+    await openRowMenu(user, 'hello world')
+
+    await user.click(screen.getByRole('menuitem', { name: '置顶评论' }))
+    await waitFor(() => {
+      expect(apiMocks.commentsApi.pin).toHaveBeenCalledWith('1')
+    })
+  })
+
   it('offers the three other status targets for a published comment', async () => {
     renderComments()
     const user = userEvent.setup()

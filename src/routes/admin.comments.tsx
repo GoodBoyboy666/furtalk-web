@@ -12,6 +12,7 @@ import {
   Eye,
   Loader2,
   MoreHorizontal,
+  Pin,
   Search,
   ShieldAlert,
   Trash2,
@@ -158,6 +159,20 @@ function CommentsList() {
         error instanceof Error ? error.message : t('operationFailed'),
       ),
   })
+  const pinAction = useMutation({
+    mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) =>
+      pinned ? commentsApi.pin(id) : commentsApi.unpin(id),
+    onSuccess: (_, variables) => {
+      toast.success(
+        variables.pinned ? t('commentPinned') : t('commentUnpinned'),
+      )
+      void queryClient.invalidateQueries({ queryKey: ['comments'] })
+    },
+    onError: (error) =>
+      toast.error(
+        error instanceof Error ? error.message : t('operationFailed'),
+      ),
+  })
 
   const total = query.isSuccess ? query.data.total : 0
   const totalPages = Math.max(1, Math.ceil(total / Math.max(1, pageSize)))
@@ -289,6 +304,12 @@ function CommentsList() {
                         className="m-0 truncate text-sm font-medium text-foreground"
                         title={comment.body}
                       >
+                        {comment.is_pinned ? (
+                          <Pin
+                            className="mr-1 inline size-3.5 text-amber-600"
+                            aria-label={t('commentPinned')}
+                          />
+                        ) : null}
                         {comment.body}
                       </p>
                       <span className="text-xs text-muted-foreground">
@@ -355,6 +376,29 @@ function CommentsList() {
                           {t('viewDetail')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
+                        {comment.parent_id === null &&
+                        (comment.is_pinned ||
+                          comment.status === 'published') ? (
+                          <DropdownMenuItem
+                            disabled={pinAction.isPending}
+                            onClick={() =>
+                              pinAction.mutate({
+                                id: comment.id,
+                                pinned: !comment.is_pinned,
+                              })
+                            }
+                          >
+                            <Pin className="mr-2 size-4" />
+                            {comment.is_pinned
+                              ? t('unpinComment')
+                              : t('pinComment')}
+                          </DropdownMenuItem>
+                        ) : null}
+                        {comment.parent_id === null &&
+                        (comment.is_pinned ||
+                          comment.status === 'published') ? (
+                          <DropdownMenuSeparator />
+                        ) : null}
                         {otherCommentStatusTargets(comment.status).map(
                           (target) => (
                             <DropdownMenuItem
