@@ -1,9 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Loader2, MoreHorizontal, Pencil, Search, Trash2 } from 'lucide-react'
+import {
+  Check,
+  Loader2,
+  MoreHorizontal,
+  Pencil,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -49,6 +58,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { PageHeader } from '@/components/PageHeader'
+import { AdminBatchToolbar } from '@/components/AdminBatchToolbar'
 import { EmptyState } from '@/components/EmptyState'
 import { StateFade } from '@/components/motion'
 import { ListPagination } from '@/components/ListPagination'
@@ -58,8 +68,10 @@ import { adminSortLabel, adminSortOptions } from '@/lib/admin-sort'
 import type { AdminSort } from '@/lib/admin-sort'
 import { selectItems } from '@/lib/i18n'
 import { usePageSize } from '@/lib/pagination'
-import type { AdminThread } from '@/lib/api/types'
+import type { AdminThread, AdminThreadBatchAction } from '@/lib/api/types'
 import { formatDateTime } from '@/lib/format'
+import { useCurrentPageSelection } from '@/lib/use-current-page-selection'
+import { getFailedBatchId } from '@/lib/admin-batch'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/admin/threads')({
@@ -87,6 +99,8 @@ export function ThreadsPage() {
   const [pendingId, setPendingId] = useState('')
   const [editing, setEditing] = useState<editState>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [batchConfirm, setBatchConfirm] =
+    useState<AdminThreadBatchAction | null>(null)
 
   const sites = useQuery({
     queryKey: ['sites'],
@@ -177,6 +191,60 @@ export function ThreadsPage() {
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : t('deleteFailed')),
   })
+
+  const visibleIds = list.data?.threads.map((thread) => thread.id) ?? []
+  const selection = useCurrentPageSelection(
+    visibleIds,
+    [siteId ?? '', enabled, q, sort, page, pageSize].join('|'),
+  )
+  const batchMutation = useMutation({
+    mutationFn: ({
+      action,
+      confirm,
+    }: {
+      action: AdminThreadBatchAction
+      confirm?: boolean
+    }) => {
+      const payload = {
+        ids: [...selection.selectedIds],
+        action,
+        ...(confirm ? { confirm: true } : {}),
+      }
+      return threadsApi.batch(siteId!, payload)
+    },
+    onSuccess: (result) => {
+      toast.success(
+        t('batchOperationCompleted', {
+          changed: result.changed_count,
+          unchanged: result.unchanged_count,
+        }),
+      )
+      selection.clear()
+      setBatchConfirm(null)
+      void invalidateThreads(queryClient)
+    },
+    onError: (error) => {
+      const failedID = getFailedBatchId(error)
+      toast.error(
+        failedID
+          ? t('batchOperationFailedWithID', { id: failedID })
+          : error instanceof Error
+            ? error.message
+            : t('operationFailed'),
+      )
+    },
+  })
+
+  const batchActions = [
+    { value: 'enable', label: t('batchEnableThreads'), icon: <Check /> },
+    { value: 'disable', label: t('batchDisableThreads'), icon: <X /> },
+    {
+      value: 'hard_delete',
+      label: t('batchHardDeleteThreads'),
+      icon: <Trash2 />,
+      variant: 'destructive' as const,
+    },
+  ]
 
   const total = list.isSuccess ? list.data.total : 0
   const totalPages = Math.max(1, Math.ceil(total / Math.max(1, pageSize)))
@@ -281,6 +349,20 @@ export function ThreadsPage() {
           {t('action.search', { ns: 'common' })}
         </Button>
       </div>
+      <AdminBatchToolbar
+        selectedCount={selection.selectedCount}
+        pending={batchMutation.isPending}
+        label={t('batchSelectedCount', { count: selection.selectedCount })}
+        actions={batchActions}
+        onAction={(batch) => {
+          const action = batch.value as AdminThreadBatchAction
+          if (action === 'hard_delete') {
+            setBatchConfirm(action)
+            return
+          }
+          batchMutation.mutate({ action })
+        }}
+      />
       <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         {!siteId ? (
           <div className="p-4">
@@ -306,6 +388,14 @@ export function ThreadsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox
+                    aria-label={t('selectAllThreads')}
+                    checked={selection.allSelected}
+                    indeterminate={selection.someSelected}
+                    onCheckedChange={(checked) => selection.toggleAll(checked)}
+                  />
+                </TableHead>
                 <TableHead className="w-[40%] min-w-[200px]">
                   {t('threadTitle')}
                 </TableHead>
@@ -327,6 +417,15 @@ export function ThreadsPage() {
             <TableBody>
               {list.data.threads.map((thread) => (
                 <TableRow key={thread.id}>
+                  <TableCell className="align-top">
+                    <Checkbox
+                      aria-label={t('selectThread', { id: thread.id })}
+                      checked={selection.isSelected(thread.id)}
+                      onCheckedChange={(checked) =>
+                        selection.toggle(thread.id, checked)
+                      }
+                    />
+                  </TableCell>
                   <TableCell className="max-w-xs sm:max-w-sm md:max-w-md whitespace-normal">
                     <p
                       className="m-0 truncate text-sm font-medium text-foreground"
@@ -536,6 +635,40 @@ export function ThreadsPage() {
             >
               {remove.isPending ? <Loader2 className="animate-spin" /> : null}
               {t('action.confirmDelete', { ns: 'common' })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog
+        open={batchConfirm !== null}
+        onOpenChange={(open) => !open && setBatchConfirm(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t('batchHardDeleteThreadsTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('batchHardDeleteThreadsHint', {
+                count: selection.selectedCount,
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t('action.cancel', { ns: 'common' })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={batchMutation.isPending || !batchConfirm}
+              onClick={() => {
+                if (!batchConfirm) return
+                batchMutation.mutate({ action: batchConfirm, confirm: true })
+              }}
+            >
+              {batchMutation.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : null}
+              {t('action.confirmAction', { ns: 'common' })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

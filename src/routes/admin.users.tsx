@@ -1,10 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  Check,
   KeyRound,
   Loader2,
+  MailCheck,
+  MailX,
   Pencil,
   Search,
+  ShieldOff,
   Trash2,
   Undo2,
   UserPlus,
@@ -16,6 +20,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
 import { StateFade } from '@/components/motion'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -55,7 +60,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { usersApi } from '@/lib/api/resources'
-import type { AdminUser, UserRole, UserStatus } from '@/lib/api/types'
+import type {
+  AdminUser,
+  AdminUserBatchAction,
+  UserRole,
+  UserStatus,
+} from '@/lib/api/types'
 import { adminSortLabel, adminSortOptions } from '@/lib/admin-sort'
 import type { AdminSort } from '@/lib/admin-sort'
 import { UserAvatar, initialsFrom } from '@/components/UserAvatar'
@@ -69,6 +79,9 @@ import { selectItems } from '@/lib/i18n'
 import { usePageSize } from '@/lib/pagination'
 import { formatDate } from '@/lib/format'
 import { toast } from 'sonner'
+import { AdminBatchToolbar } from '@/components/AdminBatchToolbar'
+import { getFailedBatchId } from '@/lib/admin-batch'
+import { useCurrentPageSelection } from '@/lib/use-current-page-selection'
 
 export const Route = createFileRoute('/admin/users')({ component: UsersPage })
 
@@ -92,12 +105,92 @@ export function UsersPage() {
   const [editTarget, setEditTarget] = useState<string | null>(null)
   const [resetTarget, setResetTarget] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null)
+  const [batchConfirm, setBatchConfirm] = useState<
+    'soft_delete' | 'hard_delete' | null
+  >(null)
+  const queryClient = useQueryClient()
   const users = useQuery({
     queryKey: ['users', { q, sort, page, pageSize }],
     queryFn: () => usersApi.list({ q, sort, page, limit: pageSize }),
   })
   const total = users.isSuccess ? users.data.total : 0
   const totalPages = Math.max(1, Math.ceil(total / Math.max(1, pageSize)))
+  const visibleIds = users.data?.users.map((user) => user.id) ?? []
+  const selection = useCurrentPageSelection(
+    visibleIds,
+    [q, sort, page, pageSize].join('|'),
+  )
+  const batchMutation = useMutation({
+    mutationFn: ({
+      ids,
+      action,
+      confirm,
+    }: {
+      ids: string[]
+      action: AdminUserBatchAction
+      confirm?: boolean
+    }) => usersApi.batch({ ids, action, confirm }),
+    onSuccess: (result, variables) => {
+      toast.success(
+        t('batchOperationCompleted', {
+          changed: result.changed_count,
+          unchanged: result.unchanged_count,
+        }),
+      )
+      selection.clear()
+      void queryClient.invalidateQueries({ queryKey: ['users'] })
+      if (variables.action === 'hard_delete') {
+        for (const id of variables.ids) {
+          void queryClient.removeQueries({ queryKey: ['users', id] })
+        }
+      }
+      setBatchConfirm(null)
+    },
+    onError: (error) => {
+      const failedID = getFailedBatchId(error)
+      toast.error(
+        failedID
+          ? t('batchOperationFailedWithID', { id: failedID })
+          : error instanceof Error
+            ? error.message
+            : t('operationFailed'),
+      )
+    },
+  })
+  const batchActions = [
+    { value: 'enable' as const, label: t('batchEnableUsers'), icon: <Check /> },
+    {
+      value: 'disable' as const,
+      label: t('batchDisableUsers'),
+      icon: <ShieldOff />,
+    },
+    {
+      value: 'verify_email' as const,
+      label: t('batchVerifyUsers'),
+      icon: <MailCheck />,
+    },
+    {
+      value: 'unverify_email' as const,
+      label: t('batchUnverifyUsers'),
+      icon: <MailX />,
+    },
+    {
+      value: 'soft_delete' as const,
+      label: t('batchSoftDeleteUsers'),
+      icon: <Trash2 />,
+    },
+    {
+      value: 'hard_delete' as const,
+      label: t('batchHardDeleteUsers'),
+      icon: <Trash2 />,
+      variant: 'destructive' as const,
+    },
+    {
+      value: 'restore' as const,
+      label: t('batchRestoreUsers'),
+      icon: <Undo2 />,
+    },
+  ]
   useEffect(() => {
     if (users.isSuccess && page > totalPages) {
       setPage(totalPages)
@@ -164,6 +257,23 @@ export function UsersPage() {
           </span>
         ) : null}
       </div>
+      <AdminBatchToolbar
+        selectedCount={selection.selectedCount}
+        pending={batchMutation.isPending}
+        label={t('batchSelectedCount', { count: selection.selectedCount })}
+        actions={batchActions}
+        onAction={(batch) => {
+          const action = batch.value as AdminUserBatchAction
+          if (action === 'soft_delete' || action === 'hard_delete') {
+            setBatchConfirm(action)
+            return
+          }
+          batchMutation.mutate({
+            ids: [...selection.selectedIds],
+            action,
+          })
+        }}
+      />
       <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         {users.isPending ? (
           <StateFade kind="loading">
@@ -181,6 +291,14 @@ export function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox
+                    aria-label={t('selectAllUsers')}
+                    checked={selection.allSelected}
+                    indeterminate={selection.someSelected}
+                    onCheckedChange={(checked) => selection.toggleAll(checked)}
+                  />
+                </TableHead>
                 <TableHead>{t('user')}</TableHead>
                 <TableHead>{t('role')}</TableHead>
                 <TableHead>{t('status')}</TableHead>
@@ -192,6 +310,15 @@ export function UsersPage() {
             <TableBody>
               {users.data.users.map((user) => (
                 <TableRow key={user.id}>
+                  <TableCell className="align-top">
+                    <Checkbox
+                      aria-label={t('selectUser', { id: user.id })}
+                      checked={selection.isSelected(user.id)}
+                      onCheckedChange={(checked) =>
+                        selection.toggle(user.id, checked)
+                      }
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <UserAvatar
@@ -310,6 +437,52 @@ export function UsersPage() {
           onClose={() => setDeleteTarget(null)}
         />
       ) : null}
+      <AlertDialog
+        open={batchConfirm !== null}
+        onOpenChange={(open) => !open && setBatchConfirm(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {batchConfirm === 'hard_delete'
+                ? t('batchHardDeleteUsersTitle')
+                : t('batchSoftDeleteUsersTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {batchConfirm === 'hard_delete'
+                ? t('batchHardDeleteUsersHint', {
+                    count: selection.selectedCount,
+                  })
+                : t('batchSoftDeleteUsersHint', {
+                    count: selection.selectedCount,
+                  })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t('action.cancel', { ns: 'common' })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={batchMutation.isPending}
+              onClick={() => {
+                if (!batchConfirm) return
+                batchMutation.mutate({
+                  ids: [...selection.selectedIds],
+                  action: batchConfirm,
+                  confirm: true,
+                })
+              }}
+            >
+              {batchMutation.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : null}
+              {batchConfirm === 'hard_delete'
+                ? t('confirmHardDelete')
+                : t('confirmSoftDelete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

@@ -3,12 +3,14 @@ import type {
   AdminComment,
   AdminCommentBatchAction,
   AdminCommentList,
+  AdminThreadBatchAction,
   AdminBatchPayload,
   AdminBatchResult,
   AdminThread,
   AdminThreadList,
   AdminThreadUpdatePayload,
   AdminUser,
+  AdminUserBatchAction,
   AdminUserCreatePayload,
   AdminUserList,
   AdminUserResetPasswordPayload,
@@ -248,12 +250,20 @@ export const threadsApi = {
     api.delete(`/admin/sites/${siteId}/threads/${threadId}`, {
       params: { confirm: true },
     }),
+  batch: (siteId: string, payload: AdminBatchPayload<AdminThreadBatchAction>) =>
+    api
+      .post<AdminBatchResult>(`/admin/sites/${siteId}/threads/batch`, payload)
+      .then((response) => response.data),
 }
 
 export const usersApi = {
   list: (params: ListParams) =>
     api
       .get<AdminUserList>('/admin/users', { params: toQuery(params) })
+      .then((response) => response.data),
+  batch: (payload: AdminBatchPayload<AdminUserBatchAction>) =>
+    api
+      .post<AdminBatchResult>('/admin/users/batch', payload)
       .then((response) => response.data),
   get: (id: string) =>
     api.get<AdminUser>(`/admin/users/${id}`).then((response) => response.data),

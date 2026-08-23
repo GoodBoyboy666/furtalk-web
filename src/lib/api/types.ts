@@ -126,6 +126,8 @@ export type AdminThreadList = {
   total: number
 }
 
+export type AdminThreadBatchAction = 'enable' | 'disable' | 'hard_delete'
+
 export type AdminThreadUpdatePayload = {
   /** 可选；省略保持现状。 */
   page_key?: string
@@ -222,6 +224,15 @@ export type AdminUserList = {
   users: AdminUser[]
   total: number
 }
+
+export type AdminUserBatchAction =
+  | 'enable'
+  | 'disable'
+  | 'verify_email'
+  | 'unverify_email'
+  | 'soft_delete'
+  | 'hard_delete'
+  | 'restore'
 
 export type AdminUserDeletePayload = {
   mode: 'soft' | 'hard'

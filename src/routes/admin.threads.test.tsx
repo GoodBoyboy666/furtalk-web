@@ -14,6 +14,7 @@ const apiMocks = vi.hoisted(() => ({
     list: vi.fn(),
     update: vi.fn(),
     remove: vi.fn(),
+    batch: vi.fn(),
   },
 }))
 
@@ -83,6 +84,12 @@ beforeEach(() => {
   apiMocks.threadsApi.update.mockResolvedValue({
     ...closedThread,
     comments_enabled: true,
+  })
+  apiMocks.threadsApi.batch.mockResolvedValue({
+    action: 'enable',
+    requested_count: 1,
+    changed_count: 1,
+    unchanged_count: 0,
   })
 })
 
@@ -257,6 +264,70 @@ describe('ThreadsPage filters', () => {
         expect.objectContaining({ q: 'alpha' }),
       )
     })
+  })
+})
+
+describe('ThreadsPage batch actions', () => {
+  it('selects only the current page and sends one enable request', async () => {
+    renderThreads()
+    const user = userEvent.setup()
+    await screen.findByText('Open Page')
+
+    await user.click(screen.getByRole('checkbox', { name: '选择评论区 1' }))
+    await user.click(screen.getByRole('button', { name: '开启评论区' }))
+
+    await waitFor(() => {
+      expect(apiMocks.threadsApi.batch).toHaveBeenCalledWith('9', {
+        ids: ['1'],
+        action: 'enable',
+      })
+    })
+  })
+
+  it('confirms hard delete with the selected thread count and cascade warning', async () => {
+    renderThreads()
+    const user = userEvent.setup()
+    await screen.findByText('Open Page')
+
+    await user.click(screen.getByRole('checkbox', { name: '选择评论区 1' }))
+    await user.click(screen.getByRole('button', { name: '批量永久删除' }))
+    expect(
+      await screen.findByText(
+        '将永久删除 1 个评论区及其全部评论；该操作不可撤销。',
+      ),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '确认操作' }))
+
+    await waitFor(() => {
+      expect(apiMocks.threadsApi.batch).toHaveBeenCalledWith('9', {
+        ids: ['1'],
+        action: 'hard_delete',
+        confirm: true,
+      })
+    })
+  })
+
+  it('keeps selection after a failed batch and shows the failed id', async () => {
+    apiMocks.threadsApi.batch.mockRejectedValue(
+      new ApiError('batch failed', 404, 'not_found', undefined, {
+        failed_id: '2',
+      }),
+    )
+    renderThreads()
+    const user = userEvent.setup()
+    await screen.findByText('Open Page')
+
+    await user.click(screen.getByRole('checkbox', { name: '选择评论区 2' }))
+    await user.click(screen.getByRole('button', { name: '开启评论区' }))
+    await waitFor(() => {
+      expect(
+        screen.getByRole('checkbox', { name: '选择评论区 2' }),
+      ).toBeChecked()
+    })
+    const { toast } = await import('sonner')
+    expect(toast.error).toHaveBeenCalledWith(
+      '批量操作失败（记录 2），未应用任何变更',
+    )
   })
 })
 

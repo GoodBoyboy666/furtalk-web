@@ -22,7 +22,9 @@ const apiMocks = vi.hoisted(() => ({
   resetPassword: vi.fn(),
   remove: vi.fn(),
   restore: vi.fn(),
+  batch: vi.fn(),
 }))
+const toastMocks = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
 
 vi.mock('@tanstack/react-router', () => ({
   createFileRoute: () => () => ({ component: null }),
@@ -31,7 +33,7 @@ vi.mock('@/lib/api/resources', () => ({
   usersApi: apiMocks,
 }))
 vi.mock('sonner', () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+  toast: toastMocks,
 }))
 
 const user: AdminUser = {
@@ -77,6 +79,12 @@ beforeEach(() => {
   apiMocks.resetPassword.mockResolvedValue(undefined)
   apiMocks.remove.mockResolvedValue(undefined)
   apiMocks.restore.mockResolvedValue(user)
+  apiMocks.batch.mockResolvedValue({
+    action: 'enable',
+    requested_count: 1,
+    changed_count: 1,
+    unchanged_count: 0,
+  })
 })
 
 afterEach(() => {
@@ -337,6 +345,72 @@ describe('UsersPage list states', () => {
     expect(await screen.findByText('未验证')).toBeInTheDocument()
     expect(screen.queryByText('待审核')).not.toBeInTheDocument()
     expect(screen.queryByText('已发布')).not.toBeInTheDocument()
+  })
+})
+
+describe('UsersPage batch actions', () => {
+  it('offers the seven user actions without a role action and sends selected IDs', async () => {
+    renderUsers()
+    const userAgent = userEvent.setup()
+    await userAgent.click(
+      await screen.findByRole('checkbox', { name: '选择用户 7' }),
+    )
+
+    for (const label of [
+      '批量启用',
+      '批量禁用',
+      '批量验证邮箱',
+      '批量取消邮箱验证',
+      '批量软删除',
+      '批量永久删除',
+      '批量恢复',
+    ]) {
+      expect(screen.getByRole('button', { name: label })).toBeInTheDocument()
+    }
+    expect(
+      screen.queryByRole('button', { name: /角色/ }),
+    ).not.toBeInTheDocument()
+
+    await userAgent.click(screen.getByRole('button', { name: '批量启用' }))
+    await waitFor(() => {
+      expect(apiMocks.batch).toHaveBeenCalledWith({
+        ids: ['7'],
+        action: 'enable',
+        confirm: undefined,
+      })
+    })
+  })
+
+  it('confirms destructive actions with count and preserves selection on failure', async () => {
+    apiMocks.batch.mockRejectedValue(
+      new ApiError('不能移除最后一个管理员', 409, 'conflict', undefined, {
+        failed_id: '7',
+      }),
+    )
+    renderUsers()
+    const userAgent = userEvent.setup()
+    await userAgent.click(
+      await screen.findByRole('checkbox', { name: '选择用户 7' }),
+    )
+    await userAgent.click(screen.getByRole('button', { name: '批量永久删除' }))
+    expect(
+      await screen.findByText(
+        '将永久删除 1 个用户及其关联评论和凭据；该操作不可撤销。',
+      ),
+    ).toBeInTheDocument()
+    await userAgent.click(screen.getByRole('button', { name: '确认永久删除' }))
+    await waitFor(() => {
+      expect(apiMocks.batch).toHaveBeenCalledWith({
+        ids: ['7'],
+        action: 'hard_delete',
+        confirm: true,
+      })
+    })
+    await userAgent.click(screen.getByRole('button', { name: '取消' }))
+    expect(screen.getByRole('button', { name: '批量启用' })).toBeInTheDocument()
+    expect(toastMocks.error).toHaveBeenCalledWith(
+      '批量操作失败（记录 7），未应用任何变更',
+    )
   })
 })
 
