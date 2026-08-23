@@ -17,6 +17,7 @@ const apiMocks = vi.hoisted(() => ({
     unpin: vi.fn(),
     restore: vi.fn(),
     remove: vi.fn(),
+    batch: vi.fn(),
   },
   navigate: vi.fn(),
 }))
@@ -142,6 +143,12 @@ beforeEach(() => {
   apiMocks.commentsApi.remove.mockResolvedValue({
     deleted_root_id: '1',
     hard: false,
+  })
+  apiMocks.commentsApi.batch.mockResolvedValue({
+    action: 'publish',
+    requested_count: 2,
+    changed_count: 2,
+    unchanged_count: 0,
   })
 })
 
@@ -280,6 +287,51 @@ describe('CommentsPage pagination', () => {
       expect(apiMocks.commentsApi.list).toHaveBeenLastCalledWith(
         expect.objectContaining({ q: 'needle', page: 1 }),
       )
+    })
+  })
+})
+
+describe('CommentsPage batch actions', () => {
+  it('sends the selected current-page comment ids in one request', async () => {
+    renderComments()
+    const user = userEvent.setup()
+    const checkboxes = await screen.findAllByRole('checkbox')
+
+    await user.click(checkboxes[1])
+    await user.click(checkboxes[2])
+    expect(screen.getByText('已选择 2 项')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '发布评论' }))
+
+    await waitFor(() => {
+      expect(apiMocks.commentsApi.batch).toHaveBeenCalledWith({
+        ids: ['1', '2'],
+        action: 'publish',
+        confirm: undefined,
+      })
+    })
+  })
+
+  it('confirms batch soft delete with the selected count', async () => {
+    renderComments()
+    const user = userEvent.setup()
+    const checkboxes = await screen.findAllByRole('checkbox')
+
+    await user.click(checkboxes[0])
+    await user.click(screen.getByRole('button', { name: '批量软删除' }))
+    expect(
+      await screen.findByRole('heading', { name: '软删除选中的评论？' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('将软删除 2 条评论；评论会被隐藏且可以恢复。'),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '确认操作' }))
+
+    await waitFor(() => {
+      expect(apiMocks.commentsApi.batch).toHaveBeenCalledWith({
+        ids: ['1', '2'],
+        action: 'soft_delete',
+        confirm: true,
+      })
     })
   })
 })

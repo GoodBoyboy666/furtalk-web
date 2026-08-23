@@ -13,6 +13,7 @@ import {
   Loader2,
   MoreHorizontal,
   Pin,
+  RotateCcw,
   Search,
   ShieldAlert,
   Trash2,
@@ -20,6 +21,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -55,6 +57,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { PageHeader } from '@/components/PageHeader'
+import { AdminBatchToolbar } from '@/components/AdminBatchToolbar'
 import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
 import { UserAvatar, initialsFrom } from '@/components/UserAvatar'
@@ -68,6 +71,9 @@ import {
   otherCommentStatusTargets,
 } from '@/lib/comment-status'
 import type { CommentAction, CommentStatusTarget } from '@/lib/comment-status'
+import type { AdminCommentBatchAction } from '@/lib/api/types'
+import { useCurrentPageSelection } from '@/lib/use-current-page-selection'
+import { getFailedBatchId } from '@/lib/admin-batch'
 import { adminSortLabel, adminSortOptions } from '@/lib/admin-sort'
 import type { AdminSort } from '@/lib/admin-sort'
 import { selectItems } from '@/lib/i18n'
@@ -121,6 +127,8 @@ function CommentsList() {
     id: string
     action: 'delete' | 'hard'
   } | null>(null)
+  const [batchConfirm, setBatchConfirm] =
+    useState<AdminCommentBatchAction | null>(null)
   const query = useQuery({
     queryKey: ['comments', { status, sort, q, page, pageSize }],
     queryFn: () =>
@@ -159,6 +167,43 @@ function CommentsList() {
         error instanceof Error ? error.message : t('operationFailed'),
       ),
   })
+  const visibleIds = query.data?.comments.map((item) => item.id) ?? []
+  const selection = useCurrentPageSelection(
+    visibleIds,
+    [status, sort, q, page, pageSize].join('|'),
+  )
+  const batchMutation = useMutation({
+    mutationFn: ({
+      ids,
+      action: batchAction,
+      confirm: confirmed,
+    }: {
+      ids: string[]
+      action: AdminCommentBatchAction
+      confirm?: boolean
+    }) => commentsApi.batch({ ids, action: batchAction, confirm: confirmed }),
+    onSuccess: (result) => {
+      toast.success(
+        t('batchOperationCompleted', {
+          changed: result.changed_count,
+          unchanged: result.unchanged_count,
+        }),
+      )
+      selection.clear()
+      void queryClient.invalidateQueries({ queryKey: ['comments'] })
+      setBatchConfirm(null)
+    },
+    onError: (error) => {
+      const failedID = getFailedBatchId(error)
+      toast.error(
+        failedID
+          ? t('batchOperationFailedWithID', { id: failedID })
+          : error instanceof Error
+            ? error.message
+            : t('operationFailed'),
+      )
+    },
+  })
   const pinAction = useMutation({
     mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) =>
       pinned ? commentsApi.pin(id) : commentsApi.unpin(id),
@@ -173,6 +218,52 @@ function CommentsList() {
         error instanceof Error ? error.message : t('operationFailed'),
       ),
   })
+
+  const selectedRows = (query.data?.comments ?? []).filter((item) =>
+    selection.selectedIds.has(item.id),
+  )
+  const canBatchPin =
+    selectedRows.length > 0 &&
+    selectedRows.every(
+      (item) => item.parent_id === null && item.status === 'published',
+    )
+  const canBatchUnpin =
+    selectedRows.length > 0 &&
+    selectedRows.every((item) => item.parent_id === null)
+  const canBatchRestore =
+    selectedRows.length > 0 &&
+    selectedRows.every((item) => item.status === 'deleted')
+  const batchActions = [
+    { value: 'pending' as const, label: t('batchPending'), icon: <Clock /> },
+    { value: 'publish' as const, label: t('batchPublish'), icon: <Check /> },
+    { value: 'spam' as const, label: t('batchSpam'), icon: <ShieldAlert /> },
+    ...(canBatchRestore
+      ? [
+          {
+            value: 'restore' as const,
+            label: t('batchRestore'),
+            icon: <RotateCcw />,
+          },
+        ]
+      : []),
+    ...(canBatchPin
+      ? [{ value: 'pin' as const, label: t('batchPin'), icon: <Pin /> }]
+      : []),
+    ...(canBatchUnpin
+      ? [{ value: 'unpin' as const, label: t('batchUnpin'), icon: <Pin /> }]
+      : []),
+    {
+      value: 'soft_delete' as const,
+      label: t('batchSoftDelete'),
+      icon: <Trash2 />,
+    },
+    {
+      value: 'hard_delete' as const,
+      label: t('batchHardDelete'),
+      icon: <Trash2 />,
+      variant: 'destructive' as const,
+    },
+  ]
 
   const total = query.isSuccess ? query.data.total : 0
   const totalPages = Math.max(1, Math.ceil(total / Math.max(1, pageSize)))
@@ -257,6 +348,23 @@ function CommentsList() {
           </SelectContent>
         </Select>
       </div>
+      <AdminBatchToolbar
+        selectedCount={selection.selectedCount}
+        pending={batchMutation.isPending}
+        label={t('batchSelectedCount', { count: selection.selectedCount })}
+        actions={batchActions}
+        onAction={(batch) => {
+          const batchAction = batch.value as AdminCommentBatchAction
+          if (batchAction === 'soft_delete' || batchAction === 'hard_delete') {
+            setBatchConfirm(batchAction)
+            return
+          }
+          batchMutation.mutate({
+            ids: [...selection.selectedIds],
+            action: batchAction,
+          })
+        }}
+      />
       <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         {query.isPending ? (
           <StateFade kind="loading">
@@ -278,6 +386,14 @@ function CommentsList() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox
+                    aria-label={t('selectAllComments')}
+                    checked={selection.allSelected}
+                    indeterminate={selection.someSelected}
+                    onCheckedChange={(checked) => selection.toggleAll(checked)}
+                  />
+                </TableHead>
                 <TableHead className="w-[42%] min-w-[200px]">
                   {t('content')}
                 </TableHead>
@@ -294,6 +410,15 @@ function CommentsList() {
             <TableBody>
               {query.data.comments.map((comment) => (
                 <TableRow key={comment.id}>
+                  <TableCell className="align-top">
+                    <Checkbox
+                      aria-label={t('selectComment', { id: comment.id })}
+                      checked={selection.isSelected(comment.id)}
+                      onCheckedChange={(checked) =>
+                        selection.toggle(comment.id, checked)
+                      }
+                    />
+                  </TableCell>
                   <TableCell className="max-w-xs sm:max-w-md lg:max-w-lg whitespace-normal">
                     <Link
                       to="/admin/comments/$commentId"
@@ -482,6 +607,50 @@ function CommentsList() {
               }
             >
               {action.isPending ? <Loader2 className="animate-spin" /> : null}
+              {t('action.confirmAction', { ns: 'common' })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog
+        open={batchConfirm !== null}
+        onOpenChange={(open) => !open && setBatchConfirm(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {batchConfirm === 'hard_delete'
+                ? t('batchHardDeleteTitle')
+                : t('batchSoftDeleteTitle')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {batchConfirm === 'hard_delete'
+                ? t('batchHardDeleteHint', {
+                    count: selection.selectedCount,
+                  })
+                : t('batchSoftDeleteHint', {
+                    count: selection.selectedCount,
+                  })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t('action.cancel', { ns: 'common' })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={batchMutation.isPending || !batchConfirm}
+              onClick={() => {
+                if (!batchConfirm) return
+                batchMutation.mutate({
+                  ids: [...selection.selectedIds],
+                  action: batchConfirm,
+                  confirm: true,
+                })
+              }}
+            >
+              {batchMutation.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : null}
               {t('action.confirmAction', { ns: 'common' })}
             </AlertDialogAction>
           </AlertDialogFooter>

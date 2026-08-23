@@ -1,7 +1,10 @@
 import { api, toQuery } from './client'
 import type {
   AdminComment,
+  AdminCommentBatchAction,
   AdminCommentList,
+  AdminBatchPayload,
+  AdminBatchResult,
   AdminThread,
   AdminThreadList,
   AdminThreadUpdatePayload,
@@ -145,6 +148,10 @@ export const commentsApi = {
   list: (params: ListParams) =>
     api
       .get<AdminCommentList>('/admin/comments', { params: toQuery(params) })
+      .then((response) => response.data),
+  batch: (payload: AdminBatchPayload<AdminCommentBatchAction>) =>
+    api
+      .post<AdminBatchResult>('/admin/comments/batch', payload)
       .then((response) => response.data),
   get: (id: string) =>
     api

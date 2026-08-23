@@ -85,6 +85,29 @@ export type AdminCommentList = {
   total: number
 }
 
+export type AdminCommentBatchAction =
+  | 'pending'
+  | 'publish'
+  | 'spam'
+  | 'soft_delete'
+  | 'restore'
+  | 'hard_delete'
+  | 'pin'
+  | 'unpin'
+
+export type AdminBatchPayload<TAction extends string = string> = {
+  ids: string[]
+  action: TAction
+  confirm?: boolean
+}
+
+export type AdminBatchResult = {
+  action: string
+  requested_count: number
+  changed_count: number
+  unchanged_count: number
+}
+
 // AdminThread 是管理端线程视图：页面级评论开关与生命周期时间戳。
 export type AdminThread = {
   id: string
