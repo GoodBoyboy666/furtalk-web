@@ -92,6 +92,7 @@ describe('SettingsPage card layout', () => {
       ['邮箱与头像', 'xl:col-span-7'],
       ['人机验证策略', 'xl:col-span-5'],
       ['第三方登录', 'xl:col-span-7'],
+      ['多通道通知', 'xl:col-span-7'],
     ] as const
 
     for (const [title, span] of cardSpans) {
@@ -103,6 +104,26 @@ describe('SettingsPage card layout', () => {
     expect(
       screen.getByText('评论策略').closest('[data-slot="card"]')?.parentElement,
     ).toHaveClass('grid', 'gap-6', 'xl:grid-cols-12')
+  })
+
+  it('renders the notification channel card with all eight fixed slots', async () => {
+    renderSettings()
+    await screen.findByText('多通道通知')
+    const channelKeys = [
+      'notification.telegram',
+      'notification.feishu',
+      'notification.dingtalk',
+      'notification.bark',
+      'notification.slack',
+      'notification.line',
+      'notification.webhook',
+      'notification.discord',
+    ]
+    for (const key of channelKeys) {
+      expect(
+        document.querySelector(`[data-testid="notification-provider-${key}"]`),
+      ).not.toBeNull()
+    }
   })
 })
 

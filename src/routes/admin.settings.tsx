@@ -24,6 +24,7 @@ import {
   ProviderSection,
 } from '@/components/provider/ProviderSection'
 import { SpamProviderSection } from '@/components/provider/SpamProviderSection'
+import { NotificationProviderSection } from '@/components/provider/NotificationProviderSection'
 import { providersApi, settingsApi } from '@/lib/api/resources'
 import {
   commentSortOptions,
@@ -455,6 +456,11 @@ export function SettingsPage() {
           </CardHeader>
           <CardContent>
             <SpamProviderSection />
+          </CardContent>
+        </Card>
+        <Card className="xl:col-span-7">
+          <CardContent>
+            <NotificationProviderSection />
           </CardContent>
         </Card>
       </div>

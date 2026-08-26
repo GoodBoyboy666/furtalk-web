@@ -285,7 +285,13 @@ export type Provider = {
 }
 
 /** ProviderKind 与后端 domain.ProviderKind 一致。 */
-export const PROVIDER_KINDS = ['captcha', 'oauth', 'oidc', 'spam'] as const
+export const PROVIDER_KINDS = [
+  'captcha',
+  'oauth',
+  'oidc',
+  'spam',
+  'notification',
+] as const
 export type ProviderKind = (typeof PROVIDER_KINDS)[number]
 
 /**
@@ -293,6 +299,8 @@ export type ProviderKind = (typeof PROVIDER_KINDS)[number]
  * CAPTCHA 不允许携带 enabled；新建 OAuth/OIDC 必须提供机密字段
  * （client_secret 或 Apple private_key），编辑已配置项省略或留空表示保留现有机密。
  * Spam 必须携带 enabled，只接受固定 key（spam.local / spam.akismet / spam.aliyun / spam.tencent）。
+ * Notification 只接受固定 key（notification.*），携带 enabled；新建必须提供全部必填字段，
+ * 编辑时机密字段留空表示保留现值、非空替换，可选签名密钥（signing_secret）用 null 显式清除。
  */
 export type ProviderUpsertPayload = {
   kind: ProviderKind
@@ -332,6 +340,22 @@ export type ProviderUpsertPayload = {
     access_key_secret?: string
     /** Spam 腾讯云专用：SecretId；SecretKey 复用上面的 secret_key 字段。 */
     secret_id?: string
+    /** Notification Telegram 专用：Bot Token；新建必填，编辑留空保留。 */
+    bot_token?: string
+    /** Notification Telegram 专用：目标 chat_id。 */
+    chat_id?: string
+    /** Notification Feishu/DingTalk/Slack/WebHook/Discord 专用：incoming webhook URL；视为机密。 */
+    webhook_url?: string
+    /** Notification 可选签名密钥（Feishu/DingTalk/WebHook）；省略保留、非空替换、null 清除。 */
+    signing_secret?: string | null
+    /** Notification Bark 专用：服务器地址（允许 http(s)，含内网；管理员可信目标）。 */
+    server_url?: string
+    /** Notification Bark 专用：设备 key；新建必填，编辑留空保留。 */
+    device_key?: string
+    /** Notification LINE 专用：Messaging API 频道访问令牌；新建必填，编辑留空保留。 */
+    channel_access_token?: string
+    /** Notification LINE 专用：目标用户/群组/房间 ID。 */
+    target_id?: string
   }
 }
 
