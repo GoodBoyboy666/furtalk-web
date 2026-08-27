@@ -57,11 +57,9 @@ export const authApi = {
     captcha_token?: string
   }) => api.post('/auth/email-code/login', payload),
   logout: () => api.post('/auth/logout'),
-  passkeyOptions: (user_handle?: string) =>
+  passkeyOptions: () =>
     api
-      .post<PasskeyOptionsResponse>('/auth/passkeys/login/options', {
-        user_handle,
-      })
+      .post<PasskeyOptionsResponse>('/auth/passkeys/login/options', {})
       .then((response) => response.data),
   passkeyVerify: (payload: {
     challenge: string

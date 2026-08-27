@@ -70,6 +70,21 @@ describe('authApi.passwordLogin', () => {
   })
 })
 
+describe('authApi.passkeyOptions', () => {
+  it('starts a discoverable ceremony with an empty request object', async () => {
+    const captured = installAdapter(
+      { challenge: 'challenge', options: {} },
+      200,
+    )
+
+    await authApi.passkeyOptions()
+
+    expect(captured[0].method).toBe('post')
+    expect(captured[0].url).toBe('/auth/passkeys/login/options')
+    expect(JSON.parse(captured[0].data)).toEqual({})
+  })
+})
+
 describe('authApi.revokeSessions', () => {
   it('POSTs the revoke-all endpoint with the current CSRF cookie', async () => {
     setDocumentCookie('__Host-furtalk_csrf=csrf-token')

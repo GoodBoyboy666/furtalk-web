@@ -421,6 +421,7 @@ describe('LoginPage passkey contract', () => {
     await waitFor(() => {
       expect(getMock).toHaveBeenCalledTimes(1)
     })
+    expect(apiMocks.passkeyOptions).toHaveBeenCalledWith()
     // 断言传给浏览器 API 的是 { publicKey, mediation } 顶层对象，
     // 而不是把 options 再包一层产生的 { publicKey: { publicKey: ... } }。
     const passed = getMock.mock.calls[0][0]

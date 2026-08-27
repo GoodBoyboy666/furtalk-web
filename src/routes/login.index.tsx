@@ -157,7 +157,7 @@ export function LoginPage() {
   })
   const passkeyLogin = useMutation({
     mutationFn: async () => {
-      const options = await authApi.passkeyOptions(email || undefined)
+      const options = await authApi.passkeyOptions()
       const credential = await navigator.credentials.get(
         prepareCredentialRequestOptions(options.options),
       )
