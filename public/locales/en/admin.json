@@ -232,6 +232,7 @@
   "passwordMinLength": "Password must be at least 8 characters",
   "confirmReset": "Confirm reset",
   "settingsTitle": "System settings",
+  "settingsHintLabel": "View setting hint: {{field}}",
   "saving": "Saving...",
   "saveSettings": "Save settings",
   "noChangesToSave": "No changes to save",

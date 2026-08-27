@@ -127,6 +127,72 @@ describe('SettingsPage card layout', () => {
   })
 })
 
+describe('SettingsPage helper cards', () => {
+  it('replaces eligible long helper paragraphs with compact info triggers', async () => {
+    renderSettings()
+    await screen.findByText('系统设置')
+
+    const fields = [
+      '用户协议地址',
+      '品牌主色',
+      '表情目录地址',
+      '用户删除本人评论方式',
+      '邮箱域名白名单',
+      '邮箱域名黑名单',
+      'Gravatar Base URL',
+    ]
+    for (const field of fields) {
+      expect(
+        screen.getByRole('button', { name: `查看设置说明：${field}` }),
+      ).toBeInTheDocument()
+    }
+
+    expect(
+      screen.queryByText('可选。必须是绝对 HTTPS 地址。'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('软删除隐藏该评论且可恢复，硬删除物理移除该评论。'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('opens a complete helper card on hover and keyboard focus', async () => {
+    renderSettings()
+    await screen.findByText('系统设置')
+    const user = userEvent.setup()
+    const emojiHint = screen.getByRole('button', {
+      name: '查看设置说明：表情目录地址',
+    })
+
+    await user.hover(emojiHint)
+    expect(
+      await screen.findByText('可选。必须是绝对 HTTPS 地址。'),
+    ).toBeInTheDocument()
+
+    const deleteHint = screen.getByRole('button', {
+      name: '查看设置说明：用户删除本人评论方式',
+    })
+    deleteHint.focus()
+    expect(deleteHint).toHaveFocus()
+    expect(
+      await screen.findByText(
+        '软删除隐藏该评论且可恢复，硬删除物理移除该评论。',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps persistent privacy and consent notices directly visible', async () => {
+    renderSettings()
+    await screen.findByText('系统设置')
+
+    expect(
+      screen.getByText(/以上精度只作用于之后新建的评论/),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/仅主动执行此操作才会让已有浏览器同意状态失效/),
+    ).toBeInTheDocument()
+  })
+})
+
 describe('SettingsPage privacy precision controls', () => {
   it('renders separate ip and ua precision selects', async () => {
     renderSettings()

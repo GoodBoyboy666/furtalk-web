@@ -232,6 +232,7 @@
   "passwordMinLength": "密码至少需要 8 位",
   "confirmReset": "确认重置",
   "settingsTitle": "系统设置",
+  "settingsHintLabel": "查看设置说明：{{field}}",
   "saving": "保存中...",
   "saveSettings": "保存设置",
   "noChangesToSave": "没有需要保存的更改",

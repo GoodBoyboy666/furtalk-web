@@ -29,6 +29,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { PageHeader } from '@/components/PageHeader'
+import { SettingsHint } from '@/components/SettingsHint'
 import { StateFade } from '@/components/motion'
 import {
   captchaProviderTypeLabel,
@@ -160,9 +161,18 @@ export function SettingsPage() {
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
-              <Label htmlFor="user-agreement-url">
-                {t('userAgreementUrl')}
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="user-agreement-url">
+                  {t('userAgreementUrl')}
+                </Label>
+                <SettingsHint
+                  label={t('settingsHintLabel', {
+                    field: t('userAgreementUrl'),
+                  })}
+                >
+                  {t('legalUrlHint')}
+                </SettingsHint>
+              </div>
               <Input
                 id="user-agreement-url"
                 type="url"
@@ -172,9 +182,6 @@ export function SettingsPage() {
                   set('user_agreement_url', event.target.value)
                 }
               />
-              <p className="m-0 text-xs text-muted-foreground">
-                {t('legalUrlHint')}
-              </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="privacy-policy-url">
@@ -191,9 +198,18 @@ export function SettingsPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="brand-primary-color">
-                {t('brandPrimaryColor')}
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="brand-primary-color">
+                  {t('brandPrimaryColor')}
+                </Label>
+                <SettingsHint
+                  label={t('settingsHintLabel', {
+                    field: t('brandPrimaryColor'),
+                  })}
+                >
+                  {t('brandPrimaryColorHint')}
+                </SettingsHint>
+              </div>
               <div className="flex flex-wrap items-center gap-3">
                 <Input
                   id="brand-primary-color-picker"
@@ -231,9 +247,6 @@ export function SettingsPage() {
                   {t('brandColorInvalid')}
                 </p>
               ) : null}
-              <p className="m-0 text-xs text-muted-foreground">
-                {t('brandPrimaryColorHint')}
-              </p>
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-3">
               <div className="flex items-start gap-3">
@@ -360,7 +373,18 @@ export function SettingsPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="emoji-catalog-url">{t('emojiCatalogUrl')}</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="emoji-catalog-url">
+                  {t('emojiCatalogUrl')}
+                </Label>
+                <SettingsHint
+                  label={t('settingsHintLabel', {
+                    field: t('emojiCatalogUrl'),
+                  })}
+                >
+                  {t('emojiCatalogUrlHint')}
+                </SettingsHint>
+              </div>
               <Input
                 id="emoji-catalog-url"
                 type="url"
@@ -370,9 +394,6 @@ export function SettingsPage() {
                   set('emoji_catalog_url', event.target.value)
                 }
               />
-              <p className="m-0 text-xs text-muted-foreground">
-                {t('emojiCatalogUrlHint')}
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -406,7 +427,16 @@ export function SettingsPage() {
               }
             />
             <div className="grid gap-2">
-              <Label>{t('userDeleteModeSetting')}</Label>
+              <div className="flex items-center gap-2">
+                <Label>{t('userDeleteModeSetting')}</Label>
+                <SettingsHint
+                  label={t('settingsHintLabel', {
+                    field: t('userDeleteModeSetting'),
+                  })}
+                >
+                  {t('userDeleteModeHint')}
+                </SettingsHint>
+              </div>
               <Select
                 value={draft.user_delete_mode}
                 onValueChange={(value) =>
@@ -427,9 +457,6 @@ export function SettingsPage() {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <p className="m-0 text-xs text-muted-foreground">
-                {t('userDeleteModeHint')}
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -497,6 +524,9 @@ export function SettingsPage() {
             <div className="grid gap-5 sm:grid-cols-2">
               <DomainListEditor
                 label={t('domainWhitelist')}
+                hintLabel={t('settingsHintLabel', {
+                  field: t('domainWhitelist'),
+                })}
                 description={t('domainWhitelistHint')}
                 placeholder={t('domainWhitelistPlaceholder')}
                 value={whitelistText}
@@ -507,6 +537,9 @@ export function SettingsPage() {
               />
               <DomainListEditor
                 label={t('domainBlacklist')}
+                hintLabel={t('settingsHintLabel', {
+                  field: t('domainBlacklist'),
+                })}
                 description={t('domainBlacklistHint')}
                 placeholder={t('domainBlacklistPlaceholder')}
                 value={blacklistText}
@@ -517,7 +550,14 @@ export function SettingsPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="gravatar-base">{t('gravatarBase')}</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="gravatar-base">{t('gravatarBase')}</Label>
+                <SettingsHint
+                  label={t('settingsHintLabel', { field: t('gravatarBase') })}
+                >
+                  {t('gravatarBaseHint')}
+                </SettingsHint>
+              </div>
               <Input
                 id="gravatar-base"
                 type="url"
@@ -527,9 +567,6 @@ export function SettingsPage() {
                   set('gravatar_base_url', event.target.value)
                 }
               />
-              <p className="text-xs text-muted-foreground">
-                {t('gravatarBaseHint')}
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -635,12 +672,14 @@ const userDeleteModeOptions = [
 
 function DomainListEditor({
   label,
+  hintLabel,
   description,
   placeholder,
   value,
   onChange,
 }: {
   label: string
+  hintLabel: string
   description: string
   placeholder?: string
   value: string
@@ -648,7 +687,10 @@ function DomainListEditor({
 }) {
   return (
     <div className="grid gap-2">
-      <Label>{label}</Label>
+      <div className="flex items-center gap-2">
+        <Label>{label}</Label>
+        <SettingsHint label={hintLabel}>{description}</SettingsHint>
+      </div>
       <Textarea
         rows={6}
         value={value}
@@ -656,7 +698,6 @@ function DomainListEditor({
         onChange={(event) => onChange(event.target.value)}
         className="resize-y font-mono text-sm"
       />
-      <p className="text-xs text-muted-foreground">{description}</p>
     </div>
   )
 }
