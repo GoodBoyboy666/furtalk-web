@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { LayoutDashboard, LogOut, Menu, UserRound } from 'lucide-react'
+import { LayoutDashboard, LogOut, Menu } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { UserAvatar, initialsFrom } from '@/components/UserAvatar'
+import { BrandMark } from '@/components/BrandMark'
 import LanguageToggle from './LanguageToggle'
 import ThemeToggle from './ThemeToggle'
 import { StateFade } from '@/components/motion'
@@ -143,7 +144,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
               <SheetContent side="left" className="w-72 p-0">
                 <SheetHeader className="border-b px-6 py-5">
                   <SheetTitle className="flex items-center gap-2">
-                    <UserRound className="size-4" />
+                    <BrandMark className="size-4" />
                     {t('app.name')}
                   </SheetTitle>
                 </SheetHeader>
@@ -157,7 +158,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
               className="flex min-w-0 items-center gap-3 text-foreground no-underline"
             >
               <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
-                <UserRound className="size-4.5" />
+                <BrandMark className="size-4.5" />
               </div>
               <div>
                 <p className="m-0 text-sm font-semibold tracking-tight">

@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { FadeIn } from '@/components/motion'
+import { BrandMark } from '@/components/BrandMark'
 import { authorizationApi } from '@/lib/api/resources'
 import { ApiError, isUnauthorized } from '@/lib/api/client'
 import type { AuthorizationContext } from '@/lib/api/types'
@@ -192,7 +193,7 @@ export function AuthorizePage() {
       <FadeIn className="w-full max-w-md">
         <div className="mb-8 flex items-center justify-center gap-3.5">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-            <Shield className="size-5.5" />
+            <BrandMark className="size-5.5" />
           </div>
           <div>
             <p className="m-0 text-xl font-bold tracking-tight">

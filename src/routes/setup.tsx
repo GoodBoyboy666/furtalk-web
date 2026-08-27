@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { KeyRound, Loader2, Mail, RotateCcw, Shield, User } from 'lucide-react'
+import { KeyRound, Loader2, Mail, RotateCcw, User } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { bootstrapApi } from '@/lib/api/resources'
 import { ApiError } from '@/lib/api/client'
+import { BrandMark } from '@/components/BrandMark'
 
 // minPasswordLength 与后端密码策略保持一致，服务端仍是最终权威。
 const minPasswordLength = 8
@@ -246,7 +247,7 @@ export function SetupPage() {
       <FadeIn className="w-full max-w-md">
         <div className="mb-8 flex items-center justify-center gap-3.5">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-            <Shield className="size-5.5" />
+            <BrandMark className="size-5.5" />
           </div>
           <div>
             <p className="m-0 text-xl font-bold tracking-tight">

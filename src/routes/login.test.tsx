@@ -204,6 +204,10 @@ describe('LoginPage default login method', () => {
     expect(
       screen.getByRole('button', { name: '发送验证码' }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '发送验证码' })).toHaveClass(
+      'bg-primary',
+    )
+    expect(document.querySelector('svg.lucide-paw-print')).not.toBeNull()
     expect(screen.queryByLabelText('密码')).not.toBeInTheDocument()
   })
 

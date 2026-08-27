@@ -94,6 +94,7 @@ describe('AccountShell branding', () => {
     renderShell()
     expect(await screen.findByText('Furtalk')).toBeInTheDocument()
     expect(screen.getByText('个人中心')).toBeInTheDocument()
+    expect(document.querySelector('svg.lucide-paw-print')).not.toBeNull()
   })
 })
 

@@ -2,6 +2,7 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { StrictMode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LoginOtpPage } from './login.otp'
 import type { CaptchaConfigResponse, Me } from '@/lib/api/types'
@@ -116,18 +117,22 @@ function seedRecord(
   return record
 }
 
-function renderOtp(configs: Record<string, CaptchaConfigResponse>) {
+function renderOtp(
+  configs: Record<string, CaptchaConfigResponse>,
+  strictMode = false,
+) {
   apiMocks.captchaConfig.mockImplementation((action: string) =>
     Promise.resolve(configs[action] ?? { required: false }),
   )
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  return render(
+  const content = (
     <QueryClientProvider client={queryClient}>
       <LoginOtpPage />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   )
+  return render(strictMode ? <StrictMode>{content}</StrictMode> : content)
 }
 
 // typeCode 在 OTP 输入中键入验证码。
@@ -158,7 +163,7 @@ describe('LoginOtpPage record guard', () => {
     ).toHaveLength(6)
   })
 
-  it('keeps the verify button disabled until all six digits are present', async () => {
+  it('auto-submits exactly once after all six digits are present', async () => {
     seedRecord({ email: 'visitor@example.com' })
     renderOtp({})
     const user = userEvent.setup()
@@ -166,7 +171,66 @@ describe('LoginOtpPage record guard', () => {
     await typeCode(user, '123')
     expect(screen.getByRole('button', { name: '登录' })).toBeDisabled()
     await typeCode(user, '456')
-    expect(screen.getByRole('button', { name: '登录' })).toBeEnabled()
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
+    })
+    expect(apiMocks.emailCodeLogin).toHaveBeenCalledWith({
+      email: 'visitor@example.com',
+      code: '123456',
+      captcha_token: undefined,
+    })
+  })
+
+  it('auto-submits a pasted complete code', async () => {
+    seedRecord({ email: 'visitor@example.com' })
+    renderOtp({})
+    const user = userEvent.setup()
+    const input = screen.getByLabelText('验证码')
+    await user.click(input)
+    await user.paste('654321')
+
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
+    })
+    expect(apiMocks.emailCodeLogin).toHaveBeenCalledWith({
+      email: 'visitor@example.com',
+      code: '654321',
+      captcha_token: undefined,
+    })
+  })
+
+  it('deduplicates automatic verification under StrictMode', async () => {
+    seedRecord({ email: 'visitor@example.com' })
+    renderOtp({}, true)
+    const user = userEvent.setup()
+    await typeCode(user, '123456')
+
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('does not submit another request while verification is pending', async () => {
+    let resolveLogin: (() => void) | undefined
+    apiMocks.emailCodeLogin.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveLogin = resolve
+        }),
+    )
+    seedRecord({ email: 'visitor@example.com' })
+    renderOtp({})
+    const user = userEvent.setup()
+    await typeCode(user, '123456')
+
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
+      expect(screen.getByRole('button', { name: '登录' })).toBeDisabled()
+    })
+    resolveLogin?.()
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
+    })
   })
 
   it('navigates back to /login with the expired marker when the record is missing', async () => {
@@ -210,9 +274,9 @@ describe('LoginOtpPage verify flow', () => {
     renderOtp({})
     const user = userEvent.setup()
     await typeCode(user, '123456')
-    await user.click(screen.getByRole('button', { name: '登录' }))
 
     await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
       expect(apiMocks.emailCodeLogin).toHaveBeenCalledWith({
         email: 'visitor@example.com',
         code: '123456',
@@ -230,7 +294,6 @@ describe('LoginOtpPage verify flow', () => {
     renderOtp({})
     const user = userEvent.setup()
     await typeCode(user, '123456')
-    await user.click(screen.getByRole('button', { name: '登录' }))
 
     await waitFor(() => {
       expect(apiMocks.navigate).toHaveBeenCalledWith({
@@ -245,7 +308,6 @@ describe('LoginOtpPage verify flow', () => {
     renderOtp({})
     const user = userEvent.setup()
     await typeCode(user, '123456')
-    await user.click(screen.getByRole('button', { name: '登录' }))
 
     await waitFor(() => {
       expect(apiMocks.navigate).toHaveBeenCalledWith({
@@ -264,7 +326,6 @@ describe('LoginOtpPage verify flow', () => {
     })
     const user = userEvent.setup()
     await typeCode(user, '123456')
-    await user.click(screen.getByRole('button', { name: '登录' }))
 
     await waitFor(() => {
       expect(screen.getByTestId('challenge-recaptcha')).toBeInTheDocument()
@@ -291,7 +352,6 @@ describe('LoginOtpPage verify flow', () => {
     })
     const user = userEvent.setup()
     await typeCode(user, '123456')
-    await user.click(screen.getByRole('button', { name: '登录' }))
     await waitFor(() => {
       expect(screen.getByTestId('challenge-recaptcha')).toBeInTheDocument()
     })
@@ -302,6 +362,86 @@ describe('LoginOtpPage verify flow', () => {
       ).not.toBeInTheDocument()
     })
     expect(apiMocks.emailCodeLogin).not.toHaveBeenCalled()
+  })
+
+  it('keeps the code after automatic failure and allows manual recovery', async () => {
+    apiMocks.emailCodeLogin
+      .mockRejectedValueOnce(new Error('invalid code'))
+      .mockResolvedValueOnce(undefined)
+    seedRecord({ email: 'visitor@example.com' })
+    renderOtp({})
+    const user = userEvent.setup()
+    const input = screen.getByLabelText<HTMLInputElement>('验证码')
+    await typeCode(user, '123456')
+
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
+      expect(input).toHaveValue('123456')
+    })
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '登录' })).toBeEnabled()
+    })
+    await user.click(screen.getByRole('button', { name: '登录' }))
+
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  it('auto-retries a changed code after the first attempt fails', async () => {
+    apiMocks.emailCodeLogin
+      .mockRejectedValueOnce(new Error('invalid code'))
+      .mockResolvedValueOnce(undefined)
+    seedRecord({ email: 'visitor@example.com' })
+    renderOtp({})
+    const user = userEvent.setup()
+    const input = screen.getByLabelText<HTMLInputElement>('验证码')
+    await typeCode(user, '123456')
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
+    })
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: '登录' })).toBeEnabled()
+    })
+
+    await user.clear(input)
+    await user.type(input, '654321')
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(2)
+    })
+    expect(apiMocks.emailCodeLogin.mock.calls[1][0]).toEqual({
+      email: 'visitor@example.com',
+      code: '654321',
+      captcha_token: undefined,
+    })
+  })
+
+  it('keeps a cancelled CAPTCHA attempt recoverable through the manual button', async () => {
+    seedRecord({ email: 'visitor@example.com' })
+    renderOtp({
+      email_code_login: {
+        required: true,
+        captcha: { provider: 'recaptcha', site_key: 'rc-site' },
+      },
+    })
+    const user = userEvent.setup()
+    const input = screen.getByLabelText<HTMLInputElement>('验证码')
+    await typeCode(user, '123456')
+    await waitFor(() => {
+      expect(screen.getByTestId('challenge-recaptcha')).toBeInTheDocument()
+    })
+    await user.click(screen.getByRole('button', { name: '取消' }))
+    expect(input).toHaveValue('123456')
+    expect(apiMocks.emailCodeLogin).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: '登录' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('challenge-recaptcha')).toBeInTheDocument()
+    })
+    await user.click(screen.getByTestId('challenge-recaptcha'))
+    await waitFor(() => {
+      expect(apiMocks.emailCodeLogin).toHaveBeenCalledTimes(1)
+    })
   })
 })
 
@@ -370,7 +510,6 @@ describe('LoginOtpPage resend flow', () => {
       },
     })
     const user = userEvent.setup()
-    await typeCode(user, '123456')
 
     // 重新发送：打开 email_code 对话框，取消不触发发送且可再次打开。
     await user.click(screen.getByRole('button', { name: '重新发送' }))
@@ -397,11 +536,10 @@ describe('LoginOtpPage resend flow', () => {
       email: 'visitor@example.com',
       captcha_token: 'solved-token',
     })
-    // 重新发送成功会清空验证码，重新输入后验证。
+    // 重新发送成功会清空验证码；重新输入后自动打开验证 CAPTCHA。
     await typeCode(user, '123456')
 
     // 验证码登录：打开 email_code_login 对话框，与 email_code 互不串用。
-    await user.click(screen.getByRole('button', { name: '登录' }))
     await waitFor(() => {
       expect(screen.getByTestId('challenge-recaptcha')).toBeInTheDocument()
     })
@@ -483,7 +621,6 @@ describe('LoginOtpPage privacy', () => {
     })
     const user = userEvent.setup()
     await typeCode(user, '123456')
-    await user.click(screen.getByRole('button', { name: '登录' }))
     await waitFor(() => {
       expect(screen.getByTestId('challenge-recaptcha')).toBeInTheDocument()
     })

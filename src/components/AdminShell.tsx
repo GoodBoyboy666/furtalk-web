@@ -8,7 +8,6 @@ import {
   Menu,
   MessageSquareQuote,
   Settings,
-  Shield,
   SlidersHorizontal,
   UserRound,
   Users,
@@ -31,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { UserAvatar, initialsFrom } from '@/components/UserAvatar'
+import { BrandMark } from '@/components/BrandMark'
 import LanguageToggle from './LanguageToggle'
 import ThemeToggle from './ThemeToggle'
 import { StateFade } from '@/components/motion'
@@ -174,7 +174,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center gap-3 border-b border-border/60 px-5">
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
-              <Shield className="size-4.5" />
+              <BrandMark className="size-4.5" />
             </div>
             <div>
               <p className="m-0 text-sm font-semibold tracking-tight">
@@ -230,7 +230,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <SheetContent side="left" className="w-72 p-0">
                 <SheetHeader className="border-b px-6 py-5">
                   <SheetTitle className="flex items-center gap-2">
-                    <Shield className="size-4" />
+                    <BrandMark className="size-4" />
                     {t('app.name')} {t('app.console')}
                   </SheetTitle>
                 </SheetHeader>

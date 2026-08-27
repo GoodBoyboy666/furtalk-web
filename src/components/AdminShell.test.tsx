@@ -89,6 +89,14 @@ describe('AdminShell navigation copy', () => {
   })
 })
 
+describe('AdminShell branding', () => {
+  it('renders the shared paw mark in the console brand block', async () => {
+    renderShell()
+    expect(await screen.findAllByText('Furtalk')).not.toHaveLength(0)
+    expect(document.querySelector('svg.lucide-paw-print')).not.toBeNull()
+  })
+})
+
 describe('AdminShell language placement', () => {
   it('renders the language control immediately beside the theme control', async () => {
     renderShell()

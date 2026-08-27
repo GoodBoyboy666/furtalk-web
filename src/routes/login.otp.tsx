@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Loader2, Mail, RotateCcw, Shield } from 'lucide-react'
+import { Loader2, Mail, RotateCcw } from 'lucide-react'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +22,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { CaptchaDialog } from '@/components/CaptchaDialog'
+import { BrandMark } from '@/components/BrandMark'
 import { authApi, captchaApi } from '@/lib/api/resources'
 import * as apiResources from '@/lib/api/resources'
 import { ApiError } from '@/lib/api/client'
@@ -42,6 +43,7 @@ import { useLegalConsent } from '@/lib/legal-consent'
 // 各自持有独立的 config 查询、对话框与一次性 pending 回调，token 绝不跨 action 串用。
 const emailCodeAction = 'email_code'
 const emailCodeLoginAction = 'email_code_login'
+const otpCodePattern = /^[0-9]{6}$/
 
 // LoginOtpPage 是邮箱验证码登录的独立 OTP 路由。
 // 邮箱只来自 sessionStorage 中的 pending 记录，绝不出现在 URL 或 payload 之外；
@@ -78,6 +80,8 @@ export function LoginOtpPage() {
   const pendingSendRef = useRef<((token: string) => void) | null>(null)
   const [loginDialogOpen, setLoginDialogOpen] = useState(false)
   const pendingLoginRef = useRef<((token: string) => void) | null>(null)
+  // 自动提交每个完整验证码最多一次；编辑回不完整或改成新值后重新获得资格。
+  const autoSubmittedCodeRef = useRef<string | null>(null)
   // 无有效记录时只回跳一次，避免 effect 反复触发。
   const redirectedRef = useRef(false)
 
@@ -189,19 +193,61 @@ export function LoginOtpPage() {
     run?.(token)
   }
 
-  // verify 仅在六位验证码齐全后可用；email_code_login required 时先过对话框。
-  function verify() {
-    setError('')
-    if (!legalConsent.canProceed) return
-    if (loginRequired) {
-      pendingLoginRef.current = (token) => {
-        emailCodeLogin.mutate({ email, code, token })
+  // verify 是手动按钮与自动提交共用的验证入口；验证码值显式传入，避免
+  // CAPTCHA 异步解决时闭包读取到之后改变的输入内容。
+  const verify = useCallback(
+    (value = code) => {
+      if (!otpCodePattern.test(value)) return
+      if (emailCodeLogin.isPending || loginDialogOpen) return
+      setError('')
+      if (!legalConsent.canProceed) return
+      if (loginRequired) {
+        pendingLoginRef.current = (token) => {
+          emailCodeLogin.mutate({ email, code: value, token })
+        }
+        setLoginDialogOpen(true)
+        return
       }
-      setLoginDialogOpen(true)
+      emailCodeLogin.mutate({ email, code: value, token: undefined })
+    },
+    [
+      code,
+      email,
+      emailCodeLogin,
+      legalConsent.canProceed,
+      loginDialogOpen,
+      loginRequired,
+    ],
+  )
+
+  // InputOTP 的输入、粘贴和 one-time-code 填充都会汇聚到 code；仅在 action
+  // 配置与协议同意状态就绪后自动提交，ref 负责抵御 StrictMode/change 重放。
+  useEffect(() => {
+    if (!otpCodePattern.test(code)) {
+      autoSubmittedCodeRef.current = null
       return
     }
-    emailCodeLogin.mutate({ email, code, token: undefined })
-  }
+    if (
+      autoSubmittedCodeRef.current === code ||
+      loginCaptchaConfig.isPending ||
+      !loginCaptchaConfig.isSuccess ||
+      emailCodeLogin.isPending ||
+      loginDialogOpen ||
+      !legalConsent.canProceed
+    ) {
+      return
+    }
+    autoSubmittedCodeRef.current = code
+    verify(code)
+  }, [
+    code,
+    emailCodeLogin.isPending,
+    legalConsent.canProceed,
+    loginCaptchaConfig.isPending,
+    loginCaptchaConfig.isSuccess,
+    loginDialogOpen,
+    verify,
+  ])
 
   // resend 使用独立的 email_code action；成功后刷新有效期。不发明后端不存在的
   // 客户端冷却期，只有请求 pending 期间禁用按钮。
@@ -263,7 +309,7 @@ export function LoginOtpPage() {
       <FadeIn className="w-full max-w-md">
         <div className="mb-8 flex items-center justify-center gap-3.5">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-            <Shield className="size-5.5" />
+            <BrandMark className="size-5.5" />
           </div>
           <div>
             <p className="m-0 text-xl font-bold tracking-tight">
@@ -399,9 +445,10 @@ export function LoginOtpPage() {
                 disabled={
                   !legalConsent.canProceed ||
                   emailCodeLogin.isPending ||
+                  loginDialogOpen ||
                   code.length !== 6
                 }
-                onClick={verify}
+                onClick={() => verify()}
               >
                 {emailCodeLogin.isPending ? (
                   <Loader2 className="animate-spin" />

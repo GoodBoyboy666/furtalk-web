@@ -5,14 +5,7 @@ import {
   useSearch,
 } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  KeyRound,
-  Loader2,
-  Mail,
-  Send,
-  Shield,
-  Fingerprint,
-} from 'lucide-react'
+import { KeyRound, Loader2, Mail, Send, Fingerprint } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -30,6 +23,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CaptchaDialog } from '@/components/CaptchaDialog'
+import { BrandMark } from '@/components/BrandMark'
 import { ProviderIcon } from '@/components/provider/ProviderIcon'
 import { authApi, captchaApi } from '@/lib/api/resources'
 import * as apiResources from '@/lib/api/resources'
@@ -315,7 +309,7 @@ export function LoginPage() {
       <FadeIn className="w-full max-w-md">
         <div className="mb-8 flex items-center justify-center gap-3.5">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-            <Shield className="size-5.5" />
+            <BrandMark className="size-5.5" />
           </div>
           <div>
             <p className="m-0 text-xl font-bold tracking-tight">
@@ -419,6 +413,7 @@ export function LoginPage() {
                   </div>
                   <Button
                     type="button"
+                    variant="default"
                     disabled={sendEmailCode.isPending || authBlocked}
                     onClick={() => {
                       setError('')

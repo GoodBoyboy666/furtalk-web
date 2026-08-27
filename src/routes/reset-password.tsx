@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { KeyRound, Loader2, Mail, Shield } from 'lucide-react'
+import { KeyRound, Loader2, Mail } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { FadeIn } from '@/components/motion'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CaptchaDialog } from '@/components/CaptchaDialog'
+import { BrandMark } from '@/components/BrandMark'
 import { authApi, captchaApi } from '@/lib/api/resources'
 import { ApiError } from '@/lib/api/client'
 
@@ -111,7 +112,7 @@ export function ResetPasswordPage() {
       <FadeIn className="w-full max-w-md">
         <div className="mb-8 flex items-center justify-center gap-3.5">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-            <Shield className="size-5.5" />
+            <BrandMark className="size-5.5" />
           </div>
           <div>
             <p className="m-0 text-xl font-bold tracking-tight">
