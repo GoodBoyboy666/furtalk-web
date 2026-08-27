@@ -4,6 +4,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Toaster } from '../components/ui/sonner'
 import RootLanguageToggle from '../components/RootLanguageToggle'
 import { NotFoundPage } from '../components/NotFoundPage'
+import { PublicTheme } from '../components/PublicTheme'
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -14,6 +15,7 @@ function RootComponent() {
   return (
     <>
       <Outlet />
+      <PublicTheme />
       <RootLanguageToggle />
       <Toaster position="top-right" />
       <TanStackDevtools

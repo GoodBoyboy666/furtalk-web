@@ -1,8 +1,10 @@
 import { api, toQuery } from './client'
+import { decodePublicConfig } from '../public-config'
 import type {
   AdminComment,
   AdminCommentBatchAction,
   AdminCommentList,
+  AdminCommentTrend,
   AdminThreadBatchAction,
   AdminBatchPayload,
   AdminBatchResult,
@@ -22,6 +24,7 @@ import type {
   CaptchaConfigResponse,
   Identity,
   ListParams,
+  LegalConsentResetResponse,
   Me,
   MeCommentDetail,
   MeCommentList,
@@ -33,6 +36,7 @@ import type {
   PasskeyOptionsResponse,
   Provider,
   ProviderUpsertPayload,
+  PublicConfig,
   PublicProvider,
   SettingItem,
   SettingsResponse,
@@ -122,6 +126,13 @@ export const captchaApi = {
       .then((response) => response.data),
 }
 
+export const publicConfigApi = {
+  get: () =>
+    api
+      .get<PublicConfig>('/config')
+      .then((response) => decodePublicConfig(response.data)),
+}
+
 export const authorizationApi = {
   context: (siteId: string, origin: string) =>
     api
@@ -148,6 +159,12 @@ export const commentsApi = {
   list: (params: ListParams) =>
     api
       .get<AdminCommentList>('/admin/comments', { params: toQuery(params) })
+      .then((response) => response.data),
+  trend: (days: 7 | 30, timezone: string) =>
+    api
+      .get<AdminCommentTrend>('/admin/comments/trend', {
+        params: { days, timezone },
+      })
       .then((response) => response.data),
   batch: (payload: AdminBatchPayload<AdminCommentBatchAction>) =>
     api
@@ -293,6 +310,10 @@ export const settingsApi = {
   patch: (settings: SettingItem[]) =>
     api
       .patch<SettingsResponse>('/admin/settings', { settings })
+      .then((response) => response.data),
+  resetLegalConsent: () =>
+    api
+      .post<LegalConsentResetResponse>('/admin/settings/legal-consent/reset')
       .then((response) => response.data),
 }
 

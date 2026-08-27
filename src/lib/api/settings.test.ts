@@ -53,6 +53,18 @@ const fullItems: SettingItem[] = [
     type: 'string',
     value: 'https://cdn.example/emoji.json',
   },
+  {
+    key: 'user_agreement_url',
+    type: 'string',
+    value: 'https://example.com/terms',
+  },
+  {
+    key: 'privacy_policy_url',
+    type: 'string',
+    value: 'https://example.com/privacy',
+  },
+  { key: 'legal_consent_version', type: 'integer', value: 2 },
+  { key: 'brand_primary_color', type: 'string', value: '#6750A4' },
 ]
 
 describe('decodeSettings', () => {
@@ -73,6 +85,10 @@ describe('decodeSettings', () => {
       gravatar_base_url: 'https://avatars.example.com/avatar',
       captcha_provider: 'turnstile',
       emoji_catalog_url: 'https://cdn.example/emoji.json',
+      user_agreement_url: 'https://example.com/terms',
+      privacy_policy_url: 'https://example.com/privacy',
+      legal_consent_version: 2,
+      brand_primary_color: '#6750A4',
     })
   })
 
@@ -92,6 +108,14 @@ describe('decodeSettings', () => {
     expect(decoded.email_domain_blacklist).toEqual([])
     expect(decoded.gravatar_base_url).toBe(defaultSettings.gravatar_base_url)
     expect(decoded.emoji_catalog_url).toBe(defaultSettings.emoji_catalog_url)
+    expect(decoded.user_agreement_url).toBe(defaultSettings.user_agreement_url)
+    expect(decoded.privacy_policy_url).toBe(defaultSettings.privacy_policy_url)
+    expect(decoded.legal_consent_version).toBe(
+      defaultSettings.legal_consent_version,
+    )
+    expect(decoded.brand_primary_color).toBe(
+      defaultSettings.brand_primary_color,
+    )
   })
 
   it('does not mutate the shared default object via nested fields', () => {
@@ -232,6 +256,29 @@ describe('diffSettings', () => {
         type: 'string',
         value: 'https://cdn.example/emoji.json',
       },
+    ])
+  })
+
+  it('encodes legal URLs and brand color while keeping consent version command-owned', () => {
+    const draft: typeof defaultSettings = {
+      ...defaultSettings,
+      user_agreement_url: 'https://example.com/terms',
+      privacy_policy_url: 'https://example.com/privacy',
+      legal_consent_version: 99,
+      brand_primary_color: '#6750A4',
+    }
+    expect(diffSettings(defaultSettings, draft)).toEqual([
+      {
+        key: 'user_agreement_url',
+        type: 'string',
+        value: 'https://example.com/terms',
+      },
+      {
+        key: 'privacy_policy_url',
+        type: 'string',
+        value: 'https://example.com/privacy',
+      },
+      { key: 'brand_primary_color', type: 'string', value: '#6750A4' },
     ])
   })
 

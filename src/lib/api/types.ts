@@ -85,6 +85,17 @@ export type AdminCommentList = {
   total: number
 }
 
+export type AdminCommentTrendPoint = {
+  date: string
+  count: number
+}
+
+export type AdminCommentTrend = {
+  days: 7 | 30
+  timezone: string
+  points: AdminCommentTrendPoint[]
+}
+
 export type AdminCommentBatchAction =
   | 'pending'
   | 'publish'
@@ -273,6 +284,17 @@ export type SettingItem = {
 
 export type SettingsResponse = {
   settings: SettingItem[]
+}
+
+export type PublicConfig = {
+  user_agreement_url: string
+  privacy_policy_url: string
+  legal_consent_version: number
+  brand_primary_color: string
+}
+
+export type LegalConsentResetResponse = {
+  legal_consent_version: number
 }
 
 export type Provider = {

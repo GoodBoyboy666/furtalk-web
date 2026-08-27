@@ -86,6 +86,17 @@
   --sidebar-accent-foreground: oklch(0.14 0.01 260);
   --sidebar-border: oklch(0.915 0.005 260);
   --sidebar-ring: oklch(0.6 0.08 260);
+
+  --primary: var(--brand-primary-light, oklch(0.2 0.02 260));
+  --primary-foreground: var(--brand-primary-foreground-light, oklch(0.99 0 0));
+  --ring: var(--brand-ring-light, oklch(0.6 0.08 260));
+  --sidebar-primary: var(--brand-sidebar-primary-light, oklch(0.2 0.02 260));
+  --sidebar-primary-foreground: var(
+    --brand-sidebar-primary-foreground-light,
+    oklch(0.99 0 0)
+  );
+  --sidebar-ring: var(--brand-sidebar-ring-light, oklch(0.6 0.08 260));
+  --chart-1: var(--brand-chart-1-light, oklch(0.65 0.18 150));
 }
 
 .dark {
@@ -120,6 +131,20 @@
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(0.245 0.01 260);
   --sidebar-ring: oklch(0.55 0.08 260);
+
+  --primary: var(--brand-primary-dark, oklch(0.96 0.005 260));
+  --primary-foreground: var(
+    --brand-primary-foreground-dark,
+    oklch(0.14 0.01 260)
+  );
+  --ring: var(--brand-ring-dark, oklch(0.55 0.08 260));
+  --sidebar-primary: var(--brand-sidebar-primary-dark, oklch(0.96 0.005 260));
+  --sidebar-primary-foreground: var(
+    --brand-sidebar-primary-foreground-dark,
+    oklch(0.14 0.01 260)
+  );
+  --sidebar-ring: var(--brand-sidebar-ring-dark, oklch(0.55 0.08 260));
+  --chart-1: var(--brand-chart-1-dark, oklch(0.7 0.18 150));
 }
 
 @layer base {

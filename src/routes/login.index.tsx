@@ -26,11 +26,13 @@ import {
 import { FadeIn } from '@/components/motion'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CaptchaDialog } from '@/components/CaptchaDialog'
 import { ProviderIcon } from '@/components/provider/ProviderIcon'
 import { authApi, captchaApi } from '@/lib/api/resources'
+import * as apiResources from '@/lib/api/resources'
 import { ApiError } from '@/lib/api/client'
 import { resolvePostLoginTarget } from '@/lib/redirect'
 import {
@@ -48,6 +50,8 @@ import {
   safeOtpSessionStorage,
   writeOtpRecord,
 } from '@/lib/otp'
+import { defaultPublicConfig, publicConfigQueryKey } from '@/lib/public-config'
+import { useLegalConsent } from '@/lib/legal-consent'
 
 // 两个登录方式的 CAPTCHA 业务 action，与后端策略键一致。
 const passwordLoginAction = 'password_login'
@@ -94,6 +98,22 @@ export function LoginPage() {
   // OTP 路由返回的过期 marker：仅在 ?otp=expired 时展示一次性提示，交互后清除。
   const [showOtpExpired, setShowOtpExpired] = useState(
     readOtpExpiredMarker(search),
+  )
+  const hasPublicConfigApi = 'publicConfigApi' in apiResources
+  const publicConfig = useQuery({
+    queryKey: publicConfigQueryKey,
+    queryFn: () => {
+      // Older route-test mocks may not expose the optional public-config API;
+      // preserving the no-policy default keeps those tests representative.
+      if (!hasPublicConfigApi) return Promise.resolve(defaultPublicConfig)
+      return apiResources.publicConfigApi.get()
+    },
+    retry: false,
+    ...(hasPublicConfigApi ? {} : { initialData: defaultPublicConfig }),
+  })
+  const legalConsent = useLegalConsent(
+    publicConfig.data,
+    hasPublicConfigApi ? publicConfig.isSuccess : true,
   )
   const captchaConfig = useQuery({
     queryKey: ['captcha-config', passwordLoginAction],
@@ -242,7 +262,7 @@ export function LoginPage() {
     event.preventDefault()
     setError('')
     setShowOtpExpired(false)
-    if (busy) return
+    if (busy || !legalConsent.canProceed) return
     if (required) {
       pendingPasswordRef.current = (token) => {
         passwordLogin.mutate({ email, password, captcha_token: token })
@@ -254,6 +274,7 @@ export function LoginPage() {
   }
   function usePasskey() {
     setError('')
+    if (!legalConsent.canProceed) return
     if (!isPasskeySupported()) {
       setError(t('passkeyUnsupported'))
       return
@@ -272,7 +293,23 @@ export function LoginPage() {
   }
   const busy =
     passwordLogin.isPending || passkeyLogin.isPending || sendEmailCode.isPending
-  const passwordDisabled = busy
+  const authBlocked = !legalConsent.canProceed
+  const passwordDisabled = busy || authBlocked
+  const legalConsentConfig = publicConfig.data
+  const legalLinks = [
+    legalConsentConfig?.user_agreement_url
+      ? {
+          label: t('userAgreement'),
+          href: legalConsentConfig.user_agreement_url,
+        }
+      : null,
+    legalConsentConfig?.privacy_policy_url
+      ? {
+          label: t('privacyPolicy'),
+          href: legalConsentConfig.privacy_policy_url,
+        }
+      : null,
+  ].filter((link): link is { label: string; href: string } => link !== null)
   return (
     <main className="relative flex min-h-screen items-center justify-center ambient-auth-bg bg-background/80 px-4 py-12">
       <FadeIn className="w-full max-w-md">
@@ -309,6 +346,50 @@ export function LoginPage() {
                 {error}
               </p>
             ) : null}
+            {publicConfig.isError ? (
+              <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <p className="m-0">{t('publicConfigLoadFailed')}</p>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto p-0 text-destructive"
+                  onClick={() => void publicConfig.refetch()}
+                >
+                  {t('retryConfig')}
+                </Button>
+              </div>
+            ) : null}
+            {legalLinks.length > 0 ? (
+              <div className="mb-4 flex items-start gap-2 rounded-md border border-border/70 bg-muted/30 p-3 text-xs">
+                <Checkbox
+                  id="legal-consent"
+                  checked={legalConsent.accepted}
+                  disabled={!publicConfig.isSuccess}
+                  onCheckedChange={(checked) =>
+                    legalConsent.setAccepted(checked === true)
+                  }
+                />
+                <Label
+                  htmlFor="legal-consent"
+                  className="cursor-pointer font-normal leading-5"
+                >
+                  {t('legalConsentPrefix')}{' '}
+                  {legalLinks.map((link, index) => (
+                    <span key={link.href}>
+                      {index > 0 ? ` ${t('legalConsentAnd')} ` : null}
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-2"
+                      >
+                        {link.label}
+                      </a>
+                    </span>
+                  ))}
+                </Label>
+              </div>
+            ) : null}
             <Tabs defaultValue="email-code">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="email-code">
@@ -338,12 +419,12 @@ export function LoginPage() {
                   </div>
                   <Button
                     type="button"
-                    variant="outline"
-                    disabled={sendEmailCode.isPending}
+                    disabled={sendEmailCode.isPending || authBlocked}
                     onClick={() => {
                       setError('')
                       setShowOtpExpired(false)
-                      if (!email) {
+                      if (!legalConsent.canProceed || !email) {
+                        if (!legalConsent.canProceed) return
                         setError(t('emailRequired'))
                         return
                       }
@@ -430,7 +511,7 @@ export function LoginPage() {
               type="button"
               variant="outline"
               className="w-full"
-              disabled={busy}
+              disabled={authBlocked || busy}
               onClick={usePasskey}
             >
               {passkeyLogin.isPending ? (
@@ -466,7 +547,7 @@ export function LoginPage() {
                         className="rounded-full"
                         aria-label={label}
                         title={label}
-                        disabled={busy || oauthStart.isPending}
+                        disabled={authBlocked || busy || oauthStart.isPending}
                         onClick={() => oauthStart.mutate(provider.key)}
                       >
                         {isPending ? (

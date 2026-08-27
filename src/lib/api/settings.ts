@@ -46,6 +46,10 @@ export type Settings = {
   gravatar_base_url: string
   captcha_provider: string
   emoji_catalog_url: string
+  user_agreement_url: string
+  privacy_policy_url: string
+  legal_consent_version: number
+  brand_primary_color: string
 }
 
 // 已知顶层设置 key，保存时只对它们做变化比较。
@@ -64,6 +68,10 @@ export const knownSettingKeys = [
   'gravatar_base_url',
   'captcha_provider',
   'emoji_catalog_url',
+  'user_agreement_url',
+  'privacy_policy_url',
+  'legal_consent_version',
+  'brand_primary_color',
 ] as const
 
 export type KnownSettingKey = (typeof knownSettingKeys)[number]
@@ -84,6 +92,10 @@ export const defaultSettings: Settings = {
   gravatar_base_url: 'https://www.gravatar.com/avatar',
   captcha_provider: '',
   emoji_catalog_url: '',
+  user_agreement_url: '',
+  privacy_policy_url: '',
+  legal_consent_version: 1,
+  brand_primary_color: '#18181B',
 }
 
 // settingType 是每个已知 key 的固定公开类型。
@@ -102,6 +114,10 @@ const settingType: Record<KnownSettingKey, SettingType> = {
   gravatar_base_url: 'string',
   captcha_provider: 'string',
   emoji_catalog_url: 'string',
+  user_agreement_url: 'string',
+  privacy_policy_url: 'string',
+  legal_consent_version: 'integer',
+  brand_primary_color: 'string',
 }
 
 // decodeSettings 把公开设置项列表转换为类型化表单状态。
@@ -159,6 +175,18 @@ export function decodeSettings(items: SettingItem[]): Settings {
       case 'emoji_catalog_url':
         out.emoji_catalog_url = item.value as string
         break
+      case 'user_agreement_url':
+        out.user_agreement_url = item.value as string
+        break
+      case 'privacy_policy_url':
+        out.privacy_policy_url = item.value as string
+        break
+      case 'legal_consent_version':
+        out.legal_consent_version = item.value as number
+        break
+      case 'brand_primary_color':
+        out.brand_primary_color = item.value as string
+        break
     }
   }
   return out
@@ -172,6 +200,7 @@ export function diffSettings(
 ): SettingItem[] {
   const items: SettingItem[] = []
   for (const key of knownSettingKeys) {
+    if (key === 'legal_consent_version') continue
     if (deepEqual(baseline[key], draft[key])) continue
     items.push({ key, type: settingType[key], value: draft[key] })
   }

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Save } from 'lucide-react'
+import { Palette, Save, ShieldAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,17 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { PageHeader } from '@/components/PageHeader'
 import { StateFade } from '@/components/motion'
 import {
@@ -34,6 +45,7 @@ import {
   privacyModeOptions,
 } from '@/lib/api/settings'
 import { selectItems } from '@/lib/i18n'
+import { publicConfigQueryKey } from '@/lib/public-config'
 import type { Settings } from '@/lib/api/settings'
 import { toast } from 'sonner'
 
@@ -91,9 +103,19 @@ export function SettingsPage() {
       }
       toast.success(t('settingsSaved'))
       void queryClient.setQueryData(['settings'], data)
+      void queryClient.invalidateQueries({ queryKey: publicConfigQueryKey })
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : t('saveFailed')),
+  })
+  const resetConsent = useMutation({
+    mutationFn: settingsApi.resetLegalConsent,
+    onSuccess: () => {
+      toast.success(t('legalConsentReset'))
+      void queryClient.invalidateQueries({ queryKey: publicConfigQueryKey })
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : t('resetFailed')),
   })
   if (settings.isPending || !draft)
     return (
@@ -116,18 +138,146 @@ export function SettingsPage() {
         ? { ...current, privacy: { ...current.privacy, [mode]: value } }
         : current,
     )
+  const brandColorValid = /^#[0-9a-fA-F]{6}$/.test(draft.brand_primary_color)
   return (
     <>
       <PageHeader
         title={t('settingsTitle')}
         action={
-          <Button onClick={() => update.mutate()} disabled={update.isPending}>
+          <Button
+            onClick={() => update.mutate()}
+            disabled={update.isPending || !brandColorValid}
+          >
             <Save />
             {update.isPending ? t('saving') : t('saveSettings')}
           </Button>
         }
       />
       <div className="grid gap-6 xl:grid-cols-12">
+        <Card className="xl:col-span-7">
+          <CardHeader>
+            <CardTitle className="text-base">{t('legalAndBranding')}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-5">
+            <div className="grid gap-2">
+              <Label htmlFor="user-agreement-url">
+                {t('userAgreementUrl')}
+              </Label>
+              <Input
+                id="user-agreement-url"
+                type="url"
+                placeholder="https://example.com/terms"
+                value={draft.user_agreement_url}
+                onChange={(event) =>
+                  set('user_agreement_url', event.target.value)
+                }
+              />
+              <p className="m-0 text-xs text-muted-foreground">
+                {t('legalUrlHint')}
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="privacy-policy-url">
+                {t('privacyPolicyUrl')}
+              </Label>
+              <Input
+                id="privacy-policy-url"
+                type="url"
+                placeholder="https://example.com/privacy"
+                value={draft.privacy_policy_url}
+                onChange={(event) =>
+                  set('privacy_policy_url', event.target.value)
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="brand-primary-color">
+                {t('brandPrimaryColor')}
+              </Label>
+              <div className="flex flex-wrap items-center gap-3">
+                <Input
+                  id="brand-primary-color-picker"
+                  aria-label={t('brandPrimaryColorPicker')}
+                  type="color"
+                  value={
+                    brandColorValid ? draft.brand_primary_color : '#18181B'
+                  }
+                  onChange={(event) =>
+                    set('brand_primary_color', event.target.value.toUpperCase())
+                  }
+                  className="h-10 w-14 cursor-pointer p-1"
+                />
+                <Input
+                  id="brand-primary-color"
+                  value={draft.brand_primary_color}
+                  aria-invalid={!brandColorValid}
+                  onChange={(event) =>
+                    set('brand_primary_color', event.target.value)
+                  }
+                  className="w-36 font-mono uppercase"
+                  placeholder="#18181B"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => set('brand_primary_color', '#18181B')}
+                >
+                  <Palette />
+                  {t('restoreDefaultBrandColor')}
+                </Button>
+              </div>
+              {!brandColorValid ? (
+                <p className="m-0 text-xs text-destructive">
+                  {t('brandColorInvalid')}
+                </p>
+              ) : null}
+              <p className="m-0 text-xs text-muted-foreground">
+                {t('brandPrimaryColorHint')}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="mt-0.5 size-4 text-destructive" />
+                <div>
+                  <p className="m-0 text-sm font-medium">
+                    {t('requireReconsent')}
+                  </p>
+                  <p className="m-0 text-xs text-muted-foreground">
+                    {t('requireReconsentHint')}
+                  </p>
+                </div>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={<Button type="button" variant="outline" />}
+                >
+                  {t('requireReconsentAction')}
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t('requireReconsentTitle')}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('requireReconsentDescription')}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>
+                      {t('cancel', { ns: 'common' })}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      disabled={resetConsent.isPending}
+                      onClick={() => resetConsent.mutate()}
+                    >
+                      {t('requireReconsentAction')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardContent>
+        </Card>
         <Card className="xl:col-span-7">
           <CardHeader>
             <CardTitle className="text-base">{t('commentPolicy')}</CardTitle>

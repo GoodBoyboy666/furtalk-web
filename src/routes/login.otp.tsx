@@ -20,8 +20,10 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { CaptchaDialog } from '@/components/CaptchaDialog'
 import { authApi, captchaApi } from '@/lib/api/resources'
+import * as apiResources from '@/lib/api/resources'
 import { ApiError } from '@/lib/api/client'
 import { resolvePostLoginTarget } from '@/lib/redirect'
 import {
@@ -33,6 +35,8 @@ import {
   maskEmail,
 } from '@/lib/otp'
 import type { PendingOtpLogin } from '@/lib/otp'
+import { defaultPublicConfig, publicConfigQueryKey } from '@/lib/public-config'
+import { useLegalConsent } from '@/lib/legal-consent'
 
 // 两个独立 CAPTCHA 业务 action：发送验证码与验证码登录，与后端策略键一致。
 // 各自持有独立的 config 查询、对话框与一次性 pending 回调，token 绝不跨 action 串用。
@@ -49,6 +53,20 @@ export function LoginOtpPage() {
   // 挂载时读取一次 pending 记录；缺失/损坏/过期由 readOtpRecord 自清并返回 null。
   const [record, setRecord] = useState<PendingOtpLogin | null>(() =>
     readOtpRecord(safeOtpSessionStorage()),
+  )
+  const hasPublicConfigApi = 'publicConfigApi' in apiResources
+  const publicConfig = useQuery({
+    queryKey: publicConfigQueryKey,
+    queryFn: () => {
+      if (!hasPublicConfigApi) return Promise.resolve(defaultPublicConfig)
+      return apiResources.publicConfigApi.get()
+    },
+    retry: false,
+    ...(hasPublicConfigApi ? {} : { initialData: defaultPublicConfig }),
+  })
+  const legalConsent = useLegalConsent(
+    publicConfig.data,
+    hasPublicConfigApi ? publicConfig.isSuccess : true,
   )
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
@@ -174,6 +192,7 @@ export function LoginOtpPage() {
   // verify 仅在六位验证码齐全后可用；email_code_login required 时先过对话框。
   function verify() {
     setError('')
+    if (!legalConsent.canProceed) return
     if (loginRequired) {
       pendingLoginRef.current = (token) => {
         emailCodeLogin.mutate({ email, code, token })
@@ -188,6 +207,7 @@ export function LoginOtpPage() {
   // 客户端冷却期，只有请求 pending 期间禁用按钮。
   function resend() {
     setError('')
+    if (!legalConsent.canProceed) return
     if (sendRequired) {
       pendingSendRef.current = (token) => {
         setResendState('pending')
@@ -224,6 +244,20 @@ export function LoginOtpPage() {
   }
 
   const resendPending = resendState === 'pending' || sendEmailCode.isPending
+  const legalLinks = [
+    publicConfig.data?.user_agreement_url
+      ? {
+          label: t('userAgreement'),
+          href: publicConfig.data.user_agreement_url,
+        }
+      : null,
+    publicConfig.data?.privacy_policy_url
+      ? {
+          label: t('privacyPolicy'),
+          href: publicConfig.data.privacy_policy_url,
+        }
+      : null,
+  ].filter((link): link is { label: string; href: string } => link !== null)
   return (
     <main className="relative flex min-h-screen items-center justify-center ambient-auth-bg bg-background/80 px-4 py-12">
       <FadeIn className="w-full max-w-md">
@@ -263,6 +297,50 @@ export function LoginOtpPage() {
                 <p className="m-0 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                   {error}
                 </p>
+              ) : null}
+              {publicConfig.isError ? (
+                <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <p className="m-0">{t('publicConfigLoadFailed')}</p>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 text-destructive"
+                    onClick={() => void publicConfig.refetch()}
+                  >
+                    {t('retryConfig')}
+                  </Button>
+                </div>
+              ) : null}
+              {legalLinks.length > 0 ? (
+                <div className="flex items-start gap-2 rounded-md border border-border/70 bg-muted/30 p-3 text-xs">
+                  <Checkbox
+                    id="otp-legal-consent"
+                    checked={legalConsent.accepted}
+                    disabled={!publicConfig.isSuccess}
+                    onCheckedChange={(checked) =>
+                      legalConsent.setAccepted(checked === true)
+                    }
+                  />
+                  <Label
+                    htmlFor="otp-legal-consent"
+                    className="cursor-pointer font-normal leading-5"
+                  >
+                    {t('legalConsentPrefix')}{' '}
+                    {legalLinks.map((link, index) => (
+                      <span key={link.href}>
+                        {index > 0 ? ` ${t('legalConsentAnd')} ` : null}
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2"
+                        >
+                          {link.label}
+                        </a>
+                      </span>
+                    ))}
+                  </Label>
+                </div>
               ) : null}
               {resendState === 'success' ? (
                 <p className="m-0 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm">
@@ -318,7 +396,11 @@ export function LoginOtpPage() {
               <Button
                 type="button"
                 className="w-full"
-                disabled={emailCodeLogin.isPending || code.length !== 6}
+                disabled={
+                  !legalConsent.canProceed ||
+                  emailCodeLogin.isPending ||
+                  code.length !== 6
+                }
                 onClick={verify}
               >
                 {emailCodeLogin.isPending ? (
@@ -333,7 +415,7 @@ export function LoginOtpPage() {
                   type="button"
                   variant="link"
                   className="h-auto p-0"
-                  disabled={resendPending}
+                  disabled={resendPending || !legalConsent.canProceed}
                   onClick={resend}
                 >
                   {sendEmailCode.isPending ? (
