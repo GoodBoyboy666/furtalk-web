@@ -16,7 +16,6 @@ import {
   Pin,
   ShieldAlert,
   Trash2,
-  UserRound,
   X,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -170,57 +169,38 @@ export function CommentDetailPage() {
       <div className="grid gap-5">
         <Card>
           <CardHeader className="gap-5 border-b border-border/60 pb-5">
-            <div className="flex min-w-0 flex-wrap items-start gap-4">
-              <UserAvatar
-                avatarUrl={item.avatar_url}
-                name={displayName}
-                fallback={initialsFrom(item.author_nickname, item.author_email)}
-                className="size-12 shrink-0"
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="m-0 text-base font-semibold">{displayName}</p>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                    {t('userNumber', { id: formatValue(item.user_id) })}
-                  </span>
-                </div>
-                <div className="mt-3 grid min-w-0 gap-x-5 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                  <Info
-                    icon={Mail}
-                    label={t('email')}
-                    value={formatValue(item.author_email)}
-                  />
-                  <Info
-                    icon={Globe2}
-                    label={t('website')}
-                    value={formatValue(item.author_website)}
-                  />
-                  <Info
-                    icon={CalendarClock}
-                    label={t('createdAt')}
-                    value={formatDateTime(item.created_at, dateTimeOptions)}
-                  />
-                  <Info
-                    icon={UserRound}
-                    label={t('userId')}
-                    value={formatValue(item.user_id)}
-                  />
-                  <Info
-                    label={t('nickname')}
-                    value={formatValue(item.author_nickname)}
-                  />
-                </div>
+            <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="flex min-w-0 shrink-0 items-center gap-4">
+                <UserAvatar
+                  avatarUrl={item.avatar_url}
+                  name={displayName}
+                  fallback={initialsFrom(
+                    item.author_nickname,
+                    item.author_email,
+                  )}
+                  className="size-12 shrink-0"
+                />
+                <p className="m-0 min-w-0 break-words text-base font-semibold [overflow-wrap:anywhere]">
+                  {displayName}
+                </p>
               </div>
-            </div>
-            <div className="grid min-w-0 gap-x-5 gap-y-2 text-sm sm:grid-cols-2">
-              <Info
-                label={t('ipValue')}
-                value={summaryValue(item.ip_mode, ipValueText(item, t), t)}
-              />
-              <Info
-                label={t('uaValue')}
-                value={summaryValue(item.ua_mode, uaValueText(item, t), t)}
-              />
+              <div className="grid min-w-0 flex-1 gap-x-5 gap-y-2 text-sm sm:grid-cols-3 md:max-w-3xl">
+                <Info
+                  icon={Mail}
+                  label={t('email')}
+                  value={formatValue(item.author_email)}
+                />
+                <Info
+                  icon={Globe2}
+                  label={t('website')}
+                  value={formatValue(item.author_website)}
+                />
+                <Info
+                  icon={CalendarClock}
+                  label={t('createdAt')}
+                  value={formatDateTime(item.created_at, dateTimeOptions)}
+                />
+              </div>
             </div>
           </CardHeader>
           <CardContent className="grid gap-3 pt-5">
@@ -257,6 +237,18 @@ export function CommentDetailPage() {
                         <Check aria-hidden="true" />
                       )}
                       {t('saveChanges')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setBody(null)
+                        setIsEditing(false)
+                      }}
+                    >
+                      <X aria-hidden="true" />
+                      {t('action.cancel', { ns: 'common' })}
                     </Button>
                   </>
                 )}
@@ -321,20 +313,6 @@ export function CommentDetailPage() {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {isEditing ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setBody(null)
-                      setIsEditing(false)
-                    }}
-                  >
-                    <X aria-hidden="true" />
-                    {t('action.cancel', { ns: 'common' })}
-                  </Button>
-                ) : null}
               </div>
             </div>
             {isEditing ? (
@@ -470,20 +448,6 @@ export function CommentDetailPage() {
 // formatValue 统一处理 null / 空字符串，缺失时返回统一占位符。
 function formatValue(value: string | null | undefined) {
   return value && value.trim() ? value : PLACEHOLDER
-}
-
-// summaryValue keeps the compact author header privacy-safe while indicating
-// the recording mode next to values repeated in the disclosure below.
-function summaryValue(
-  mode: string,
-  value: string,
-  t: (key: string, options?: Record<string, unknown>) => string,
-) {
-  return mode === 'none'
-    ? formatValue(null)
-    : mode === 'coarse' || mode === 'full'
-      ? `${value} · ${privacyModeLabel(mode, t)}`
-      : t('privacyMode.unknown', { ns: 'enums' })
 }
 
 // privacyModeLabel 把隐私记录模式映射为翻译后的展示名；

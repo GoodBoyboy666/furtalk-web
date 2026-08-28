@@ -142,10 +142,13 @@ function ComboboxItemIndicator({
     <ComboboxPrimitive.ItemIndicator
       keepMounted
       data-slot="combobox-item-indicator"
-      className={cn(
-        'pointer-events-none absolute right-2 flex size-4 items-center justify-center',
-        className,
-      )}
+      className={(state) =>
+        cn(
+          'pointer-events-none absolute right-2 size-4 items-center justify-center',
+          state.selected ? 'flex' : 'hidden',
+          typeof className === 'function' ? className(state) : className,
+        )
+      }
       {...props}
     >
       {children ?? <CheckIcon className="size-4" />}

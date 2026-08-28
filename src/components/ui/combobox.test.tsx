@@ -95,4 +95,35 @@ describe('Combobox', () => {
     )
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
+
+  it('shows the indicator only for the selected option and moves it after selection', async () => {
+    render(<TestCombobox />)
+    const user = userEvent.setup()
+    const trigger = screen.getByRole('button', { name: 'Open time zones' })
+
+    await user.click(trigger)
+    const shanghai = await screen.findByRole('option', {
+      name: 'Asia/Shanghai',
+    })
+    const utc = screen.getByRole('option', { name: 'UTC' })
+    expect(
+      shanghai.querySelector('[data-slot="combobox-item-indicator"]'),
+    ).toHaveClass('flex')
+    expect(
+      utc.querySelector('[data-slot="combobox-item-indicator"]'),
+    ).toHaveClass('hidden')
+
+    await user.click(utc)
+    await user.click(trigger)
+    const nextShanghai = await screen.findByRole('option', {
+      name: 'Asia/Shanghai',
+    })
+    const nextUtc = screen.getByRole('option', { name: 'UTC' })
+    expect(
+      nextShanghai.querySelector('[data-slot="combobox-item-indicator"]'),
+    ).toHaveClass('hidden')
+    expect(
+      nextUtc.querySelector('[data-slot="combobox-item-indicator"]'),
+    ).toHaveClass('flex')
+  })
 })

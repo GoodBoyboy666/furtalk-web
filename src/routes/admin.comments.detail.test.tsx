@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -92,10 +98,33 @@ describe('CommentDetailPage complete data', () => {
   it('renders identifiers, relations, author, request and lifecycle fields', async () => {
     renderDetail()
     expect(await screen.findByText('hello world')).toBeInTheDocument()
-    // 作者（昵称同时出现在头像回退与信息字段中）
-    expect(screen.getAllByText('Author').length).toBeGreaterThanOrEqual(2)
+    // 作者栏仅保留头像旁的主要昵称与右侧三项元数据。
+    const authorName = screen.getByText('Author')
+    const authorHeader = authorName.closest('[data-slot="card-header"]')
+    expect(authorHeader).not.toBeNull()
     expect(screen.getByText('author@example.com')).toBeInTheDocument()
     expect(screen.getByText('https://author.example')).toBeInTheDocument()
+    expect(
+      within(authorHeader as HTMLElement).getByText('邮箱'),
+    ).toBeInTheDocument()
+    expect(
+      within(authorHeader as HTMLElement).getByText('网站'),
+    ).toBeInTheDocument()
+    expect(
+      within(authorHeader as HTMLElement).getByText('创建时间'),
+    ).toBeInTheDocument()
+    expect(
+      within(authorHeader as HTMLElement).queryByText('用户 ID'),
+    ).not.toBeInTheDocument()
+    expect(
+      within(authorHeader as HTMLElement).queryByText('昵称'),
+    ).not.toBeInTheDocument()
+    expect(
+      within(authorHeader as HTMLElement).queryByText('IP 值'),
+    ).not.toBeInTheDocument()
+    expect(
+      within(authorHeader as HTMLElement).queryByText('UA 信息'),
+    ).not.toBeInTheDocument()
     // 关系与标识
     expect(screen.getByText('站点 ID')).toBeInTheDocument()
     expect(screen.getByText('9')).toBeInTheDocument()
@@ -135,7 +164,7 @@ describe('CommentDetailPage privacy modes', () => {
       ua_raw: null,
     })
     await screen.findByText('hello world')
-    // 模式标签与值各出现一次：IP 模式/IP 值、UA 模式/UA 信息共 4 处“未记录”。
+    // IP / UA 仅在技术信息中展示：模式标签与值各有一处“未记录”。
     expect(screen.getAllByText('未记录')).toHaveLength(4)
     expect(screen.queryByText('203.0.113.42')).not.toBeInTheDocument()
     expect(screen.queryByText(/Mozilla/)).not.toBeInTheDocument()
@@ -239,6 +268,26 @@ describe('CommentDetailPage responsive layout', () => {
     expect(grid?.className).toContain('lg:grid-cols-3')
   })
 
+  it('places author identity beside the three wrapping metadata fields', async () => {
+    renderDetail({
+      author_email: `${'long'.repeat(30)}@example.com`,
+      author_website: `https://example.com/${'path'.repeat(30)}`,
+    })
+    await screen.findByText('hello world')
+
+    const authorHeader = screen
+      .getByText('Author')
+      .closest('[data-slot="card-header"]')
+    const layout = authorHeader?.firstElementChild
+    expect(layout).toHaveClass('flex-col', 'md:flex-row')
+    const metadata = within(authorHeader as HTMLElement).getByText('邮箱')
+      .parentElement?.parentElement
+    expect(metadata).toHaveClass('min-w-0', 'sm:grid-cols-3')
+    expect(
+      within(authorHeader as HTMLElement).getByText(/@example\.com/),
+    ).toHaveClass('break-words', '[overflow-wrap:anywhere]')
+  })
+
   it('keeps long body and technical values inside wrapping containers', async () => {
     renderDetail({
       body: 'x'.repeat(300),
@@ -281,7 +330,11 @@ describe('CommentDetailPage body editing', () => {
     const textarea = screen.getByRole('textbox', { name: '评论正文' })
     expect(textarea).toHaveValue('hello world')
     const save = screen.getByRole('button', { name: '保存修改' })
+    const cancel = screen.getByRole('button', { name: '取消' })
+    const editingManagement = screen.getByRole('button', { name: '评论操作' })
     expect(save).toBeDisabled()
+    expect(save.compareDocumentPosition(cancel) & 4).toBe(4)
+    expect(cancel.compareDocumentPosition(editingManagement) & 4).toBe(4)
 
     await user.type(textarea, ' updated')
     expect(save).toBeEnabled()
