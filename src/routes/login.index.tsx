@@ -353,37 +353,6 @@ export function LoginPage() {
                 </Button>
               </div>
             ) : null}
-            {legalLinks.length > 0 ? (
-              <div className="mb-4 flex items-start gap-2 rounded-md border border-border/70 bg-muted/30 p-3 text-xs">
-                <Checkbox
-                  id="legal-consent"
-                  checked={legalConsent.accepted}
-                  disabled={!publicConfig.isSuccess}
-                  onCheckedChange={(checked) =>
-                    legalConsent.setAccepted(checked === true)
-                  }
-                />
-                <Label
-                  htmlFor="legal-consent"
-                  className="cursor-pointer font-normal leading-5"
-                >
-                  {t('legalConsentPrefix')}{' '}
-                  {legalLinks.map((link, index) => (
-                    <span key={link.href}>
-                      {index > 0 ? ` ${t('legalConsentAnd')} ` : null}
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-2"
-                      >
-                        {link.label}
-                      </a>
-                    </span>
-                  ))}
-                </Label>
-              </div>
-            ) : null}
             <Tabs defaultValue="email-code">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="email-code">
@@ -411,6 +380,15 @@ export function LoginPage() {
                       />
                     </div>
                   </div>
+                  <LegalConsentRow
+                    id="email-code-legal-consent"
+                    links={legalLinks}
+                    accepted={legalConsent.accepted}
+                    disabled={!publicConfig.isSuccess}
+                    onAccepted={legalConsent.setAccepted}
+                    prefix={t('legalConsentPrefix')}
+                    conjunction={t('legalConsentAnd')}
+                  />
                   <Button
                     type="button"
                     variant="default"
@@ -486,6 +464,15 @@ export function LoginPage() {
                       </Link>
                     </div>
                   </div>
+                  <LegalConsentRow
+                    id="password-legal-consent"
+                    links={legalLinks}
+                    accepted={legalConsent.accepted}
+                    disabled={!publicConfig.isSuccess}
+                    onAccepted={legalConsent.setAccepted}
+                    prefix={t('legalConsentPrefix')}
+                    conjunction={t('legalConsentAnd')}
+                  />
                   <Button type="submit" disabled={passwordDisabled}>
                     {passwordLogin.isPending ? (
                       <Loader2 className="animate-spin" />
@@ -586,6 +573,53 @@ export function LoginPage() {
         onError={(message) => setError(message)}
       />
     </main>
+  )
+}
+
+function LegalConsentRow({
+  id,
+  links,
+  accepted,
+  disabled,
+  onAccepted,
+  prefix,
+  conjunction,
+}: {
+  id: string
+  links: Array<{ label: string; href: string }>
+  accepted: boolean
+  disabled: boolean
+  onAccepted: (accepted: boolean) => void
+  prefix: string
+  conjunction: string
+}) {
+  if (links.length === 0) return null
+
+  return (
+    <div className="flex items-start gap-2 rounded-md border border-border/70 bg-muted/30 p-3 text-xs">
+      <Checkbox
+        id={id}
+        checked={accepted}
+        disabled={disabled}
+        onCheckedChange={(checked) => onAccepted(checked === true)}
+      />
+      <Label htmlFor={id} className="cursor-pointer font-normal leading-5">
+        {prefix}{' '}
+        {links.map((link, index) => (
+          <span key={link.href}>
+            {index > 0 ? ` ${conjunction} ` : null}
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2"
+            >
+              {link.label}
+            </a>
+          </span>
+        ))}
+      </Label>
+    </div>
   )
 }
 

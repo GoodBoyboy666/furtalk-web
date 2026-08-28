@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Palette, Save, ShieldAlert } from 'lucide-react'
+import { Palette, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -156,8 +156,38 @@ export function SettingsPage() {
       />
       <div className="grid gap-6 xl:grid-cols-12">
         <Card className="xl:col-span-7">
-          <CardHeader>
-            <CardTitle className="text-base">{t('legalAndBranding')}</CardTitle>
+          <CardHeader className="flex-row flex-wrap items-center justify-between gap-4">
+            <CardTitle className="text-base">
+              {t('legalSettingsTitle')}
+            </CardTitle>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={<Button type="button" variant="outline" />}
+              >
+                {t('requireReconsentAction')}
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {t('requireReconsentTitle')}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('requireReconsentDescription')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>
+                    {t('cancel', { ns: 'common' })}
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={resetConsent.isPending}
+                    onClick={() => resetConsent.mutate()}
+                  >
+                    {t('requireReconsentAction')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
@@ -197,6 +227,15 @@ export function SettingsPage() {
                 }
               />
             </div>
+          </CardContent>
+        </Card>
+        <Card className="xl:col-span-5">
+          <CardHeader>
+            <CardTitle className="text-base">
+              {t('brandingSettingsTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-5">
             <div className="grid gap-2">
               <div className="flex items-center gap-2">
                 <Label htmlFor="brand-primary-color">
@@ -247,47 +286,6 @@ export function SettingsPage() {
                   {t('brandColorInvalid')}
                 </p>
               ) : null}
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-3">
-              <div className="flex items-start gap-3">
-                <ShieldAlert className="mt-0.5 size-4 text-destructive" />
-                <div>
-                  <p className="m-0 text-sm font-medium">
-                    {t('requireReconsent')}
-                  </p>
-                  <p className="m-0 text-xs text-muted-foreground">
-                    {t('requireReconsentHint')}
-                  </p>
-                </div>
-              </div>
-              <AlertDialog>
-                <AlertDialogTrigger
-                  render={<Button type="button" variant="outline" />}
-                >
-                  {t('requireReconsentAction')}
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {t('requireReconsentTitle')}
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t('requireReconsentDescription')}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>
-                      {t('cancel', { ns: 'common' })}
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      disabled={resetConsent.isPending}
-                      onClick={() => resetConsent.mutate()}
-                    >
-                      {t('requireReconsentAction')}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
             </div>
           </CardContent>
         </Card>
@@ -466,7 +464,16 @@ export function SettingsPage() {
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
-              <Label>{t('ipRecording')}</Label>
+              <div className="flex items-center gap-2">
+                <Label>{t('ipRecording')}</Label>
+                <SettingsHint
+                  label={t('settingsHintLabel', {
+                    field: t('privacyRecording'),
+                  })}
+                >
+                  {t('privacyApplyHint')}
+                </SettingsHint>
+              </div>
               <Select
                 value={draft.privacy.ip_mode}
                 onValueChange={(value) =>
@@ -511,9 +518,6 @@ export function SettingsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <p className="m-0 text-xs text-muted-foreground">
-              {t('privacyApplyHint')}
-            </p>
           </CardContent>
         </Card>
         <Card className="xl:col-span-7">
@@ -632,7 +636,17 @@ export function SettingsPage() {
             <CardTitle className="text-base">{t('thirdPartyLogin')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <ProviderSection />
+            <ProviderSection mode="auth" hideHeader />
+          </CardContent>
+        </Card>
+        <Card className="xl:col-span-5">
+          <CardHeader>
+            <CardTitle className="text-base">
+              {t('captchaProviderTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProviderSection mode="captcha" hideHeader />
           </CardContent>
         </Card>
         <Card className="xl:col-span-7">

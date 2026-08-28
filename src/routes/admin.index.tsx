@@ -119,11 +119,11 @@ export function OverviewPage() {
               <Link to={card.to} className="group block h-full no-underline">
                 <Card className="h-full subtle-card-hover border-border/80 bg-card">
                   <CardHeader className="flex-row items-center justify-between pb-3">
-                    <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <CardTitle className="text-base font-semibold">
                       {card.label}
                     </CardTitle>
-                    <div className="flex size-8 items-center justify-center rounded-lg bg-muted/70 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
-                      <Icon className="size-4" />
+                    <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+                      <Icon className="size-4.5" />
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -155,16 +155,37 @@ export function OverviewPage() {
               <CardTitle className="text-base font-semibold">
                 {t('commentTrendTitle')}
               </CardTitle>
-              <p className="mt-0.5 mb-0 text-xs text-muted-foreground">
-                {t('commentTrendHint')}
-              </p>
             </div>
           </div>
           <div
-            className="flex flex-wrap items-center gap-2"
+            className="flex flex-wrap items-center justify-end gap-2"
             role="group"
             aria-label={t('commentTrendRange')}
           >
+            <div className="flex items-center gap-2">
+              <Label
+                htmlFor="comment-trend-timezone"
+                className="text-xs text-muted-foreground"
+              >
+                {t('commentTrendTimezone')}
+              </Label>
+              <Input
+                id="comment-trend-timezone"
+                list="comment-trend-timezones"
+                value={timezoneInput}
+                onChange={(event) => updateTimezoneInput(event.target.value)}
+                onBlur={commitTimezoneInput}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') commitTimezoneInput()
+                }}
+                className="w-36 font-mono text-xs sm:w-44"
+              />
+              <datalist id="comment-trend-timezones">
+                {timezoneOptions.map((option) => (
+                  <option key={option} value={option} />
+                ))}
+              </datalist>
+            </div>
             {commentTrendDays.map((days) => (
               <Button
                 key={days}
@@ -179,37 +200,6 @@ export function OverviewPage() {
           </div>
         </CardHeader>
         <CardContent className="grid gap-4 pt-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Label
-              htmlFor="comment-trend-timezone"
-              className="text-xs text-muted-foreground"
-            >
-              {t('commentTrendTimezone')}
-            </Label>
-            <Input
-              id="comment-trend-timezone"
-              list="comment-trend-timezones"
-              value={timezoneInput}
-              onChange={(event) => updateTimezoneInput(event.target.value)}
-              onBlur={commitTimezoneInput}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') commitTimezoneInput()
-              }}
-              aria-describedby="comment-trend-timezone-hint"
-              className="w-full max-w-xs font-mono text-xs"
-            />
-            <datalist id="comment-trend-timezones">
-              {timezoneOptions.map((option) => (
-                <option key={option} value={option} />
-              ))}
-            </datalist>
-            <span
-              id="comment-trend-timezone-hint"
-              className="text-xs text-muted-foreground"
-            >
-              {t('commentTrendTimezoneHint')}
-            </span>
-          </div>
           {commentTrend.isPending ? (
             <Skeleton className="min-h-[260px] w-full" />
           ) : commentTrend.isError ? (

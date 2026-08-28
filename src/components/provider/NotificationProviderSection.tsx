@@ -420,16 +420,6 @@ export function NotificationProviderSection() {
                   </Button>
                 </div>
               </div>
-              {spec.outboundWarning ? (
-                <p className="m-0 mt-2 flex items-start gap-2 rounded-md bg-destructive/10 px-3 py-2 text-xs break-words text-destructive">
-                  <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-                  {t(
-                    spec.key === 'notification.bark'
-                      ? 'notificationBarkOutboundWarning'
-                      : 'notificationWebhookOutboundWarning',
-                  )}
-                </p>
-              ) : null}
             </div>
           ))}
         </div>

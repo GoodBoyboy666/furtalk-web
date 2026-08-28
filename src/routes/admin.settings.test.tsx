@@ -86,12 +86,16 @@ describe('SettingsPage card layout', () => {
     await screen.findByText('评论策略')
 
     const cardSpans = [
+      ['协议', 'xl:col-span-7'],
+      ['品牌', 'xl:col-span-5'],
       ['评论策略', 'xl:col-span-7'],
       ['用户与通知', 'xl:col-span-5'],
       ['隐私记录', 'xl:col-span-5'],
       ['邮箱与头像', 'xl:col-span-7'],
       ['人机验证策略', 'xl:col-span-5'],
       ['第三方登录', 'xl:col-span-7'],
+      ['人机验证提供商', 'xl:col-span-5'],
+      ['垃圾检测', 'xl:col-span-7'],
       ['多通道通知', 'xl:col-span-7'],
     ] as const
 
@@ -180,16 +184,19 @@ describe('SettingsPage helper cards', () => {
     ).toBeInTheDocument()
   })
 
-  it('keeps persistent privacy and consent notices directly visible', async () => {
+  it('keeps only the re-consent action visible and moves privacy impact copy to a hint', async () => {
     renderSettings()
     await screen.findByText('系统设置')
 
     expect(
-      screen.getByText(/以上精度只作用于之后新建的评论/),
+      screen.getByRole('button', { name: '要求重新同意' }),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/仅主动执行此操作才会让已有浏览器同意状态失效/),
-    ).toBeInTheDocument()
+      screen.queryByText(/以上精度只作用于之后新建的评论/),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(/仅主动执行此操作才会让已有浏览器同意状态失效/),
+    ).not.toBeInTheDocument()
   })
 })
 
@@ -204,7 +211,9 @@ describe('SettingsPage privacy precision controls', () => {
     // 默认值来自既有设置（coarse），以中文标签展示而非原始枚举。
     expect(ipTrigger).toHaveTextContent('粗略记录')
     expect(uaTrigger).toHaveTextContent('粗略记录')
-    expect(screen.getByText(/只作用于之后新建的评论/)).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: '查看设置说明：隐私记录' }),
+    ).toBeInTheDocument()
   })
 
   it('offers none/coarse/full options with Chinese labels for both controls', async () => {

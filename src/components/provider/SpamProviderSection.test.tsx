@@ -64,8 +64,13 @@ describe('SpamProviderSection contract', () => {
     expect(positions).toEqual([0, 1, 2, 3])
   })
 
-  it('shows a persistent Akismet data-transfer warning near the enable switch', async () => {
+  it('keeps the Akismet data-transfer warning inside its configuration dialog', async () => {
     renderSection()
+    await screen.findByText('本地关键词库')
+    expect(screen.queryByText(/发送至 Akismet 服务/)).not.toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole('button', { name: '编辑 spam.akismet' }),
+    )
     expect(await screen.findByText(/发送至 Akismet 服务/)).toBeInTheDocument()
   })
 

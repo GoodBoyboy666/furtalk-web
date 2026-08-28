@@ -19,13 +19,13 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
-function renderSection() {
+function renderSection(mode?: 'all' | 'auth' | 'captcha') {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
   return render(
     <QueryClientProvider client={queryClient}>
-      <ProviderSection />
+      <ProviderSection mode={mode} />
     </QueryClientProvider>,
   )
 }
@@ -44,6 +44,33 @@ afterEach(() => {
 })
 
 describe('ProviderSection provider management contract', () => {
+  it('can render auth and captcha management independently', async () => {
+    apiMocks.list.mockResolvedValue({
+      providers: [
+        {
+          provider_key: 'github',
+          kind: 'oauth',
+          configured: true,
+          public_config: { client_id: 'c' },
+        },
+        {
+          provider_key: 'turnstile',
+          kind: 'captcha',
+          configured: true,
+          public_config: { provider: 'turnstile' },
+        },
+      ],
+    })
+    const { unmount } = renderSection('auth')
+    expect(await screen.findByText('GitHub')).toBeInTheDocument()
+    expect(screen.queryByText('还没有验证码提供商')).not.toBeInTheDocument()
+    unmount()
+
+    renderSection('captcha')
+    expect(await screen.findByText(/Cloudflare Turnstile/)).toBeInTheDocument()
+    expect(screen.queryByText('还没有第三方登录入口')).not.toBeInTheDocument()
+  })
+
   it('renders an empty hint when no auth providers exist', async () => {
     renderSection()
     expect(await screen.findByText('还没有第三方登录入口')).toBeInTheDocument()

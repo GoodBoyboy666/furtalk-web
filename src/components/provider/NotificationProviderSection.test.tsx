@@ -124,14 +124,28 @@ describe('NotificationProviderSection fixed eight-slot catalog', () => {
     ).toHaveLength(1)
   })
 
-  it('shows Bark and WebHook trusted-admin outbound warnings', async () => {
+  it('keeps Bark and WebHook outbound warnings inside configuration dialogs', async () => {
     renderSection()
     await screen.findByText('多通道通知')
+    await screen.findByTestId('notification-provider-notification.bark')
+    expect(
+      screen.queryByText(/Bark 服务器地址允许任意 HTTP\/HTTPS/),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(/通用 WebHook 允许任意 HTTP\/HTTPS/),
+    ).not.toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole('button', { name: '配置 notification.bark' }),
+    )
     expect(
       await screen.findByText(/Bark 服务器地址允许任意 HTTP\/HTTPS/),
     ).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: '取消' }))
+    await userEvent.click(
+      screen.getByRole('button', { name: '配置 notification.webhook' }),
+    )
     expect(
-      screen.getByText(/通用 WebHook 允许任意 HTTP\/HTTPS/),
+      await screen.findByText(/通用 WebHook 允许任意 HTTP\/HTTPS/),
     ).toBeInTheDocument()
   })
 

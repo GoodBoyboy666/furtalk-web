@@ -161,6 +161,7 @@ describe('LoginOtpPage record guard', () => {
     expect(
       container.querySelectorAll('[data-slot="input-otp-slot"]'),
     ).toHaveLength(6)
+    expect(screen.queryByText(/我已阅读并同意/)).not.toBeInTheDocument()
   })
 
   it('auto-submits exactly once after all six digits are present', async () => {

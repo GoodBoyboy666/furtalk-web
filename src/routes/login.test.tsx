@@ -7,6 +7,7 @@ import { LoginPage } from './login.index'
 import type { CaptchaConfigResponse, Me } from '@/lib/api/types'
 import { pendingRecordKey, pendingRecordTTLMs } from '@/lib/authorize'
 import { otpRecordKey } from '@/lib/otp'
+import { defaultPublicConfig } from '@/lib/public-config'
 
 // apiMocks 是 API 模块的替代实现，供 vi.mock 与断言共享。
 const apiMocks = vi.hoisted(() => {
@@ -21,6 +22,7 @@ const apiMocks = vi.hoisted(() => {
     me: vi.fn(),
     providers: vi.fn(),
     oauthStart: vi.fn(),
+    publicConfig: vi.fn(),
     navigate: vi.fn(),
     search,
   }
@@ -58,6 +60,9 @@ vi.mock('@/lib/api/resources', () => ({
   },
   captchaApi: {
     config: apiMocks.captchaConfig,
+  },
+  publicConfigApi: {
+    get: apiMocks.publicConfig,
   },
 }))
 vi.mock('@/lib/passkey', () => ({
@@ -183,6 +188,7 @@ beforeEach(() => {
   apiMocks.oauthStart.mockResolvedValue({
     auth_url: 'https://github.example/auth',
   })
+  apiMocks.publicConfig.mockResolvedValue(defaultPublicConfig)
 })
 
 afterEach(() => {
@@ -218,6 +224,35 @@ describe('LoginPage default login method', () => {
     expect(screen.getByLabelText('密码')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '忘记密码？' })).toBeInTheDocument()
   })
+
+  it('places legal consent immediately above each tab primary action', async () => {
+    apiMocks.publicConfig.mockResolvedValue({
+      ...defaultPublicConfig,
+      user_agreement_url: 'https://example.com/terms',
+      privacy_policy_url: 'https://example.com/privacy',
+    })
+    renderLogin({ required: false })
+    const user = userEvent.setup()
+    const send = screen.getByRole('button', { name: '发送验证码' })
+    const emailConsent = await screen.findByRole('checkbox', {
+      name: /我已阅读并同意/,
+    })
+    expect(
+      emailConsent.compareDocumentPosition(send) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+
+    await openPasswordTab(user)
+    const passwordSubmit = screen.getByRole('button', { name: '登录' })
+    const passwordConsent = screen.getByRole('checkbox', {
+      name: /我已阅读并同意/,
+    })
+    expect(
+      passwordConsent.compareDocumentPosition(passwordSubmit) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1)
+  })
 })
 
 describe('LoginPage CAPTCHA gating', () => {
@@ -227,7 +262,7 @@ describe('LoginPage CAPTCHA gating', () => {
     await openPasswordTab(user)
     await user.type(screen.getByLabelText('邮箱'), 'admin@example.com')
     await user.type(screen.getByLabelText('密码'), 'secret')
-    await user.click(screen.getByRole('button', { name: '邮箱密码登录' }))
+    await user.click(screen.getByRole('button', { name: '登录' }))
 
     await waitFor(() => {
       expect(apiMocks.passwordLogin.mock.calls[0][0]).toEqual({
@@ -247,7 +282,7 @@ describe('LoginPage CAPTCHA gating', () => {
     await openPasswordTab(user)
     // 表单内不存在内联挑战，提交按钮保持可用。
     expect(screen.queryByTestId('challenge-turnstile')).not.toBeInTheDocument()
-    const submit = screen.getByRole('button', { name: '邮箱密码登录' })
+    const submit = screen.getByRole('button', { name: '登录' })
     expect(submit).toBeEnabled()
 
     await user.type(screen.getByLabelText('邮箱'), 'admin@example.com')
@@ -286,7 +321,7 @@ describe('LoginPage CAPTCHA gating', () => {
     await openPasswordTab(user)
     await user.type(screen.getByLabelText('邮箱'), 'admin@example.com')
     await user.type(screen.getByLabelText('密码'), 'secret')
-    await user.click(screen.getByRole('button', { name: '邮箱密码登录' }))
+    await user.click(screen.getByRole('button', { name: '登录' }))
     await waitFor(() => {
       expect(screen.getByTestId('challenge-turnstile')).toBeInTheDocument()
     })
@@ -351,7 +386,7 @@ describe('LoginPage CAPTCHA gating', () => {
     await user.clear(emailInput)
     await user.type(emailInput, 'admin@example.com')
     await user.type(screen.getByLabelText('密码'), 'secret')
-    await user.click(screen.getByRole('button', { name: '邮箱密码登录' }))
+    await user.click(screen.getByRole('button', { name: '登录' }))
     await waitFor(() => {
       expect(screen.getByTestId('challenge-turnstile')).toBeInTheDocument()
     })
@@ -369,7 +404,7 @@ describe('LoginPage role-aware redirect', () => {
     await openPasswordTab(user)
     await user.type(screen.getByLabelText('邮箱'), 'admin@example.com')
     await user.type(screen.getByLabelText('密码'), 'secret')
-    await user.click(screen.getByRole('button', { name: '邮箱密码登录' }))
+    await user.click(screen.getByRole('button', { name: '登录' }))
 
     await waitFor(() => {
       expect(apiMocks.navigate).toHaveBeenCalledWith({ href: '/admin' })
@@ -383,7 +418,7 @@ describe('LoginPage role-aware redirect', () => {
     await openPasswordTab(user)
     await user.type(screen.getByLabelText('邮箱'), 'user@example.com')
     await user.type(screen.getByLabelText('密码'), 'secret')
-    await user.click(screen.getByRole('button', { name: '邮箱密码登录' }))
+    await user.click(screen.getByRole('button', { name: '登录' }))
 
     await waitFor(() => {
       expect(apiMocks.navigate).toHaveBeenCalledWith({
@@ -592,7 +627,7 @@ describe('LoginPage authorization flow', () => {
     await openPasswordTab(user)
     await user.type(screen.getByLabelText('邮箱'), 'admin@example.com')
     await user.type(screen.getByLabelText('密码'), 'secret')
-    await user.click(screen.getByRole('button', { name: '邮箱密码登录' }))
+    await user.click(screen.getByRole('button', { name: '登录' }))
 
     await waitFor(() => {
       expect(apiMocks.navigate).toHaveBeenCalledWith({
@@ -615,7 +650,7 @@ describe('LoginPage authorization flow', () => {
     await user.clear(emailInput)
     await user.type(emailInput, 'admin@example.com')
     await user.type(screen.getByLabelText('密码'), 'secret')
-    await user.click(screen.getByRole('button', { name: '邮箱密码登录' }))
+    await user.click(screen.getByRole('button', { name: '登录' }))
 
     // 密码登录 mutation 直接绑定 authApi.passwordLogin，react-query 会传入
     // 第二个 context 参数，因此与既有用例一样只断言第一个参数。

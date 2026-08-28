@@ -55,7 +55,15 @@ import { toast } from 'sonner'
 
 export const providerQueryKey = ['providers'] as const
 
-export function ProviderSection() {
+type ProviderSectionMode = 'all' | 'auth' | 'captcha'
+
+export function ProviderSection({
+  mode = 'all',
+  hideHeader = false,
+}: {
+  mode?: ProviderSectionMode
+  hideHeader?: boolean
+} = {}) {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
   const providers = useQuery({
@@ -82,6 +90,8 @@ export function ProviderSection() {
   const configuredCaptchaTypes = new Set(
     captchaProviders.map((provider) => readPublicString(provider, 'provider')),
   )
+  const showAuth = mode !== 'captcha'
+  const showCaptcha = mode !== 'auth'
 
   const invalidate = () =>
     void queryClient.invalidateQueries({ queryKey: providerQueryKey })
@@ -130,288 +140,328 @@ export function ProviderSection() {
 
   return (
     <div className="grid gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="m-0 text-base font-semibold">{t('providerTitle')}</p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={() => {
-            setCreating(true)
-          }}
-        >
-          <Plus />
-          {t('createLoginEntry')}
-        </Button>
-      </div>
-      {providers.isPending ? (
-        <p className="text-sm text-muted-foreground">{t('loadingProviders')}</p>
-      ) : providers.isError ? (
-        <p className="text-sm text-destructive">
-          {providers.error instanceof Error
-            ? providers.error.message
-            : t('providersLoadFailed')}
-        </p>
-      ) : authProviders.length ? (
-        <div className="grid gap-3">
-          {authProviders.map((provider) => (
-            <div
-              key={provider.provider_key}
-              className="flex items-center justify-between gap-3 rounded-md border px-3 py-3"
+      {showAuth ? (
+        <>
+          <div
+            className={
+              hideHeader
+                ? 'flex justify-end'
+                : 'flex items-center justify-between gap-4'
+            }
+          >
+            {!hideHeader ? (
+              <div>
+                <p className="m-0 text-base font-semibold">
+                  {t('providerTitle')}
+                </p>
+              </div>
+            ) : null}
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCreating(true)
+              }}
             >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
-                  <ProviderIcon
-                    providerKey={provider.provider_key}
-                    className="size-4 text-muted-foreground"
-                  />
+              <Plus />
+              {t('createLoginEntry')}
+            </Button>
+          </div>
+          {providers.isPending ? (
+            <p className="text-sm text-muted-foreground">
+              {t('loadingProviders')}
+            </p>
+          ) : providers.isError ? (
+            <p className="text-sm text-destructive">
+              {providers.error instanceof Error
+                ? providers.error.message
+                : t('providersLoadFailed')}
+            </p>
+          ) : authProviders.length ? (
+            <div className="grid gap-3">
+              {authProviders.map((provider) => (
+                <div
+                  key={provider.provider_key}
+                  className="flex items-center justify-between gap-3 rounded-md border px-3 py-3"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                      <ProviderIcon
+                        providerKey={provider.provider_key}
+                        className="size-4 text-muted-foreground"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="m-0 truncate text-sm font-medium">
+                        {presetLabel(t, provider.provider_key, provider.kind)}
+                      </p>
+                      <p className="m-0 truncate text-xs text-muted-foreground">
+                        {provider.configured
+                          ? t('configured')
+                          : t('unconfiguredSecret')}
+                        {provider.enabled
+                          ? ` · ${t('enabled')}`
+                          : ` · ${t('disabled')}`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Switch
+                      checked={provider.enabled ?? false}
+                      disabled={!provider.configured}
+                      aria-label={t('enableProvider', {
+                        key: provider.provider_key,
+                      })}
+                      title={
+                        provider.configured
+                          ? undefined
+                          : t('configureSecretHint')
+                      }
+                      onCheckedChange={() => toggle.mutate(provider)}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t('testProvider', {
+                        key: provider.provider_key,
+                      })}
+                      onClick={() => test.mutate(provider)}
+                    >
+                      <FlaskConical className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t('editProvider', {
+                        key: provider.provider_key,
+                      })}
+                      onClick={() => setEditing(provider)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t('deleteProvider', {
+                        key: provider.provider_key,
+                      })}
+                      onClick={() => setDeleting(provider)}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="m-0 truncate text-sm font-medium">
-                    {presetLabel(t, provider.provider_key, provider.kind)}
-                  </p>
-                  <p className="m-0 truncate text-xs text-muted-foreground">
-                    {provider.configured
-                      ? t('configured')
-                      : t('unconfiguredSecret')}
-                    {provider.enabled
-                      ? ` · ${t('enabled')}`
-                      : ` · ${t('disabled')}`}
-                  </p>
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <Switch
-                  checked={provider.enabled ?? false}
-                  disabled={!provider.configured}
-                  aria-label={t('enableProvider', {
-                    key: provider.provider_key,
-                  })}
-                  title={
-                    provider.configured ? undefined : t('configureSecretHint')
-                  }
-                  onCheckedChange={() => toggle.mutate(provider)}
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('testProvider', {
-                    key: provider.provider_key,
-                  })}
-                  onClick={() => test.mutate(provider)}
-                >
-                  <FlaskConical className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('editProvider', {
-                    key: provider.provider_key,
-                  })}
-                  onClick={() => setEditing(provider)}
-                >
-                  <Pencil className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('deleteProvider', {
-                    key: provider.provider_key,
-                  })}
-                  onClick={() => setDeleting(provider)}
-                >
-                  <Trash2 className="size-4 text-destructive" />
-                </Button>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-2 rounded-lg border border-dashed bg-muted/20 px-6 py-8 text-center">
-          <p className="m-0 text-sm font-medium">{t('noLoginEntries')}</p>
-          <p className="m-0 text-xs text-muted-foreground">
-            {t('noLoginEntriesHint')}
-          </p>
-        </div>
-      )}
-      {creating ? (
-        <ProviderFormDialog
-          title={t('createLoginEntryTitle')}
-          configuredKeys={configuredAuthKeys}
-          onClose={() => setCreating(false)}
-        />
-      ) : null}
-      {editing ? (
-        <ProviderFormDialog
-          title={t('editLoginEntryTitle')}
-          provider={editing}
-          onClose={() => setEditing(null)}
-        />
-      ) : null}
-      <AlertDialog
-        open={!!deleting}
-        onOpenChange={(value) => !value && setDeleting(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteLoginEntryTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {deleting
-                ? t('deleteLoginEntryHint', { key: deleting.provider_key })
-                : ''}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              {t('action.cancel', { ns: 'common' })}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={remove.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleting && remove.mutate(deleting)}
-            >
-              {remove.isPending ? <Loader2 className="animate-spin" /> : null}
-              {t('action.confirmDelete', { ns: 'common' })}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <div className="mt-2 flex items-center justify-between gap-4 border-t pt-5">
-        <div>
-          <p className="m-0 text-base font-semibold">
-            {t('captchaProviderTitle')}
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          disabled={captchaProviderTypes.every((option) =>
-            configuredCaptchaTypes.has(option.value),
+          ) : (
+            <div className="grid gap-2 rounded-lg border border-dashed bg-muted/20 px-6 py-8 text-center">
+              <p className="m-0 text-sm font-medium">{t('noLoginEntries')}</p>
+              <p className="m-0 text-xs text-muted-foreground">
+                {t('noLoginEntriesHint')}
+              </p>
+            </div>
           )}
-          title={
-            captchaProviderTypes.every((option) =>
-              configuredCaptchaTypes.has(option.value),
-            )
-              ? t('allCaptchaTypesConfigured')
-              : undefined
-          }
-          onClick={() => setCreatingCaptcha(true)}
-        >
-          <Plus />
-          {t('createCaptchaProvider')}
-        </Button>
-      </div>
-      {captchaProviders.length ? (
-        <div className="grid gap-3">
-          {captchaProviders.map((provider) => (
-            <div
-              key={provider.provider_key}
-              className="flex items-center justify-between gap-3 rounded-md border px-3 py-3"
+          {creating ? (
+            <ProviderFormDialog
+              title={t('createLoginEntryTitle')}
+              configuredKeys={configuredAuthKeys}
+              onClose={() => setCreating(false)}
+            />
+          ) : null}
+          {editing ? (
+            <ProviderFormDialog
+              title={t('editLoginEntryTitle')}
+              provider={editing}
+              onClose={() => setEditing(null)}
+            />
+          ) : null}
+          <AlertDialog
+            open={!!deleting}
+            onOpenChange={(value) => !value && setDeleting(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t('deleteLoginEntryTitle')}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {deleting
+                    ? t('deleteLoginEntryHint', { key: deleting.provider_key })
+                    : ''}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>
+                  {t('action.cancel', { ns: 'common' })}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={remove.isPending}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => deleting && remove.mutate(deleting)}
+                >
+                  {remove.isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : null}
+                  {t('action.confirmDelete', { ns: 'common' })}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
+      ) : null}
+
+      {showCaptcha ? (
+        <>
+          <div
+            className={
+              hideHeader
+                ? 'flex justify-end'
+                : 'mt-2 flex items-center justify-between gap-4 border-t pt-5'
+            }
+          >
+            {!hideHeader ? (
+              <div>
+                <p className="m-0 text-base font-semibold">
+                  {t('captchaProviderTitle')}
+                </p>
+              </div>
+            ) : null}
+            <Button
+              variant="outline"
+              disabled={captchaProviderTypes.every((option) =>
+                configuredCaptchaTypes.has(option.value),
+              )}
+              title={
+                captchaProviderTypes.every((option) =>
+                  configuredCaptchaTypes.has(option.value),
+                )
+                  ? t('allCaptchaTypesConfigured')
+                  : undefined
+              }
+              onClick={() => setCreatingCaptcha(true)}
             >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
-                  <ShieldCheck className="size-4 text-muted-foreground" />
+              <Plus />
+              {t('createCaptchaProvider')}
+            </Button>
+          </div>
+          {captchaProviders.length ? (
+            <div className="grid gap-3">
+              {captchaProviders.map((provider) => (
+                <div
+                  key={provider.provider_key}
+                  className="flex items-center justify-between gap-3 rounded-md border px-3 py-3"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                      <ShieldCheck className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="m-0 truncate text-sm font-medium">
+                        {captchaProviderLabel(provider)}
+                      </p>
+                      <p className="m-0 truncate text-xs text-muted-foreground">
+                        {provider.configured
+                          ? t('configured')
+                          : t('unconfiguredSecretKey')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t('testProvider', {
+                        key: provider.provider_key,
+                      })}
+                      onClick={() => test.mutate(provider)}
+                    >
+                      <FlaskConical className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t('editProvider', {
+                        key: provider.provider_key,
+                      })}
+                      onClick={() => setEditingCaptcha(provider)}
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t('deleteProvider', {
+                        key: provider.provider_key,
+                      })}
+                      onClick={() => setDeletingCaptcha(provider)}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="m-0 truncate text-sm font-medium">
-                    {captchaProviderLabel(provider)}
-                  </p>
-                  <p className="m-0 truncate text-xs text-muted-foreground">
-                    {provider.configured
-                      ? t('configured')
-                      : t('unconfiguredSecretKey')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('testProvider', {
-                    key: provider.provider_key,
-                  })}
-                  onClick={() => test.mutate(provider)}
-                >
-                  <FlaskConical className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('editProvider', {
-                    key: provider.provider_key,
-                  })}
-                  onClick={() => setEditingCaptcha(provider)}
-                >
-                  <Pencil className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('deleteProvider', {
-                    key: provider.provider_key,
-                  })}
-                  onClick={() => setDeletingCaptcha(provider)}
-                >
-                  <Trash2 className="size-4 text-destructive" />
-                </Button>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-2 rounded-lg border border-dashed bg-muted/20 px-6 py-8 text-center">
-          <p className="m-0 text-sm font-medium">{t('noCaptchaProviders')}</p>
-          <p className="m-0 text-xs text-muted-foreground">
-            {t('noCaptchaProvidersHint')}
-          </p>
-        </div>
-      )}
-      {creatingCaptcha ? (
-        <CaptchaProviderFormDialog
-          title={t('createCaptchaProviderTitle')}
-          configuredTypes={configuredCaptchaTypes}
-          onClose={() => setCreatingCaptcha(false)}
-        />
+          ) : (
+            <div className="grid gap-2 rounded-lg border border-dashed bg-muted/20 px-6 py-8 text-center">
+              <p className="m-0 text-sm font-medium">
+                {t('noCaptchaProviders')}
+              </p>
+              <p className="m-0 text-xs text-muted-foreground">
+                {t('noCaptchaProvidersHint')}
+              </p>
+            </div>
+          )}
+          {creatingCaptcha ? (
+            <CaptchaProviderFormDialog
+              title={t('createCaptchaProviderTitle')}
+              configuredTypes={configuredCaptchaTypes}
+              onClose={() => setCreatingCaptcha(false)}
+            />
+          ) : null}
+          {editingCaptcha ? (
+            <CaptchaProviderFormDialog
+              title={t('editCaptchaProviderTitle')}
+              provider={editingCaptcha}
+              onClose={() => setEditingCaptcha(null)}
+            />
+          ) : null}
+          <AlertDialog
+            open={!!deletingCaptcha}
+            onOpenChange={(value) => !value && setDeletingCaptcha(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t('deleteCaptchaProviderTitle')}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {deletingCaptcha
+                    ? t('deleteCaptchaProviderHint', {
+                        key: deletingCaptcha.provider_key,
+                      })
+                    : ''}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>
+                  {t('action.cancel', { ns: 'common' })}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={remove.isPending}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() =>
+                    deletingCaptcha && remove.mutate(deletingCaptcha)
+                  }
+                >
+                  {remove.isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : null}
+                  {t('action.confirmDelete', { ns: 'common' })}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       ) : null}
-      {editingCaptcha ? (
-        <CaptchaProviderFormDialog
-          title={t('editCaptchaProviderTitle')}
-          provider={editingCaptcha}
-          onClose={() => setEditingCaptcha(null)}
-        />
-      ) : null}
-      <AlertDialog
-        open={!!deletingCaptcha}
-        onOpenChange={(value) => !value && setDeletingCaptcha(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t('deleteCaptchaProviderTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {deletingCaptcha
-                ? t('deleteCaptchaProviderHint', {
-                    key: deletingCaptcha.provider_key,
-                  })
-                : ''}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              {t('action.cancel', { ns: 'common' })}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              disabled={remove.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deletingCaptcha && remove.mutate(deletingCaptcha)}
-            >
-              {remove.isPending ? <Loader2 className="animate-spin" /> : null}
-              {t('action.confirmDelete', { ns: 'common' })}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

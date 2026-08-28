@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -81,5 +87,27 @@ describe('OverviewPage comment trend', () => {
         expect.any(String),
       )
     })
+  })
+
+  it('keeps trend controls together on the right and removes the redundant hint', async () => {
+    renderOverview()
+    const trendTitle = await screen.findByText('评论趋势')
+    const header = trendTitle.closest('[data-slot="card-header"]')
+    expect(header).not.toBeNull()
+    const controls = within(header as HTMLElement).getByRole('group', {
+      name: '评论趋势时间范围',
+    })
+    expect(within(controls).getByLabelText('时区')).toBeInTheDocument()
+    expect(
+      within(controls).getByRole('button', { name: '近 7 天' }),
+    ).toBeInTheDocument()
+    expect(
+      within(controls).getByRole('button', { name: '近 30 天' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        '按创建日期查看全部评论数量，包含已审核与已删除评论。',
+      ),
+    ).not.toBeInTheDocument()
   })
 })

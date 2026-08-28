@@ -107,15 +107,10 @@ export function SpamProviderSection() {
 
   return (
     <div className="grid gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="m-0 text-base font-semibold">
-            {t('spamDetectionTitle')}
-          </p>
-          <p className="m-0 text-xs text-muted-foreground">
-            {t('spamDetectionHint')}
-          </p>
-        </div>
+      <div>
+        <p className="m-0 text-xs text-muted-foreground">
+          {t('spamDetectionHint')}
+        </p>
       </div>
       {providers.isPending ? (
         <p className="text-sm text-muted-foreground">{t('loadingProviders')}</p>
@@ -181,17 +176,6 @@ export function SpamProviderSection() {
                   </Button>
                 </div>
               </div>
-              {spec.key === 'spam.akismet' ? (
-                <p className="m-0 mt-2 flex items-start gap-2 rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                  <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
-                  {t('spamAkismetWarning')}
-                </p>
-              ) : null}
-              {spec.key === 'spam.aliyun' || spec.key === 'spam.tencent' ? (
-                <p className="m-0 mt-2 text-xs text-muted-foreground">
-                  {t('spamCloudBodyNotice')}
-                </p>
-              ) : null}
             </div>
           ))}
         </div>
