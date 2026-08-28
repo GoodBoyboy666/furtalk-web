@@ -24,7 +24,7 @@ import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +36,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { PageHeader } from '@/components/PageHeader'
-import { CardHeaderLead } from '@/components/CardHeaderLead'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -332,13 +331,20 @@ export function CommentDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="border-b border-border/60 pb-4">
-            <CardHeaderLead icon={MessageSquare}>
-              <CardTitle>{t('commentInfoTitle')}</CardTitle>
-            </CardHeaderLead>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-px overflow-hidden bg-border p-0 sm:grid-cols-2 lg:grid-cols-3">
+        <details className="group overflow-hidden rounded-xl bg-card text-sm ring-1 ring-foreground/10">
+          <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50 sm:px-5">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <MessageSquare aria-hidden="true" className="size-4.5" />
+            </span>
+            <span className="min-w-0 flex-1 font-medium">
+              {t('commentInfoTitle')}
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <div className="grid grid-cols-1 gap-px border-t border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
             <InfoCell label={t('commentId')} value={formatValue(item.id)} />
             <InfoCell label={t('userId')} value={formatValue(item.user_id)} />
             <InfoCell
@@ -378,8 +384,8 @@ export function CommentDetailPage() {
               label={t('deletedAt')}
               value={formatDateTime(item.deleted_at, dateTimeOptions)}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </details>
 
         <details className="group overflow-hidden rounded-xl bg-card text-sm ring-1 ring-foreground/10">
           <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50 sm:px-5">

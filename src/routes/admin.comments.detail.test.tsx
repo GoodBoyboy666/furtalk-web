@@ -255,14 +255,13 @@ describe('CommentDetailPage missing values', () => {
 })
 
 describe('CommentDetailPage responsive layout', () => {
-  it('lays the relationship card out in two columns on wider screens', async () => {
+  it('lays the comment information grid out responsively', async () => {
     renderDetail()
     await screen.findByText('hello world')
-    // “评论信息”卡片在桌面宽度下使用三栏网格，窄屏逐级回退。
-    const heading = screen.getByText('评论信息')
-    const card = heading.closest('[data-slot="card"]')
-    expect(card).not.toBeNull()
-    const grid = card?.querySelector('[data-slot="card-content"]')
+    // “评论信息”折叠内容在桌面宽度下使用三栏网格，窄屏逐级回退。
+    const details = screen.getByText('评论信息').closest('details')
+    expect(details).not.toBeNull()
+    const grid = details?.querySelector('div')
     expect(grid?.className).toContain('grid')
     expect(grid?.className).toContain('sm:grid-cols-2')
     expect(grid?.className).toContain('lg:grid-cols-3')
@@ -411,7 +410,20 @@ describe('CommentDetailPage body editing', () => {
   })
 })
 
-describe('CommentDetailPage technical disclosure', () => {
+describe('CommentDetailPage information disclosures', () => {
+  it('keeps comment information closed by default and toggles it natively', async () => {
+    const user = userEvent.setup()
+    renderDetail()
+    await screen.findByText('hello world')
+
+    const summary = screen.getByText('评论信息').closest('summary')
+    expect(summary).not.toBeNull()
+    const details = summary?.closest('details')
+    expect(details).not.toHaveAttribute('open')
+    await user.click(summary as HTMLElement)
+    expect(details).toHaveAttribute('open')
+  })
+
   it('is closed by default and toggles with the native summary control', async () => {
     const user = userEvent.setup()
     renderDetail()
