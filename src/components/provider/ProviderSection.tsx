@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   FlaskConical,
+  KeyRound,
   Loader2,
   Pencil,
   Plus,
@@ -47,6 +48,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { ProviderIcon } from './ProviderIcon'
+import { CardHeaderLead } from '@/components/CardHeaderLead'
 import {
   AUTH_PRESETS,
   CUSTOM_AUTH_PRESET,
@@ -147,9 +149,11 @@ export function ProviderSection({
       {showAuth ? (
         <>
           <CardHeader className="border-b border-border/60 pb-3">
-            <CardTitle className="text-base font-semibold">
-              {t('providerTitle')}
-            </CardTitle>
+            <CardHeaderLead icon={KeyRound}>
+              <CardTitle className="text-base font-semibold">
+                {t('providerTitle')}
+              </CardTitle>
+            </CardHeaderLead>
             <CardAction className="max-sm:col-start-1 max-sm:col-span-2 max-sm:row-start-2 max-sm:row-span-1 max-sm:justify-self-start">
               <Button
                 variant="outline"
@@ -312,9 +316,11 @@ export function ProviderSection({
       {showCaptcha ? (
         <>
           <CardHeader className="border-b border-border/60 pb-3">
-            <CardTitle className="text-base font-semibold">
-              {t('captchaProviderTitle')}
-            </CardTitle>
+            <CardHeaderLead icon={ShieldCheck}>
+              <CardTitle className="text-base font-semibold">
+                {t('captchaProviderTitle')}
+              </CardTitle>
+            </CardHeaderLead>
             <CardAction className="max-sm:col-start-1 max-sm:col-span-2 max-sm:row-start-2 max-sm:row-span-1 max-sm:justify-self-start">
               <Button
                 variant="outline"

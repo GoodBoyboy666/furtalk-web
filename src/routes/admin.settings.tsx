@@ -1,9 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Palette, Save } from 'lucide-react'
+import {
+  Bot,
+  FileText,
+  Mail,
+  MessageSquare,
+  Palette,
+  Save,
+  Send,
+  Shield,
+  ShieldAlert,
+  Users,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { CardHeaderLead } from '@/components/CardHeaderLead'
 import {
   Card,
   CardAction,
@@ -167,9 +179,11 @@ export function SettingsPage() {
       <div className="grid gap-6 xl:grid-cols-12">
         <Card className={`${settingsCardClassName} xl:col-span-7`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <CardTitle className={settingsCardTitleClassName}>
-              {t('legalSettingsTitle')}
-            </CardTitle>
+            <CardHeaderLead icon={FileText}>
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('legalSettingsTitle')}
+              </CardTitle>
+            </CardHeaderLead>
             <CardAction className="max-sm:col-start-1 max-sm:col-span-2 max-sm:row-start-2 max-sm:row-span-1 max-sm:justify-self-start">
               <AlertDialog>
                 <AlertDialogTrigger
@@ -243,9 +257,11 @@ export function SettingsPage() {
         </Card>
         <Card className={`${settingsCardClassName} xl:col-span-5`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <CardTitle className={settingsCardTitleClassName}>
-              {t('brandingSettingsTitle')}
-            </CardTitle>
+            <CardHeaderLead icon={Palette}>
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('brandingSettingsTitle')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
@@ -303,9 +319,11 @@ export function SettingsPage() {
         </Card>
         <Card className={`${settingsCardClassName} xl:col-span-7`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <CardTitle className={settingsCardTitleClassName}>
-              {t('commentPolicy')}
-            </CardTitle>
+            <CardHeaderLead icon={MessageSquare}>
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('commentPolicy')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
@@ -411,9 +429,11 @@ export function SettingsPage() {
         </Card>
         <Card className={`${settingsCardClassName} xl:col-span-5`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <CardTitle className={settingsCardTitleClassName}>
-              {t('usersAndNotifications')}
-            </CardTitle>
+            <CardHeaderLead icon={Users}>
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('usersAndNotifications')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-5">
             <SettingSwitch
@@ -474,9 +494,11 @@ export function SettingsPage() {
         </Card>
         <Card className={`${settingsCardClassName} xl:col-span-5`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <CardTitle className={settingsCardTitleClassName}>
-              {t('privacyRecording')}
-            </CardTitle>
+            <CardHeaderLead icon={Shield}>
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('privacyRecording')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
@@ -538,9 +560,11 @@ export function SettingsPage() {
         </Card>
         <Card className={`${settingsCardClassName} xl:col-span-7`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <CardTitle className={settingsCardTitleClassName}>
-              {t('emailAndAvatar')}
-            </CardTitle>
+            <CardHeaderLead icon={Mail}>
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('emailAndAvatar')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-5 sm:grid-cols-2">
@@ -594,9 +618,11 @@ export function SettingsPage() {
         </Card>
         <Card className={`${settingsCardClassName} xl:col-span-5`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <CardTitle className={settingsCardTitleClassName}>
-              {t('captchaPolicy')}
-            </CardTitle>
+            <CardHeaderLead icon={Bot}>
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('captchaPolicy')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-5">
             {captchaActions.map((action) => (
@@ -659,18 +685,20 @@ export function SettingsPage() {
         </Card>
         <Card className={`${settingsCardClassName} xl:col-span-7`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <div className="flex items-center gap-2">
-              <CardTitle className={settingsCardTitleClassName}>
-                {t('spamDetectionTitle')}
-              </CardTitle>
-              <SettingsHint
-                label={t('settingsHintLabel', {
-                  field: t('spamDetectionTitle'),
-                })}
-              >
-                {t('spamDetectionHint')}
-              </SettingsHint>
-            </div>
+            <CardHeaderLead icon={ShieldAlert}>
+              <div className="flex items-center gap-2">
+                <CardTitle className={settingsCardTitleClassName}>
+                  {t('spamDetectionTitle')}
+                </CardTitle>
+                <SettingsHint
+                  label={t('settingsHintLabel', {
+                    field: t('spamDetectionTitle'),
+                  })}
+                >
+                  {t('spamDetectionHint')}
+                </SettingsHint>
+              </div>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent>
             <SpamProviderSection />
@@ -678,9 +706,11 @@ export function SettingsPage() {
         </Card>
         <Card className={`${settingsCardClassName} xl:col-span-7`}>
           <CardHeader className={settingsCardHeaderClassName}>
-            <CardTitle className={settingsCardTitleClassName}>
-              {t('notificationChannelsTitle')}
-            </CardTitle>
+            <CardHeaderLead icon={Send}>
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('notificationChannelsTitle')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent>
             <NotificationProviderSection hideHeader />

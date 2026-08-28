@@ -131,6 +131,26 @@ describe('SettingsPage card layout', () => {
       ).not.toBeNull()
     }
   })
+
+  it('adds a decorative icon to each direct settings card header', async () => {
+    renderSettings()
+    await screen.findByText('系统设置')
+
+    for (const title of [
+      '协议',
+      '品牌',
+      '评论策略',
+      '用户与通知',
+      '隐私记录',
+      '邮箱与头像',
+      '人机验证策略',
+      '垃圾检测',
+      '多通道通知',
+    ]) {
+      const card = screen.getByText(title).closest('[data-slot="card"]')
+      expect(card?.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+    }
+  })
 })
 
 describe('SettingsPage helper cards', () => {

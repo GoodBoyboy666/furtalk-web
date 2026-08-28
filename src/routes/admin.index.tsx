@@ -3,6 +3,7 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
   ArrowUpRight,
+  Command,
   FileCheck2,
   Globe2,
   MessageSquare,
@@ -34,6 +35,7 @@ import {
   ComboboxTrigger,
 } from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
+import { CardHeaderLead } from '@/components/CardHeaderLead'
 import { PageHeader } from '@/components/PageHeader'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -50,6 +52,8 @@ import {
 import type { CommentTrendDays } from '@/lib/comment-trend'
 
 export const Route = createFileRoute('/admin/')({ component: OverviewPage })
+
+const commentTrendStateClassName = 'h-[220px] w-full'
 
 export function OverviewPage() {
   const { t, i18n } = useTranslation('admin')
@@ -141,14 +145,14 @@ export function OverviewPage() {
               <Link to={card.to} className="group block h-full no-underline">
                 <Card className="h-full subtle-card-hover border-border/80 bg-card">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-                        <Icon className="size-4.5" />
-                      </div>
+                    <CardHeaderLead
+                      icon={Icon}
+                      iconClassName="transition-colors group-hover:bg-primary/15"
+                    >
                       <CardTitle className="text-base font-semibold">
                         {card.label}
                       </CardTitle>
-                    </div>
+                    </CardHeaderLead>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold tracking-tight">
@@ -171,16 +175,11 @@ export function OverviewPage() {
       </Stagger>
       <Card className="mt-6 border-border/80">
         <CardHeader className="gap-4 border-b border-border/60 pb-4">
-          <div className="flex items-start gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <MessageSquare className="size-4.5" />
-            </div>
-            <div>
-              <CardTitle className="text-base font-semibold">
-                {t('commentTrendTitle')}
-              </CardTitle>
-            </div>
-          </div>
+          <CardHeaderLead icon={MessageSquare}>
+            <CardTitle className="text-base font-semibold">
+              {t('commentTrendTitle')}
+            </CardTitle>
+          </CardHeaderLead>
           <CardAction
             className="flex flex-wrap items-center justify-end gap-2 max-sm:col-start-1 max-sm:col-span-2 max-sm:row-start-2 max-sm:row-span-1 max-sm:justify-start"
             role="group"
@@ -241,9 +240,11 @@ export function OverviewPage() {
         </CardHeader>
         <CardContent className="grid gap-4 pt-4">
           {commentTrend.isPending ? (
-            <Skeleton className="min-h-[260px] w-full" />
+            <Skeleton className={commentTrendStateClassName} />
           ) : commentTrend.isError ? (
-            <div className="flex min-h-[260px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-destructive/40 bg-destructive/5 p-6 text-center text-sm text-destructive">
+            <div
+              className={`flex ${commentTrendStateClassName} flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-destructive/40 bg-destructive/5 p-6 text-center text-sm text-destructive`}
+            >
               <p className="m-0">{t('commentTrendLoadFailed')}</p>
               <Button
                 type="button"
@@ -254,14 +255,16 @@ export function OverviewPage() {
               </Button>
             </div>
           ) : chartData.every((point) => point.count === 0) ? (
-            <div className="flex min-h-[260px] flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/80 bg-muted/20 p-6 text-center text-sm text-muted-foreground">
+            <div
+              className={`flex ${commentTrendStateClassName} flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/80 bg-muted/20 p-6 text-center text-sm text-muted-foreground`}
+            >
               <MessageSquare className="size-5" />
               <p className="m-0">{t('commentTrendEmpty')}</p>
             </div>
           ) : (
             <ChartContainer
               config={chartConfig}
-              className="min-h-[260px] w-full"
+              className={`${commentTrendStateClassName} aspect-auto`}
             >
               <AreaChart
                 accessibilityLayer
@@ -312,11 +315,11 @@ export function OverviewPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <Card className="border-border/80">
           <CardHeader className="border-b border-border/60 pb-3">
-            <div>
+            <CardHeaderLead icon={FileCheck2}>
               <CardTitle className="text-base font-semibold">
                 {t('pendingQueueTitle')}
               </CardTitle>
-            </div>
+            </CardHeaderLead>
             <CardAction>
               <Link
                 to="/admin/comments"
@@ -369,9 +372,11 @@ export function OverviewPage() {
         </Card>
         <Card className="border-border/80">
           <CardHeader className="border-b border-border/60 pb-3">
-            <CardTitle className="text-base font-semibold">
-              {t('quickLinks')}
-            </CardTitle>
+            <CardHeaderLead icon={Command}>
+              <CardTitle className="text-base font-semibold">
+                {t('quickLinks')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-2">
             {[

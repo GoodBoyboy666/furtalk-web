@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Fingerprint,
   KeyRound,
+  Link2,
   Loader2,
   LogOut,
   Mail,
@@ -14,12 +15,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
+  CardAction,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { CardHeaderLead } from '@/components/CardHeaderLead'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -203,13 +206,15 @@ export function SecurityPage() {
       />
       <div className="grid gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {hasPassword ? t('changePassword') : t('setPassword')}
-            </CardTitle>
-            {hasPassword ? null : (
-              <CardDescription>{t('setPasswordHint')}</CardDescription>
-            )}
+          <CardHeader className="border-b border-border/60 pb-3">
+            <CardHeaderLead icon={KeyRound}>
+              <CardTitle className="text-base">
+                {hasPassword ? t('changePassword') : t('setPassword')}
+              </CardTitle>
+              {hasPassword ? null : (
+                <CardDescription>{t('setPasswordHint')}</CardDescription>
+              )}
+            </CardHeaderLead>
           </CardHeader>
           <CardContent>
             <form className="grid max-w-md gap-4" onSubmit={submitPassword}>
@@ -278,18 +283,20 @@ export function SecurityPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex-row items-center justify-between">
-            <div>
+          <CardHeader className="border-b border-border/60 pb-3">
+            <CardHeaderLead icon={Fingerprint}>
               <CardTitle className="text-base">{t('loginMethods')}</CardTitle>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => register.mutate()}
-              disabled={register.isPending}
-            >
-              <Fingerprint />
-              {t('addPasskey')}
-            </Button>
+            </CardHeaderLead>
+            <CardAction className="max-sm:col-start-1 max-sm:col-span-2 max-sm:row-start-2 max-sm:row-span-1 max-sm:justify-self-start">
+              <Button
+                variant="outline"
+                onClick={() => register.mutate()}
+                disabled={register.isPending}
+              >
+                <Fingerprint />
+                {t('addPasskey')}
+              </Button>
+            </CardAction>
           </CardHeader>
           <CardContent>
             {identities.isPending ? (
@@ -358,8 +365,12 @@ export function SecurityPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t('thirdPartyLogin')}</CardTitle>
+          <CardHeader className="border-b border-border/60 pb-3">
+            <CardHeaderLead icon={Link2}>
+              <CardTitle className="text-base">
+                {t('thirdPartyLogin')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-4">
             {identities.data?.identities.some(
@@ -443,9 +454,16 @@ export function SecurityPage() {
           </CardContent>
         </Card>
         <Card className="border-destructive/30">
-          <CardHeader>
-            <CardTitle className="text-base">{t('revokeSessions')}</CardTitle>
-            <CardDescription>{t('revokeSessionsDescription')}</CardDescription>
+          <CardHeader className="border-b border-border/60 pb-3">
+            <CardHeaderLead
+              icon={LogOut}
+              iconClassName="bg-destructive/10 text-destructive"
+            >
+              <CardTitle className="text-base">{t('revokeSessions')}</CardTitle>
+              <CardDescription>
+                {t('revokeSessionsDescription')}
+              </CardDescription>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-3">
             {revokeSessions.isError ? (

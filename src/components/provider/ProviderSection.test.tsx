@@ -50,6 +50,11 @@ describe('ProviderSection provider management contract', () => {
       name: '新建登录入口',
     })
     expect(authCreate.closest('[data-slot="card-action"]')).not.toBeNull()
+    expect(
+      authCreate
+        .closest('[data-slot="card-header"]')
+        ?.querySelector('svg[aria-hidden="true"]'),
+    ).not.toBeNull()
 
     cleanup()
     renderSection('captcha')
@@ -57,6 +62,11 @@ describe('ProviderSection provider management contract', () => {
       name: '新建验证码提供商',
     })
     expect(captchaCreate.closest('[data-slot="card-action"]')).not.toBeNull()
+    expect(
+      captchaCreate
+        .closest('[data-slot="card-header"]')
+        ?.querySelector('svg[aria-hidden="true"]'),
+    ).not.toBeNull()
   })
 
   it('can render auth and captcha management independently', async () => {

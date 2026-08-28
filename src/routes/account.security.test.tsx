@@ -94,6 +94,21 @@ afterEach(() => {
 })
 
 describe('SecurityPage passkey registration contract', () => {
+  it('uses decorative header icons and separators for every security card', async () => {
+    renderSecurity()
+    await screen.findByText('修改密码')
+
+    const cards = Array.from(document.querySelectorAll('[data-slot="card"]'))
+    expect(cards).toHaveLength(4)
+    for (const card of cards) {
+      expect(card.querySelector('[data-slot="card-header"]')).toHaveClass(
+        'border-b',
+        'border-border/60',
+      )
+      expect(card.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+    }
+  })
+
   it('passes the full top-level WebAuthn options to navigator.credentials.create', async () => {
     const envelope = {
       publicKey: {

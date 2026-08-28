@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Save } from 'lucide-react'
+import { Bell, Save, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { CardHeaderLead } from '@/components/CardHeaderLead'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -67,9 +68,11 @@ export function ProfilePage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-border/80 bg-card shadow-xs">
           <CardHeader className="border-b border-border/60 pb-3">
-            <CardTitle className="text-base font-semibold">
-              {t('basicInfo')}
-            </CardTitle>
+            <CardHeaderLead icon={UserRound}>
+              <CardTitle className="text-base font-semibold">
+                {t('basicInfo')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
@@ -105,9 +108,11 @@ export function ProfilePage() {
         </Card>
         <Card className="border-border/80 bg-card shadow-xs">
           <CardHeader className="border-b border-border/60 pb-3">
-            <CardTitle className="text-base font-semibold">
-              {t('notificationPreferences')}
-            </CardTitle>
+            <CardHeaderLead icon={Bell}>
+              <CardTitle className="text-base font-semibold">
+                {t('notificationPreferences')}
+              </CardTitle>
+            </CardHeaderLead>
           </CardHeader>
           <CardContent className="grid gap-4">
             <Preference

@@ -65,6 +65,44 @@ beforeEach(() => {
 })
 
 describe('OverviewPage comment trend', () => {
+  it('keeps fallback and populated trend states at the compact height', async () => {
+    renderOverview()
+    const emptyState = await screen.findByText('所选时间范围内暂无评论。')
+    expect(emptyState.parentElement).toHaveClass('h-[220px]', 'w-full')
+
+    cleanup()
+    apiMocks.commentsApi.trend.mockResolvedValueOnce({
+      ...trend(7),
+      points: [{ date: '2026-08-01', count: 1 }],
+    })
+    renderOverview()
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-slot="chart"]')).not.toBeNull()
+    })
+    expect(document.querySelector('[data-slot="chart"]')).toHaveClass(
+      'aspect-auto',
+      'h-[220px]',
+      'w-full',
+    )
+  })
+
+  it('adds decorative icons to the pending queue and quick links cards', async () => {
+    renderOverview()
+    const pendingCard = screen
+      .getAllByText('待审核评论')
+      .map((title) => title.closest('[data-slot="card"]'))
+      .find((card) => card?.querySelector('[data-slot="card-action"]'))
+    const quickLinksCard = screen
+      .getByText('快速入口')
+      .closest('[data-slot="card"]')
+
+    expect(pendingCard?.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+    expect(
+      quickLinksCard?.querySelector('svg[aria-hidden="true"]'),
+    ).not.toBeNull()
+  })
+
   it('uses the pending comment total instead of the preview row count', async () => {
     renderOverview()
     expect(await screen.findByText('9')).toBeInTheDocument()
