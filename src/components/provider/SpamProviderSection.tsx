@@ -107,11 +107,6 @@ export function SpamProviderSection() {
 
   return (
     <div className="grid gap-4">
-      <div>
-        <p className="m-0 text-xs text-muted-foreground">
-          {t('spamDetectionHint')}
-        </p>
-      </div>
       {providers.isPending ? (
         <p className="text-sm text-muted-foreground">{t('loadingProviders')}</p>
       ) : (

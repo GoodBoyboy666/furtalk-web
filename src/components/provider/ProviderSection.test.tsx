@@ -44,6 +44,21 @@ afterEach(() => {
 })
 
 describe('ProviderSection provider management contract', () => {
+  it('keeps create actions in card header action slots', async () => {
+    renderSection('auth')
+    const authCreate = await screen.findByRole('button', {
+      name: '新建登录入口',
+    })
+    expect(authCreate.closest('[data-slot="card-action"]')).not.toBeNull()
+
+    cleanup()
+    renderSection('captcha')
+    const captchaCreate = await screen.findByRole('button', {
+      name: '新建验证码提供商',
+    })
+    expect(captchaCreate.closest('[data-slot="card-action"]')).not.toBeNull()
+  })
+
   it('can render auth and captcha management independently', async () => {
     apiMocks.list.mockResolvedValue({
       providers: [

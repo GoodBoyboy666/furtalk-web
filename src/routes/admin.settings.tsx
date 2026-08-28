@@ -4,7 +4,13 @@ import { Palette, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
@@ -62,6 +68,10 @@ const captchaActions = [
   { key: 'password_reset', labelKey: 'forgotPasswordReset' },
   { key: 'comment', labelKey: 'postComment' },
 ] as const
+
+const settingsCardClassName = 'border-border/80 bg-card shadow-xs'
+const settingsCardHeaderClassName = 'border-b border-border/60 pb-3'
+const settingsCardTitleClassName = 'text-base font-semibold'
 
 // SettingsPage 是系统设置页，供测试直接使用。
 export function SettingsPage() {
@@ -155,39 +165,41 @@ export function SettingsPage() {
         }
       />
       <div className="grid gap-6 xl:grid-cols-12">
-        <Card className="xl:col-span-7">
-          <CardHeader className="flex-row flex-wrap items-center justify-between gap-4">
-            <CardTitle className="text-base">
+        <Card className={`${settingsCardClassName} xl:col-span-7`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <CardTitle className={settingsCardTitleClassName}>
               {t('legalSettingsTitle')}
             </CardTitle>
-            <AlertDialog>
-              <AlertDialogTrigger
-                render={<Button type="button" variant="outline" />}
-              >
-                {t('requireReconsentAction')}
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    {t('requireReconsentTitle')}
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t('requireReconsentDescription')}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>
-                    {t('cancel', { ns: 'common' })}
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    disabled={resetConsent.isPending}
-                    onClick={() => resetConsent.mutate()}
-                  >
-                    {t('requireReconsentAction')}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <CardAction className="max-sm:col-start-1 max-sm:col-span-2 max-sm:row-start-2 max-sm:row-span-1 max-sm:justify-self-start">
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={<Button type="button" variant="outline" />}
+                >
+                  {t('requireReconsentAction')}
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t('requireReconsentTitle')}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('requireReconsentDescription')}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>
+                      {t('cancel', { ns: 'common' })}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      disabled={resetConsent.isPending}
+                      onClick={() => resetConsent.mutate()}
+                    >
+                      {t('requireReconsentAction')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </CardAction>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
@@ -229,9 +241,9 @@ export function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="xl:col-span-5">
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className={`${settingsCardClassName} xl:col-span-5`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <CardTitle className={settingsCardTitleClassName}>
               {t('brandingSettingsTitle')}
             </CardTitle>
           </CardHeader>
@@ -289,9 +301,11 @@ export function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="xl:col-span-7">
-          <CardHeader>
-            <CardTitle className="text-base">{t('commentPolicy')}</CardTitle>
+        <Card className={`${settingsCardClassName} xl:col-span-7`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <CardTitle className={settingsCardTitleClassName}>
+              {t('commentPolicy')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
@@ -395,9 +409,9 @@ export function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="xl:col-span-5">
-          <CardHeader>
-            <CardTitle className="text-base">
+        <Card className={`${settingsCardClassName} xl:col-span-5`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <CardTitle className={settingsCardTitleClassName}>
               {t('usersAndNotifications')}
             </CardTitle>
           </CardHeader>
@@ -458,9 +472,11 @@ export function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="xl:col-span-5">
-          <CardHeader>
-            <CardTitle className="text-base">{t('privacyRecording')}</CardTitle>
+        <Card className={`${settingsCardClassName} xl:col-span-5`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <CardTitle className={settingsCardTitleClassName}>
+              {t('privacyRecording')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-2">
@@ -520,9 +536,11 @@ export function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="xl:col-span-7">
-          <CardHeader>
-            <CardTitle className="text-base">{t('emailAndAvatar')}</CardTitle>
+        <Card className={`${settingsCardClassName} xl:col-span-7`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <CardTitle className={settingsCardTitleClassName}>
+              {t('emailAndAvatar')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-5">
             <div className="grid gap-5 sm:grid-cols-2">
@@ -574,9 +592,11 @@ export function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="xl:col-span-5">
-          <CardHeader>
-            <CardTitle className="text-base">{t('captchaPolicy')}</CardTitle>
+        <Card className={`${settingsCardClassName} xl:col-span-5`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <CardTitle className={settingsCardTitleClassName}>
+              {t('captchaPolicy')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-5">
             {captchaActions.map((action) => (
@@ -631,37 +651,39 @@ export function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="xl:col-span-7">
-          <CardHeader>
-            <CardTitle className="text-base">{t('thirdPartyLogin')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProviderSection mode="auth" hideHeader />
-          </CardContent>
+        <Card className={`${settingsCardClassName} xl:col-span-7`}>
+          <ProviderSection mode="auth" />
         </Card>
-        <Card className="xl:col-span-5">
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t('captchaProviderTitle')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProviderSection mode="captcha" hideHeader />
-          </CardContent>
+        <Card className={`${settingsCardClassName} xl:col-span-5`}>
+          <ProviderSection mode="captcha" />
         </Card>
-        <Card className="xl:col-span-7">
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t('spamDetectionTitle')}
-            </CardTitle>
+        <Card className={`${settingsCardClassName} xl:col-span-7`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <div className="flex items-center gap-2">
+              <CardTitle className={settingsCardTitleClassName}>
+                {t('spamDetectionTitle')}
+              </CardTitle>
+              <SettingsHint
+                label={t('settingsHintLabel', {
+                  field: t('spamDetectionTitle'),
+                })}
+              >
+                {t('spamDetectionHint')}
+              </SettingsHint>
+            </div>
           </CardHeader>
           <CardContent>
             <SpamProviderSection />
           </CardContent>
         </Card>
-        <Card className="xl:col-span-7">
+        <Card className={`${settingsCardClassName} xl:col-span-7`}>
+          <CardHeader className={settingsCardHeaderClassName}>
+            <CardTitle className={settingsCardTitleClassName}>
+              {t('notificationChannelsTitle')}
+            </CardTitle>
+          </CardHeader>
           <CardContent>
-            <NotificationProviderSection />
+            <NotificationProviderSection hideHeader />
           </CardContent>
         </Card>
       </div>

@@ -441,6 +441,12 @@ export function LoginPage() {
                   <div className="grid gap-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password">{t('password')}</Label>
+                      <Link
+                        to="/reset-password"
+                        className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+                      >
+                        {t('forgotPassword')}
+                      </Link>
                     </div>
                     <div className="relative">
                       <KeyRound className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground" />
@@ -454,14 +460,6 @@ export function LoginPage() {
                         onChange={(event) => setPassword(event.target.value)}
                         required
                       />
-                    </div>
-                    <div className="flex justify-end">
-                      <Link
-                        to="/reset-password"
-                        className="text-xs text-muted-foreground underline-offset-4 hover:underline"
-                      >
-                        {t('forgotPassword')}
-                      </Link>
                     </div>
                   </div>
                   <LegalConsentRow
@@ -596,7 +594,7 @@ function LegalConsentRow({
   if (links.length === 0) return null
 
   return (
-    <div className="flex items-start gap-2 rounded-md border border-border/70 bg-muted/30 p-3 text-xs">
+    <div className="flex items-start gap-2 text-xs">
       <Checkbox
         id={id}
         checked={accepted}

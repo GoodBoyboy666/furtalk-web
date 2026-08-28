@@ -253,7 +253,11 @@ function readString(provider: Provider | undefined, field: string) {
   return typeof value === 'string' ? value : ''
 }
 
-export function NotificationProviderSection() {
+export function NotificationProviderSection({
+  hideHeader = false,
+}: {
+  hideHeader?: boolean
+} = {}) {
   const { t } = useTranslation('admin')
   const queryClient = useQueryClient()
   const providers = useQuery({
@@ -326,16 +330,13 @@ export function NotificationProviderSection() {
 
   return (
     <div className="grid gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="min-w-0">
+      {!hideHeader ? (
+        <div className="flex items-center justify-between gap-4">
           <p className="m-0 text-base font-semibold">
             {t('notificationChannelsTitle')}
           </p>
-          <p className="m-0 text-xs text-muted-foreground">
-            {t('notificationChannelsHint')}
-          </p>
         </div>
-      </div>
+      ) : null}
       {providers.isPending ? (
         <p className="text-sm text-muted-foreground">{t('loadingProviders')}</p>
       ) : providers.isError ? (

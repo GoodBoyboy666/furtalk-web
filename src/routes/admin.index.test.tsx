@@ -2,6 +2,7 @@
 
 import {
   cleanup,
+  fireEvent,
   render,
   screen,
   waitFor,
@@ -97,6 +98,7 @@ describe('OverviewPage comment trend', () => {
     const controls = within(header as HTMLElement).getByRole('group', {
       name: '评论趋势时间范围',
     })
+    expect(controls.closest('[data-slot="card-action"]')).not.toBeNull()
     expect(within(controls).getByLabelText('时区')).toBeInTheDocument()
     expect(
       within(controls).getByRole('button', { name: '近 7 天' }),
@@ -109,5 +111,42 @@ describe('OverviewPage comment trend', () => {
         '按创建日期查看全部评论数量，包含已审核与已删除评论。',
       ),
     ).not.toBeInTheDocument()
+  })
+
+  it('allows a valid IANA timezone to be typed and persisted', async () => {
+    renderOverview()
+    const user = userEvent.setup()
+    const input = screen.getByLabelText('时区')
+
+    await user.clear(input)
+    await user.type(input, 'Pacific/Auckland')
+    fireEvent.blur(input)
+
+    await waitFor(() => {
+      expect(input).toHaveValue('Pacific/Auckland')
+      expect(
+        window.localStorage.getItem('furtalk:admin-comment-trend-timezone'),
+      ).toBe('Pacific/Auckland')
+      expect(apiMocks.commentsApi.trend).toHaveBeenLastCalledWith(
+        7,
+        'Pacific/Auckland',
+      )
+    })
+  })
+
+  it('restores the last valid timezone after an invalid edit', async () => {
+    renderOverview()
+    const user = userEvent.setup()
+    const input = screen.getByLabelText('时区')
+    const initialTimezone = (input as HTMLInputElement).value
+
+    await user.clear(input)
+    await user.type(input, 'Not/AZone')
+    fireEvent.blur(input)
+
+    expect(input).toHaveValue(initialTimezone)
+    expect(
+      window.localStorage.getItem('furtalk:admin-comment-trend-timezone'),
+    ).toBe(null)
   })
 })

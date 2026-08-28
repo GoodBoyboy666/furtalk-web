@@ -222,7 +222,14 @@ describe('LoginPage default login method', () => {
     const user = userEvent.setup()
     await openPasswordTab(user)
     expect(screen.getByLabelText('密码')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '忘记密码？' })).toBeInTheDocument()
+    const passwordLabel = screen.getByText('密码', { selector: 'label' })
+    const forgotPassword = screen.getByRole('link', { name: '忘记密码？' })
+    expect(forgotPassword).toBeInTheDocument()
+    expect(
+      passwordLabel.compareDocumentPosition(forgotPassword) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(forgotPassword.parentElement).toContainElement(passwordLabel)
   })
 
   it('places legal consent immediately above each tab primary action', async () => {
@@ -252,6 +259,9 @@ describe('LoginPage default login method', () => {
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
     expect(screen.getAllByRole('checkbox')).toHaveLength(1)
+    expect(
+      screen.getByRole('checkbox', { name: /我已阅读并同意/ }).closest('div'),
+    ).not.toHaveClass('rounded-md', 'border', 'bg-muted/30', 'p-3')
   })
 })
 

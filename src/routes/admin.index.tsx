@@ -17,8 +17,22 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxInputGroup,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from '@/components/ui/combobox'
 import { Label } from '@/components/ui/label'
 import { PageHeader } from '@/components/PageHeader'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -96,14 +110,22 @@ export function OverviewPage() {
 
   function updateTimezoneInput(value: string) {
     setTimezoneInput(value)
-    if (isValidTimeZone(value)) {
-      setTimezone(value)
-      persistCommentTrendTimeZone(value)
-    }
   }
 
-  function commitTimezoneInput() {
-    if (!isValidTimeZone(timezoneInput)) {
+  function commitTimezoneInput(value = timezoneInput) {
+    if (!isValidTimeZone(value)) {
+      setTimezoneInput(timezone)
+      return
+    }
+    setTimezone(value)
+    setTimezoneInput(value)
+    persistCommentTrendTimeZone(value)
+  }
+
+  function handleTimezoneValueChange(value: string | null) {
+    if (typeof value === 'string') {
+      commitTimezoneInput(value)
+    } else {
       setTimezoneInput(timezone)
     }
   }
@@ -118,12 +140,14 @@ export function OverviewPage() {
             <StaggerItem key={card.label} className="h-full">
               <Link to={card.to} className="group block h-full no-underline">
                 <Card className="h-full subtle-card-hover border-border/80 bg-card">
-                  <CardHeader className="flex-row items-center justify-between pb-3">
-                    <CardTitle className="text-base font-semibold">
-                      {card.label}
-                    </CardTitle>
-                    <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-                      <Icon className="size-4.5" />
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+                        <Icon className="size-4.5" />
+                      </div>
+                      <CardTitle className="text-base font-semibold">
+                        {card.label}
+                      </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -146,7 +170,7 @@ export function OverviewPage() {
         })}
       </Stagger>
       <Card className="mt-6 border-border/80">
-        <CardHeader className="gap-4 border-b border-border/60 pb-4 lg:flex-row lg:items-center lg:justify-between">
+        <CardHeader className="gap-4 border-b border-border/60 pb-4">
           <div className="flex items-start gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <MessageSquare className="size-4.5" />
@@ -157,8 +181,8 @@ export function OverviewPage() {
               </CardTitle>
             </div>
           </div>
-          <div
-            className="flex flex-wrap items-center justify-end gap-2"
+          <CardAction
+            className="flex flex-wrap items-center justify-end gap-2 max-sm:col-start-1 max-sm:col-span-2 max-sm:row-start-2 max-sm:row-span-1 max-sm:justify-start"
             role="group"
             aria-label={t('commentTrendRange')}
           >
@@ -169,22 +193,38 @@ export function OverviewPage() {
               >
                 {t('commentTrendTimezone')}
               </Label>
-              <Input
-                id="comment-trend-timezone"
-                list="comment-trend-timezones"
-                value={timezoneInput}
-                onChange={(event) => updateTimezoneInput(event.target.value)}
-                onBlur={commitTimezoneInput}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') commitTimezoneInput()
-                }}
-                className="w-36 font-mono text-xs sm:w-44"
-              />
-              <datalist id="comment-trend-timezones">
-                {timezoneOptions.map((option) => (
-                  <option key={option} value={option} />
-                ))}
-              </datalist>
+              <Combobox
+                items={timezoneOptions}
+                value={timezone}
+                inputValue={timezoneInput}
+                onInputValueChange={updateTimezoneInput}
+                onValueChange={handleTimezoneValueChange}
+              >
+                <ComboboxInputGroup className="w-36 sm:w-44">
+                  <ComboboxInput
+                    id="comment-trend-timezone"
+                    onBlur={(event) =>
+                      commitTimezoneInput(event.currentTarget.value)
+                    }
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        commitTimezoneInput(event.currentTarget.value)
+                      }
+                    }}
+                    className="font-mono text-xs"
+                  />
+                  <ComboboxTrigger />
+                </ComboboxInputGroup>
+                <ComboboxContent>
+                  <ComboboxList>
+                    {(option: string, index: number) => (
+                      <ComboboxItem key={option} value={option} index={index}>
+                        {option}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
             </div>
             {commentTrendDays.map((days) => (
               <Button
@@ -197,7 +237,7 @@ export function OverviewPage() {
                 {t(days === 7 ? 'last7Days' : 'last30Days')}
               </Button>
             ))}
-          </div>
+          </CardAction>
         </CardHeader>
         <CardContent className="grid gap-4 pt-4">
           {commentTrend.isPending ? (
@@ -271,21 +311,20 @@ export function OverviewPage() {
       </Card>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <Card className="border-border/80">
-          <CardHeader className="flex-row items-center justify-between border-b border-border/60 pb-3">
+          <CardHeader className="border-b border-border/60 pb-3">
             <div>
               <CardTitle className="text-base font-semibold">
                 {t('pendingQueueTitle')}
               </CardTitle>
-              <p className="mt-0.5 mb-0 text-xs text-muted-foreground">
-                {t('pendingQueueHint')}
-              </p>
             </div>
-            <Link
-              to="/admin/comments"
-              className="text-xs font-medium text-primary no-underline hover:underline"
-            >
-              {t('viewAll')}
-            </Link>
+            <CardAction>
+              <Link
+                to="/admin/comments"
+                className="text-xs font-medium text-primary no-underline hover:underline"
+              >
+                {t('viewAll')}
+              </Link>
+            </CardAction>
           </CardHeader>
           <CardContent>
             {comments.isError ? (

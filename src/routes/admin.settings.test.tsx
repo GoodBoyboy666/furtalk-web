@@ -25,7 +25,9 @@ vi.mock('@/lib/api/resources', () => ({
   providersApi: apiMocks.providersApi,
 }))
 vi.mock('@/components/provider/ProviderSection', () => ({
-  ProviderSection: () => null,
+  ProviderSection: ({ mode }: { mode: 'auth' | 'captcha' }) => (
+    <span>{mode === 'auth' ? '第三方登录' : '人机验证提供商'}</span>
+  ),
   captchaProviderTypeLabel: (value: string | null | undefined) => value ?? '',
 }))
 vi.mock('sonner', () => ({
@@ -188,9 +190,9 @@ describe('SettingsPage helper cards', () => {
     renderSettings()
     await screen.findByText('系统设置')
 
-    expect(
-      screen.getByRole('button', { name: '要求重新同意' }),
-    ).toBeInTheDocument()
+    const reconsent = screen.getByRole('button', { name: '要求重新同意' })
+    expect(reconsent).toBeInTheDocument()
+    expect(reconsent.closest('[data-slot="card-action"]')).not.toBeNull()
     expect(
       screen.queryByText(/以上精度只作用于之后新建的评论/),
     ).not.toBeInTheDocument()
