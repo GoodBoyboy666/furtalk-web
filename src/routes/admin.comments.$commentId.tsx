@@ -2,16 +2,27 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft,
+  CalendarClock,
   Check,
+  ChevronDown,
   Clock,
+  Globe2,
   Loader2,
+  Mail,
+  MessageSquare,
+  Monitor,
+  MoreHorizontal,
+  Pencil,
   Pin,
   ShieldAlert,
   Trash2,
+  UserRound,
+  X,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,6 +37,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { PageHeader } from '@/components/PageHeader'
+import { CardHeaderLead } from '@/components/CardHeaderLead'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { StatusBadge } from '@/components/StatusBadge'
 import { StateFade } from '@/components/motion'
 import { UserAvatar, initialsFrom } from '@/components/UserAvatar'
@@ -50,13 +69,13 @@ const PLACEHOLDER = '-'
 function targetIcon(target: CommentStatusTarget) {
   switch (target) {
     case 'pending':
-      return <Clock />
+      return <Clock aria-hidden="true" />
     case 'published':
-      return <Check />
+      return <Check aria-hidden="true" />
     case 'spam':
-      return <ShieldAlert />
+      return <ShieldAlert aria-hidden="true" />
     default:
-      return <Trash2 />
+      return <Trash2 aria-hidden="true" />
   }
 }
 
@@ -70,11 +89,14 @@ export function CommentDetailPage() {
     queryFn: () => commentsApi.get(commentId),
   })
   const [body, setBody] = useState<string | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const update = useMutation({
     mutationFn: () => commentsApi.update(commentId, body ?? ''),
     onSuccess: () => {
       toast.success(t('commentUpdated'))
+      setBody(null)
+      setIsEditing(false)
       void queryClient.invalidateQueries({ queryKey: ['comment', commentId] })
       void queryClient.invalidateQueries({ queryKey: ['comments'] })
     },
@@ -121,6 +143,16 @@ export function CommentDetailPage() {
       </StateFade>
     )
   const item = comment.data
+  const isBodyChanged = isEditing && body !== null && body !== item.body
+  const displayName =
+    item.author_nickname || item.author_email || t('anonymous')
+  const dateTimeOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }
   return (
     <>
       <Link
@@ -135,201 +167,273 @@ export function CommentDetailPage() {
         description={t('commentNumber', { id: item.id })}
         action={<StatusBadge value={item.status} />}
       />
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <Card className="self-start">
-          <CardHeader>
-            <CardTitle className="text-base">{t('body')}</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <Textarea
-              value={body ?? item.body}
-              onChange={(event) => setBody(event.target.value)}
-              rows={10}
-              className="resize-y"
-            />
-            <div className="flex justify-end">
-              <Button
-                onClick={() => update.mutate()}
-                disabled={
-                  update.isPending || body === null || body === item.body
-                }
-              >
-                {update.isPending ? <Loader2 className="animate-spin" /> : null}
-                {t('saveChanges')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        <div className="grid content-start gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                {t('authorInformation')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm">
-              <div className="flex items-center gap-3">
-                <UserAvatar
-                  avatarUrl={item.avatar_url}
-                  name={item.author_nickname || item.author_email}
-                  fallback={initialsFrom(
-                    item.author_nickname,
-                    item.author_email,
-                  )}
-                  className="size-10 shrink-0"
-                />
-                <div className="min-w-0">
-                  <p className="m-0 font-medium">
-                    {item.author_nickname || t('anonymous')}
-                  </p>
-                  <p className="m-0 truncate text-xs text-muted-foreground">
-                    {t('userNumber', { id: item.user_id })}
-                  </p>
+      <div className="grid gap-5">
+        <Card>
+          <CardHeader className="gap-5 border-b border-border/60 pb-5">
+            <div className="flex min-w-0 flex-wrap items-start gap-4">
+              <UserAvatar
+                avatarUrl={item.avatar_url}
+                name={displayName}
+                fallback={initialsFrom(item.author_nickname, item.author_email)}
+                className="size-12 shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="m-0 text-base font-semibold">{displayName}</p>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    {t('userNumber', { id: formatValue(item.user_id) })}
+                  </span>
+                </div>
+                <div className="mt-3 grid min-w-0 gap-x-5 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                  <Info
+                    icon={Mail}
+                    label={t('email')}
+                    value={formatValue(item.author_email)}
+                  />
+                  <Info
+                    icon={Globe2}
+                    label={t('website')}
+                    value={formatValue(item.author_website)}
+                  />
+                  <Info
+                    icon={CalendarClock}
+                    label={t('createdAt')}
+                    value={formatDateTime(item.created_at, dateTimeOptions)}
+                  />
+                  <Info
+                    icon={UserRound}
+                    label={t('userId')}
+                    value={formatValue(item.user_id)}
+                  />
+                  <Info
+                    label={t('nickname')}
+                    value={formatValue(item.author_nickname)}
+                  />
                 </div>
               </div>
-              <Info label={t('userId')} value={formatValue(item.user_id)} />
+            </div>
+            <div className="grid min-w-0 gap-x-5 gap-y-2 text-sm sm:grid-cols-2">
               <Info
-                label={t('nickname')}
-                value={formatValue(item.author_nickname)}
-              />
-              <Info label={t('email')} value={formatValue(item.author_email)} />
-              <Info
-                label={t('website')}
-                value={formatValue(item.author_website)}
-              />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                {t('relationsAndIds')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
-              <Info label={t('commentId')} value={formatValue(item.id)} />
-              <Info label={t('siteId')} value={formatValue(item.site_id)} />
-              <Info label={t('threadId')} value={formatValue(item.thread_id)} />
-              <Info label={t('parentId')} value={formatValue(item.parent_id)} />
-              <Info label={t('rootId')} value={formatValue(item.root_id)} />
-              <Info label={t('depth')} value={String(item.depth)} />
-              <Info
-                label={t('replyToUserId')}
-                value={formatValue(item.reply_to_user_id)}
+                label={t('ipValue')}
+                value={summaryValue(item.ip_mode, ipValueText(item, t), t)}
               />
               <Info
-                label={t('replyToNickname')}
-                value={formatValue(item.reply_to_nickname)}
+                label={t('uaValue')}
+                value={summaryValue(item.ua_mode, uaValueText(item, t), t)}
               />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{t('requestInfo')}</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm">
-              <Info
-                label={t('ipMode')}
-                value={privacyModeLabel(item.ip_mode, t)}
-              />
-              <Info label={t('ipValue')} value={ipValueText(item, t)} />
-              <Info
-                label={t('uaMode')}
-                value={privacyModeLabel(item.ua_mode, t)}
-              />
-              <Info label={t('uaValue')} value={uaValueText(item, t)} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{t('lifecycle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm">
-              <Info
-                label={t('status')}
-                value={<StatusBadge value={item.status} />}
-              />
-              <Info
-                label={t('pinStatus')}
-                value={
-                  item.is_pinned ? t('commentPinned') : t('commentNotPinned')
-                }
-              />
-              <Info
-                label={t('createdAt')}
-                value={formatDateTime(item.created_at, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              />
-              <Info
-                label={t('publishedAt')}
-                value={formatDateTime(item.published_at, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              />
-              <Info
-                label={t('deletedAt')}
-                value={formatDateTime(item.deleted_at, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">{t('statusActions')}</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-2">
-              {item.parent_id === null &&
-              (item.is_pinned || item.status === 'published') ? (
-                <Button
-                  variant="outline"
-                  disabled={pinAction.isPending}
-                  onClick={() => pinAction.mutate(!item.is_pinned)}
-                >
-                  {pinAction.isPending ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    <Pin />
-                  )}
-                  {item.is_pinned ? t('unpinComment') : t('pinComment')}
-                </Button>
-              ) : null}
-              {otherCommentStatusTargets(item.status).map((target) => (
-                <Button
-                  key={target.value}
-                  variant="outline"
-                  disabled={action.isPending}
-                  onClick={() => {
-                    if (target.value === 'deleted') {
-                      setConfirmDelete(true)
-                      return
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-3 pt-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="m-0 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                {t('body')}
+              </p>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {!isEditing ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setBody(item.body)
+                      setIsEditing(true)
+                    }}
+                  >
+                    <Pencil aria-hidden="true" />
+                    {t('edit')}
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => update.mutate()}
+                      disabled={update.isPending || !isBodyChanged}
+                    >
+                      {update.isPending ? (
+                        <Loader2 aria-hidden="true" className="animate-spin" />
+                      ) : (
+                        <Check aria-hidden="true" />
+                      )}
+                      {t('saveChanges')}
+                    </Button>
+                  </>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        aria-label={t('commentActions')}
+                      >
+                        <MoreHorizontal aria-hidden="true" />
+                        {t('commentActions')}
+                      </Button>
                     }
-                    action.mutate(commentStatusAction(target.value))
-                  }}
-                >
-                  {targetIcon(target.value)}
-                  {t(target.key)}
-                </Button>
-              ))}
-              <Button variant="destructive" disabled>
-                <Trash2 />
-                {t('permanentDeleteFromList')}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+                  />
+                  <DropdownMenuContent align="end">
+                    {item.parent_id === null &&
+                    (item.is_pinned || item.status === 'published') ? (
+                      <DropdownMenuItem
+                        disabled={pinAction.isPending}
+                        onClick={() => pinAction.mutate(!item.is_pinned)}
+                      >
+                        {pinAction.isPending ? (
+                          <Loader2
+                            aria-hidden="true"
+                            className="animate-spin"
+                          />
+                        ) : (
+                          <Pin aria-hidden="true" />
+                        )}
+                        {item.is_pinned ? t('unpinComment') : t('pinComment')}
+                      </DropdownMenuItem>
+                    ) : null}
+                    {item.parent_id === null &&
+                    (item.is_pinned || item.status === 'published') ? (
+                      <DropdownMenuSeparator />
+                    ) : null}
+                    {otherCommentStatusTargets(item.status).map((target) => (
+                      <DropdownMenuItem
+                        key={target.value}
+                        variant={
+                          target.value === 'deleted' ? 'destructive' : 'default'
+                        }
+                        disabled={action.isPending}
+                        onClick={() => {
+                          if (target.value === 'deleted') {
+                            setConfirmDelete(true)
+                            return
+                          }
+                          action.mutate(commentStatusAction(target.value))
+                        }}
+                      >
+                        {targetIcon(target.value)}
+                        {target.value === 'deleted'
+                          ? t('action.delete', { ns: 'common' })
+                          : target.value === 'spam'
+                            ? t('markCommentSpam')
+                            : t(target.key)}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {isEditing ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setBody(null)
+                      setIsEditing(false)
+                    }}
+                  >
+                    <X aria-hidden="true" />
+                    {t('action.cancel', { ns: 'common' })}
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+            {isEditing ? (
+              <Textarea
+                id="comment-body"
+                aria-label={t('body')}
+                value={body ?? ''}
+                onChange={(event) => setBody(event.target.value)}
+                rows={8}
+                className="resize-y"
+              />
+            ) : (
+              <p className="m-0 min-w-0 whitespace-pre-wrap break-words text-[0.95rem] leading-7 [overflow-wrap:anywhere]">
+                {item.body || PLACEHOLDER}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="border-b border-border/60 pb-4">
+            <CardHeaderLead icon={MessageSquare}>
+              <CardTitle>{t('commentInfoTitle')}</CardTitle>
+            </CardHeaderLead>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-px overflow-hidden bg-border p-0 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoCell label={t('commentId')} value={formatValue(item.id)} />
+            <InfoCell label={t('userId')} value={formatValue(item.user_id)} />
+            <InfoCell
+              label={t('replyToUserId')}
+              value={formatValue(item.reply_to_user_id)}
+            />
+            <InfoCell
+              label={t('replyToNickname')}
+              value={formatValue(item.reply_to_nickname)}
+            />
+            <InfoCell
+              label={t('parentId')}
+              value={formatValue(item.parent_id)}
+            />
+            <InfoCell label={t('rootId')} value={formatValue(item.root_id)} />
+            <InfoCell label={t('depth')} value={String(item.depth)} />
+            <InfoCell
+              label={t('threadId')}
+              value={formatValue(item.thread_id)}
+            />
+            <InfoCell label={t('siteId')} value={formatValue(item.site_id)} />
+            <InfoCell
+              label={t('pinStatus')}
+              value={
+                item.is_pinned ? t('commentPinned') : t('commentNotPinned')
+              }
+            />
+            <InfoCell
+              label={t('createdAt')}
+              value={formatDateTime(item.created_at, dateTimeOptions)}
+            />
+            <InfoCell
+              label={t('publishedAt')}
+              value={formatDateTime(item.published_at, dateTimeOptions)}
+            />
+            <InfoCell
+              label={t('deletedAt')}
+              value={formatDateTime(item.deleted_at, dateTimeOptions)}
+            />
+          </CardContent>
+        </Card>
+
+        <details className="group overflow-hidden rounded-xl bg-card text-sm ring-1 ring-foreground/10">
+          <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 outline-none transition-colors hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50 sm:px-5">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Monitor aria-hidden="true" className="size-4.5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium">
+                {t('technicalInfoTitle')}
+              </span>
+              <span className="mt-1 block text-sm text-muted-foreground">
+                {t('technicalInfoDescription')}
+              </span>
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <div className="grid grid-cols-1 gap-px border-t border-border bg-border sm:grid-cols-2">
+            <InfoCell
+              label={t('ipMode')}
+              value={privacyModeLabel(item.ip_mode, t)}
+            />
+            <InfoCell label={t('ipValue')} value={ipValueText(item, t)} />
+            <InfoCell
+              label={t('uaMode')}
+              value={privacyModeLabel(item.ua_mode, t)}
+            />
+            <InfoCell label={t('uaValue')} value={uaValueText(item, t)} />
+          </div>
+        </details>
       </div>
       <AlertDialog
         open={confirmDelete}
@@ -366,6 +470,20 @@ export function CommentDetailPage() {
 // formatValue 统一处理 null / 空字符串，缺失时返回统一占位符。
 function formatValue(value: string | null | undefined) {
   return value && value.trim() ? value : PLACEHOLDER
+}
+
+// summaryValue keeps the compact author header privacy-safe while indicating
+// the recording mode next to values repeated in the disclosure below.
+function summaryValue(
+  mode: string,
+  value: string,
+  t: (key: string, options?: Record<string, unknown>) => string,
+) {
+  return mode === 'none'
+    ? formatValue(null)
+    : mode === 'coarse' || mode === 'full'
+      ? `${value} · ${privacyModeLabel(mode, t)}`
+      : t('privacyMode.unknown', { ns: 'enums' })
 }
 
 // privacyModeLabel 把隐私记录模式映射为翻译后的展示名；
@@ -418,11 +536,34 @@ function uaValueText(
   return PLACEHOLDER
 }
 
-function Info({ label, value }: { label: string; value: ReactNode }) {
+function Info({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string
+  value: ReactNode
+  icon?: LucideIcon
+}) {
   return (
-    <div>
-      <p className="m-0 text-xs text-muted-foreground">{label}</p>
-      <p className="m-0 mt-1 break-words">{value}</p>
+    <div className="min-w-0">
+      <p className="m-0 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+        {Icon ? (
+          <Icon aria-hidden="true" className="size-3.5 shrink-0" />
+        ) : null}
+        {label}
+      </p>
+      <div className="m-0 mt-1 min-w-0 break-words [overflow-wrap:anywhere]">
+        {value}
+      </div>
+    </div>
+  )
+}
+
+function InfoCell({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="min-w-0 bg-card p-4 sm:p-5">
+      <Info label={label} value={value} />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CommentDetailPage } from './admin.comments.$commentId'
@@ -78,6 +79,11 @@ function renderDetail(overrides: Partial<AdminComment> = {}) {
 beforeEach(() => {
   cleanup()
   vi.clearAllMocks()
+  apiMocks.update.mockReset()
+  apiMocks.pending.mockResolvedValue(comment({ status: 'pending' }))
+  apiMocks.publish.mockResolvedValue(comment({ status: 'published' }))
+  apiMocks.spam.mockResolvedValue(comment({ status: 'spam' }))
+  apiMocks.remove.mockResolvedValue(comment({ status: 'deleted' }))
   apiMocks.pin.mockResolvedValue(comment({ is_pinned: true }))
   apiMocks.unpin.mockResolvedValue(comment({ is_pinned: false }))
 })
@@ -112,8 +118,8 @@ describe('CommentDetailPage complete data', () => {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0',
       ),
     ).toBeInTheDocument()
-    // 生命周期（标题徽章与生命周期状态徽章各一次）
-    expect(screen.getAllByText('已发布').length).toBeGreaterThanOrEqual(2)
+    // 状态在标题区保留一次，避免信息卡重复展示。
+    expect(screen.getByText('已发布')).toBeInTheDocument()
   })
 })
 
@@ -197,30 +203,269 @@ describe('CommentDetailPage missing values', () => {
     await screen.findByText('hello world')
     expect(screen.getAllByText('-').length).toBeGreaterThan(0)
   })
+
+  it('keeps a partial reply target visible in independent information cells', async () => {
+    renderDetail({ reply_to_user_id: '7', reply_to_nickname: null })
+    await screen.findByText('hello world')
+
+    expect(screen.getByText('回复对象 ID')).toBeInTheDocument()
+    expect(screen.getByText('回复对象昵称')).toBeInTheDocument()
+    expect(screen.getAllByText('7').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Replied · 用户 ID 7')).not.toBeInTheDocument()
+  })
+
+  it('keeps a nickname-only reply target visible alongside the missing id', async () => {
+    renderDetail({ reply_to_user_id: null, reply_to_nickname: 'Replied' })
+    await screen.findByText('hello world')
+
+    expect(screen.getByText('回复对象昵称')).toBeInTheDocument()
+    expect(screen.getByText('Replied')).toBeInTheDocument()
+    expect(screen.getAllByText('-').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Replied · 用户 ID 7')).not.toBeInTheDocument()
+  })
 })
 
 describe('CommentDetailPage responsive layout', () => {
   it('lays the relationship card out in two columns on wider screens', async () => {
     renderDetail()
     await screen.findByText('hello world')
-    // “关系与标识”卡片在桌面宽度下使用双栏网格，窄屏回退单栏。
-    const heading = screen.getByText('关系与标识')
+    // “评论信息”卡片在桌面宽度下使用三栏网格，窄屏逐级回退。
+    const heading = screen.getByText('评论信息')
     const card = heading.closest('[data-slot="card"]')
     expect(card).not.toBeNull()
     const grid = card?.querySelector('[data-slot="card-content"]')
     expect(grid?.className).toContain('grid')
     expect(grid?.className).toContain('sm:grid-cols-2')
+    expect(grid?.className).toContain('lg:grid-cols-3')
+  })
+
+  it('keeps long body and technical values inside wrapping containers', async () => {
+    renderDetail({
+      body: 'x'.repeat(300),
+      ip_value: '203.0.113.' + '9'.repeat(80),
+      ua_raw: 'Mozilla/' + 'x'.repeat(300),
+    })
+    expect(await screen.findByText('x'.repeat(300))).toHaveClass(
+      'break-words',
+      '[overflow-wrap:anywhere]',
+    )
+
+    const summary = screen.getByText('技术信息').closest('summary')
+    await userEvent.setup().click(summary as HTMLElement)
+    const uaValues = screen.getAllByText(/Mozilla\/x+/)
+    expect(uaValues.at(-1)).toHaveClass(
+      'break-words',
+      '[overflow-wrap:anywhere]',
+    )
+  })
+})
+
+describe('CommentDetailPage body editing', () => {
+  it('starts in reading mode and only enables save after a changed draft', async () => {
+    const user = userEvent.setup()
+    renderDetail()
+
+    expect(await screen.findByText('hello world')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('textbox', { name: '评论正文' }),
+    ).not.toBeInTheDocument()
+    const editButton = screen.getByRole('button', { name: '编辑' })
+    const managementButton = screen.getByRole('button', { name: '评论操作' })
+    expect(editButton).toBeInTheDocument()
+    expect(editButton.compareDocumentPosition(managementButton) & 4).toBe(4)
+    expect(
+      screen.queryByRole('button', { name: '保存修改' }),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '编辑' }))
+    const textarea = screen.getByRole('textbox', { name: '评论正文' })
+    expect(textarea).toHaveValue('hello world')
+    const save = screen.getByRole('button', { name: '保存修改' })
+    expect(save).toBeDisabled()
+
+    await user.type(textarea, ' updated')
+    expect(save).toBeEnabled()
+  })
+
+  it('cancels a draft and does not leak it into the next edit session', async () => {
+    const user = userEvent.setup()
+    renderDetail()
+    await screen.findByText('hello world')
+
+    await user.click(screen.getByRole('button', { name: '编辑' }))
+    const textarea = screen.getByRole('textbox', { name: '评论正文' })
+    await user.clear(textarea)
+    await user.type(textarea, 'discarded draft')
+    await user.click(screen.getByRole('button', { name: '取消' }))
+
+    expect(screen.getByText('hello world')).toBeInTheDocument()
+    expect(screen.queryByText('discarded draft')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '编辑' }))
+    expect(screen.getByRole('textbox', { name: '评论正文' })).toHaveValue(
+      'hello world',
+    )
+  })
+
+  it('saves a changed draft and returns to reading mode', async () => {
+    const user = userEvent.setup()
+    const saved = comment({ body: 'saved comment' })
+    apiMocks.update.mockResolvedValue(saved)
+    renderDetail()
+    await screen.findByText('hello world')
+
+    await user.click(screen.getByRole('button', { name: '编辑' }))
+    const textarea = screen.getByRole('textbox', { name: '评论正文' })
+    await user.clear(textarea)
+    await user.type(textarea, 'saved comment')
+    await user.click(screen.getByRole('button', { name: '保存修改' }))
+
+    await waitFor(() => {
+      expect(apiMocks.update).toHaveBeenCalledWith('1', 'saved comment')
+    })
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('textbox', { name: '评论正文' }),
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  it('keeps the save action pending until the update resolves', async () => {
+    const user = userEvent.setup()
+    let resolveUpdate: (value: AdminComment) => void = () => undefined
+    apiMocks.update.mockImplementation(
+      () =>
+        new Promise<AdminComment>((resolve) => {
+          resolveUpdate = resolve
+        }),
+    )
+    renderDetail()
+    await screen.findByText('hello world')
+
+    await user.click(screen.getByRole('button', { name: '编辑' }))
+    const textarea = screen.getByRole('textbox', { name: '评论正文' })
+    await user.clear(textarea)
+    await user.type(textarea, 'pending comment')
+    const save = screen.getByRole('button', { name: '保存修改' })
+    await user.click(save)
+
+    await waitFor(() => expect(save).toBeDisabled())
+    resolveUpdate(comment({ body: 'pending comment' }))
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('textbox', { name: '评论正文' }),
+      ).not.toBeInTheDocument()
+    })
+  })
+})
+
+describe('CommentDetailPage technical disclosure', () => {
+  it('is closed by default and toggles with the native summary control', async () => {
+    const user = userEvent.setup()
+    renderDetail()
+    await screen.findByText('hello world')
+
+    const summary = screen.getByText('技术信息').closest('summary')
+    expect(summary).not.toBeNull()
+    const details = summary?.closest('details')
+    expect(details).not.toHaveAttribute('open')
+    await user.click(summary as HTMLElement)
+    expect(details).toHaveAttribute('open')
   })
 })
 
 describe('CommentDetailPage pin action', () => {
-  it('pins a published root from the status actions card', async () => {
+  it('pins a published root from the management dropdown', async () => {
+    const user = userEvent.setup()
     renderDetail()
     expect(await screen.findByText('hello world')).toBeInTheDocument()
-    await screen.findByRole('button', { name: '置顶评论' })
-    screen.getByRole('button', { name: '置顶评论' }).click()
+    await user.click(screen.getByRole('button', { name: '评论操作' }))
+    await user.click(await screen.findByRole('menuitem', { name: '置顶评论' }))
     await waitFor(() => {
       expect(apiMocks.pin).toHaveBeenCalledWith('1')
     })
+  })
+
+  it('offers unpin only for a pinned root and calls the unpin endpoint', async () => {
+    const user = userEvent.setup()
+    renderDetail({ is_pinned: true })
+    await screen.findByText('hello world')
+
+    await user.click(screen.getByRole('button', { name: '评论操作' }))
+    expect(
+      await screen.findByRole('menuitem', { name: '取消置顶' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('menuitem', { name: '置顶评论' }),
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole('menuitem', { name: '取消置顶' }))
+    await waitFor(() => {
+      expect(apiMocks.unpin).toHaveBeenCalledWith('1')
+    })
+  })
+
+  it('keeps the pin action hidden for a non-root comment', async () => {
+    const user = userEvent.setup()
+    renderDetail({ parent_id: '4', status: 'published' })
+    await screen.findByText('hello world')
+
+    await user.click(screen.getByRole('button', { name: '评论操作' }))
+    await screen.findByRole('menuitem', { name: '移入待审核' })
+    expect(
+      screen.queryByRole('menuitem', { name: '置顶评论' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('menuitem', { name: '取消置顶' }),
+    ).not.toBeInTheDocument()
+  })
+})
+
+describe('CommentDetailPage status actions', () => {
+  it('moves a published comment to pending through the shared endpoint mapping', async () => {
+    const user = userEvent.setup()
+    renderDetail()
+    await screen.findByText('hello world')
+
+    await user.click(screen.getByRole('button', { name: '评论操作' }))
+    await user.click(
+      await screen.findByRole('menuitem', { name: '移入待审核' }),
+    )
+    await waitFor(() => {
+      expect(apiMocks.pending).toHaveBeenCalledWith('1')
+    })
+  })
+
+  it('confirms soft deletion before calling the non-permanent endpoint', async () => {
+    const user = userEvent.setup()
+    renderDetail()
+    await screen.findByText('hello world')
+
+    await user.click(screen.getByRole('button', { name: '评论操作' }))
+    await user.click(await screen.findByRole('menuitem', { name: '删除' }))
+    expect(
+      await screen.findByRole('heading', { name: '软删除这条评论？' }),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '确认操作' }))
+    await waitFor(() => {
+      expect(apiMocks.remove).toHaveBeenCalledWith('1', false)
+    })
+  })
+
+  it('uses the explicit spam label in the management dropdown', async () => {
+    const user = userEvent.setup()
+    renderDetail()
+    await screen.findByText('hello world')
+
+    await user.click(screen.getByRole('button', { name: '评论操作' }))
+    expect(
+      await screen.findByRole('menuitem', { name: '标记为垃圾' }),
+    ).toBeInTheDocument()
+  })
+
+  it('does not expose a permanent-delete action on the detail page', async () => {
+    renderDetail()
+    await screen.findByText('hello world')
+
+    expect(screen.queryByText('永久删除')).not.toBeInTheDocument()
+    expect(screen.queryByText('永久删除请从列表确认')).not.toBeInTheDocument()
   })
 })
