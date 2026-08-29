@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { CommentsPage } from './admin.comments'
+import { CommentsPage } from '@/pages/admin.comments'
 import type { AdminComment } from '@/lib/api/types'
 
 // apiMocks 是 commentsApi 的替代实现，供 vi.mock 与断言共享。
@@ -23,7 +23,6 @@ const apiMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
   useNavigate: () => apiMocks.navigate,
   // 列表单测只渲染列表本身，视为不存在详情子路由匹配。
   useMatch: () => undefined,

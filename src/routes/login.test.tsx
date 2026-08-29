@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { LoginPage } from './login.index'
+import { LoginPage } from '@/pages/login.index'
 import type { CaptchaConfigResponse, Me } from '@/lib/api/types'
 import { pendingRecordKey, pendingRecordTTLMs } from '@/lib/authorize'
 import { otpRecordKey } from '@/lib/otp'
@@ -30,7 +30,6 @@ const apiMocks = vi.hoisted(() => {
 
 // 模拟路由与 API，避免真实导航和网络。
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
   useNavigate: () => apiMocks.navigate,
   useSearch: () => apiMocks.search,
   Link: ({

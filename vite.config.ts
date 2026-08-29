@@ -11,6 +11,20 @@ const config = defineConfig(({ mode }) => {
 
   return {
     resolve: { tsconfigPaths: true },
+    build: {
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              {
+                name: 'react-runtime',
+                test: /node_modules[\\/](?:react-dom|react|scheduler)[\\/]/,
+              },
+            ],
+          },
+        },
+      },
+    },
     server: {
       proxy: {
         '/api': {

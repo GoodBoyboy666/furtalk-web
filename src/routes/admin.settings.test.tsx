@@ -9,7 +9,7 @@ import {
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { SettingsPage } from './admin.settings'
+import { SettingsPage } from '@/pages/admin.settings'
 import type { SettingItem } from '@/lib/api/types'
 
 const apiMocks = vi.hoisted(() => ({
@@ -17,9 +17,6 @@ const apiMocks = vi.hoisted(() => ({
   providersApi: { list: vi.fn() },
 }))
 
-vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
-}))
 vi.mock('@/lib/api/resources', () => ({
   settingsApi: apiMocks.settingsApi,
   providersApi: apiMocks.providersApi,

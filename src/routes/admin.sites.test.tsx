@@ -2,7 +2,7 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { SitesPage } from './admin.sites'
+import { SitesPage } from '@/pages/admin.sites'
 import type { Site } from '@/lib/api/types'
 
 const apiMocks = vi.hoisted(() => ({
@@ -17,9 +17,6 @@ const apiMocks = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
-}))
 vi.mock('@/lib/api/resources', () => ({
   sitesApi: apiMocks.sitesApi,
 }))

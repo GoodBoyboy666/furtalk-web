@@ -9,7 +9,7 @@ import {
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { UsersPage } from './admin.users'
+import { UsersPage } from '@/pages/admin.users'
 import type { AdminUser } from '@/lib/api/types'
 import { ApiError } from '@/lib/api/client'
 
@@ -26,9 +26,6 @@ const apiMocks = vi.hoisted(() => ({
 }))
 const toastMocks = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
 
-vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
-}))
 vi.mock('@/lib/api/resources', () => ({
   usersApi: apiMocks,
 }))

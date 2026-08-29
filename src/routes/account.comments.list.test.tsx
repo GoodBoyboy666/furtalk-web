@@ -2,7 +2,8 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { CommentsPage, parseCommentsPage } from './account.comments'
+import { CommentsPage } from '@/pages/account.comments'
+import { parseCommentsPage } from '@/lib/account-comments-search'
 
 const apiMocks = vi.hoisted(() => ({
   list: vi.fn(),
@@ -16,6 +17,7 @@ const searchMock = vi.hoisted(() => ({
 
 vi.mock('@tanstack/react-router', () => ({
   createFileRoute: () => () => ({ component: null }),
+  getRouteApi: () => ({ useSearch: searchMock.useSearch }),
   Link: ({ children }: { children: React.ReactNode }) => <a>{children}</a>,
   Outlet: () => null,
   useMatch: () => undefined,

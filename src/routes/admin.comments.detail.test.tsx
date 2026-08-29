@@ -9,7 +9,7 @@ import {
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { CommentDetailPage } from './admin.comments.$commentId'
+import { CommentDetailPage } from '@/pages/admin.comments.$commentId'
 import type { AdminComment } from '@/lib/api/types'
 
 const apiMocks = vi.hoisted(() => ({
@@ -24,10 +24,7 @@ const apiMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({
-    component: null,
-    useParams: () => ({ commentId: '1' }),
-  }),
+  getRouteApi: () => ({ useParams: () => ({ commentId: '1' }) }),
   Link: ({ children }: { children: React.ReactNode }) => <a>{children}</a>,
 }))
 

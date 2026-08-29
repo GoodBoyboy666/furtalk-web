@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ResetPasswordPage } from './reset-password'
+import { ResetPasswordPage } from '@/pages/reset-password'
 import type { CaptchaConfigResponse } from '@/lib/api/types'
 
 // apiMocks 是 API 模块的替代实现，供 vi.mock 与断言共享。
@@ -15,7 +15,6 @@ const apiMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
   useNavigate: () => apiMocks.navigate,
   useSearch: () => ({ email: 'prefill@example.com' }),
 }))

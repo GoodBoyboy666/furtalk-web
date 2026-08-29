@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { CommentDetailPage } from './account.comments.$commentId'
+import { CommentDetailPage } from '@/pages/account.comments.$commentId'
 import type { CaptchaConfigResponse, MeCommentDetail } from '@/lib/api/types'
 
 const apiMocks = vi.hoisted(() => ({
@@ -14,10 +14,7 @@ const apiMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({
-    component: null,
-    useParams: () => ({ commentId: '10' }),
-  }),
+  getRouteApi: () => ({ useParams: () => ({ commentId: '10' }) }),
   Link: ({ children }: { children: React.ReactNode }) => <a>{children}</a>,
 }))
 

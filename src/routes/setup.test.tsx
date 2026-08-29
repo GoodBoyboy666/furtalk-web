@@ -3,8 +3,8 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { SetupPage } from './setup'
-import { LoginPage } from './login.index'
+import { SetupPage } from '@/pages/setup'
+import { LoginPage } from '@/pages/login.index'
 import { ApiError } from '@/lib/api/client'
 import type { BootstrapStatus } from '@/lib/api/types'
 
@@ -16,7 +16,6 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
   useNavigate: () => mocks.navigate,
   useSearch: () => ({}),
   Link: ({ to, children }: { to: string; children: React.ReactNode }) => (

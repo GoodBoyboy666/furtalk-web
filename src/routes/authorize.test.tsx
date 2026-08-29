@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { AuthorizePage, authorizeLoginRedirect } from './authorize'
+import { AuthorizePage, authorizeLoginRedirect } from '@/pages/authorize'
 import { ApiError } from '@/lib/api/client'
 import {
   pendingRecordKey,
@@ -23,7 +23,6 @@ const apiMocks = vi.hoisted(() => {
 })
 
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
   useNavigate: () => apiMocks.navigate,
   useSearch: () => apiMocks.search,
 }))

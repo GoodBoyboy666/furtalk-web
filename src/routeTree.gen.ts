@@ -8,243 +8,272 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AccountRouteImport } from './routes/account'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthorizeRouteImport } from './routes/authorize'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as LogoutRouteImport } from './routes/logout'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as SetupRouteImport } from './routes/setup'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AccountCommentsRouteImport } from './routes/account.comments'
-import { Route as AccountProfileRouteImport } from './routes/account.profile'
-import { Route as AccountSecurityRouteImport } from './routes/account.security'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminAccountRouteImport } from './routes/admin.account'
-import { Route as AdminCommentsRouteImport } from './routes/admin.comments'
-import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminSitesRouteImport } from './routes/admin.sites'
-import { Route as AdminThreadsRouteImport } from './routes/admin.threads'
-import { Route as AdminUsersRouteImport } from './routes/admin.users'
-import { Route as LoginIndexRouteImport } from './routes/login.index'
-import { Route as LoginOtpRouteImport } from './routes/login.otp'
-import { Route as AccountCommentsCommentIdRouteImport } from './routes/account.comments.$commentId'
-import { Route as AdminCommentsCommentIdRouteImport } from './routes/admin.comments.$commentId'
-import { Route as OauthCallbackProviderRouteImport } from './routes/oauth.callback.$provider'
 
-const IndexRoute = IndexRouteImport.update({
+const IndexLazyRouteImport = createFileRoute('/')()
+const AccountLazyRouteImport = createFileRoute('/account')()
+const AdminLazyRouteImport = createFileRoute('/admin')()
+const LoginLazyRouteImport = createFileRoute('/login')()
+const LogoutLazyRouteImport = createFileRoute('/logout')()
+const ResetPasswordLazyRouteImport = createFileRoute('/reset-password')()
+const SetupLazyRouteImport = createFileRoute('/setup')()
+const AccountProfileLazyRouteImport = createFileRoute('/account/profile')()
+const AccountSecurityLazyRouteImport = createFileRoute('/account/security')()
+const AdminIndexLazyRouteImport = createFileRoute('/admin/')()
+const AdminAccountLazyRouteImport = createFileRoute('/admin/account')()
+const AdminCommentsLazyRouteImport = createFileRoute('/admin/comments')()
+const AdminSettingsLazyRouteImport = createFileRoute('/admin/settings')()
+const AdminSitesLazyRouteImport = createFileRoute('/admin/sites')()
+const AdminThreadsLazyRouteImport = createFileRoute('/admin/threads')()
+const AdminUsersLazyRouteImport = createFileRoute('/admin/users')()
+const LoginIndexLazyRouteImport = createFileRoute('/login/')()
+const LoginOtpLazyRouteImport = createFileRoute('/login/otp')()
+const AccountCommentsCommentIdLazyRouteImport = createFileRoute(
+  '/account/comments/$commentId',
+)()
+const AdminCommentsCommentIdLazyRouteImport = createFileRoute(
+  '/admin/comments/$commentId',
+)()
+const OauthCallbackProviderLazyRouteImport = createFileRoute(
+  '/oauth/callback/$provider',
+)()
+
+const IndexLazyRoute = IndexLazyRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AccountRoute = AccountRouteImport.update({
+} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+const AccountLazyRoute = AccountLazyRouteImport.update({
   id: '/account',
   path: '/account',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
+} as any).lazy(() => import('./routes/account.lazy').then((d) => d.Route))
+const AdminLazyRoute = AdminLazyRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/admin.lazy').then((d) => d.Route))
 const AuthorizeRoute = AuthorizeRouteImport.update({
   id: '/authorize',
   path: '/authorize',
   getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
+} as any).lazy(() => import('./routes/authorize.lazy').then((d) => d.Route))
+const LoginLazyRoute = LoginLazyRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any)
-const LogoutRoute = LogoutRouteImport.update({
+} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
+const LogoutLazyRoute = LogoutLazyRouteImport.update({
   id: '/logout',
   path: '/logout',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
+} as any).lazy(() => import('./routes/logout.lazy').then((d) => d.Route))
+const ResetPasswordLazyRoute = ResetPasswordLazyRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
-} as any)
-const SetupRoute = SetupRouteImport.update({
+} as any).lazy(() =>
+  import('./routes/reset-password.lazy').then((d) => d.Route),
+)
+const SetupLazyRoute = SetupLazyRouteImport.update({
   id: '/setup',
   path: '/setup',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/setup.lazy').then((d) => d.Route))
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/unsubscribe.lazy').then((d) => d.Route))
 const AccountCommentsRoute = AccountCommentsRouteImport.update({
   id: '/comments',
   path: '/comments',
-  getParentRoute: () => AccountRoute,
-} as any)
-const AccountProfileRoute = AccountProfileRouteImport.update({
+  getParentRoute: () => AccountLazyRoute,
+} as any).lazy(() =>
+  import('./routes/account.comments.lazy').then((d) => d.Route),
+)
+const AccountProfileLazyRoute = AccountProfileLazyRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => AccountRoute,
-} as any)
-const AccountSecurityRoute = AccountSecurityRouteImport.update({
+  getParentRoute: () => AccountLazyRoute,
+} as any).lazy(() =>
+  import('./routes/account.profile.lazy').then((d) => d.Route),
+)
+const AccountSecurityLazyRoute = AccountSecurityLazyRouteImport.update({
   id: '/security',
   path: '/security',
-  getParentRoute: () => AccountRoute,
-} as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
+  getParentRoute: () => AccountLazyRoute,
+} as any).lazy(() =>
+  import('./routes/account.security.lazy').then((d) => d.Route),
+)
+const AdminIndexLazyRoute = AdminIndexLazyRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAccountRoute = AdminAccountRouteImport.update({
+  getParentRoute: () => AdminLazyRoute,
+} as any).lazy(() => import('./routes/admin.index.lazy').then((d) => d.Route))
+const AdminAccountLazyRoute = AdminAccountLazyRouteImport.update({
   id: '/account',
   path: '/account',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCommentsRoute = AdminCommentsRouteImport.update({
+  getParentRoute: () => AdminLazyRoute,
+} as any).lazy(() => import('./routes/admin.account.lazy').then((d) => d.Route))
+const AdminCommentsLazyRoute = AdminCommentsLazyRouteImport.update({
   id: '/comments',
   path: '/comments',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  getParentRoute: () => AdminLazyRoute,
+} as any).lazy(() =>
+  import('./routes/admin.comments.lazy').then((d) => d.Route),
+)
+const AdminSettingsLazyRoute = AdminSettingsLazyRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSitesRoute = AdminSitesRouteImport.update({
+  getParentRoute: () => AdminLazyRoute,
+} as any).lazy(() =>
+  import('./routes/admin.settings.lazy').then((d) => d.Route),
+)
+const AdminSitesLazyRoute = AdminSitesLazyRouteImport.update({
   id: '/sites',
   path: '/sites',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminThreadsRoute = AdminThreadsRouteImport.update({
+  getParentRoute: () => AdminLazyRoute,
+} as any).lazy(() => import('./routes/admin.sites.lazy').then((d) => d.Route))
+const AdminThreadsLazyRoute = AdminThreadsLazyRouteImport.update({
   id: '/threads',
   path: '/threads',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
+  getParentRoute: () => AdminLazyRoute,
+} as any).lazy(() => import('./routes/admin.threads.lazy').then((d) => d.Route))
+const AdminUsersLazyRoute = AdminUsersLazyRouteImport.update({
   id: '/users',
   path: '/users',
-  getParentRoute: () => AdminRoute,
-} as any)
-const LoginIndexRoute = LoginIndexRouteImport.update({
+  getParentRoute: () => AdminLazyRoute,
+} as any).lazy(() => import('./routes/admin.users.lazy').then((d) => d.Route))
+const LoginIndexLazyRoute = LoginIndexLazyRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => LoginRoute,
-} as any)
-const LoginOtpRoute = LoginOtpRouteImport.update({
+  getParentRoute: () => LoginLazyRoute,
+} as any).lazy(() => import('./routes/login.index.lazy').then((d) => d.Route))
+const LoginOtpLazyRoute = LoginOtpLazyRouteImport.update({
   id: '/otp',
   path: '/otp',
-  getParentRoute: () => LoginRoute,
-} as any)
-const AccountCommentsCommentIdRoute =
-  AccountCommentsCommentIdRouteImport.update({
+  getParentRoute: () => LoginLazyRoute,
+} as any).lazy(() => import('./routes/login.otp.lazy').then((d) => d.Route))
+const AccountCommentsCommentIdLazyRoute =
+  AccountCommentsCommentIdLazyRouteImport.update({
     id: '/$commentId',
     path: '/$commentId',
     getParentRoute: () => AccountCommentsRoute,
-  } as any)
-const AdminCommentsCommentIdRoute = AdminCommentsCommentIdRouteImport.update({
-  id: '/$commentId',
-  path: '/$commentId',
-  getParentRoute: () => AdminCommentsRoute,
-} as any)
-const OauthCallbackProviderRoute = OauthCallbackProviderRouteImport.update({
-  id: '/oauth/callback/$provider',
-  path: '/oauth/callback/$provider',
-  getParentRoute: () => rootRouteImport,
-} as any)
+  } as any).lazy(() =>
+    import('./routes/account.comments.$commentId.lazy').then((d) => d.Route),
+  )
+const AdminCommentsCommentIdLazyRoute =
+  AdminCommentsCommentIdLazyRouteImport.update({
+    id: '/$commentId',
+    path: '/$commentId',
+    getParentRoute: () => AdminCommentsLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/admin.comments.$commentId.lazy').then((d) => d.Route),
+  )
+const OauthCallbackProviderLazyRoute =
+  OauthCallbackProviderLazyRouteImport.update({
+    id: '/oauth/callback/$provider',
+    path: '/oauth/callback/$provider',
+    getParentRoute: () => rootRouteImport,
+  } as any).lazy(() =>
+    import('./routes/oauth.callback.$provider.lazy').then((d) => d.Route),
+  )
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/account': typeof AccountRouteWithChildren
-  '/admin': typeof AdminRouteWithChildren
+  '/': typeof IndexLazyRoute
   '/authorize': typeof AuthorizeRoute
-  '/login': typeof LoginRouteWithChildren
-  '/logout': typeof LogoutRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/account': typeof AccountLazyRouteWithChildren
+  '/admin': typeof AdminLazyRouteWithChildren
+  '/login': typeof LoginLazyRouteWithChildren
+  '/logout': typeof LogoutLazyRoute
+  '/reset-password': typeof ResetPasswordLazyRoute
+  '/setup': typeof SetupLazyRoute
   '/account/comments': typeof AccountCommentsRouteWithChildren
-  '/account/profile': typeof AccountProfileRoute
-  '/account/security': typeof AccountSecurityRoute
-  '/admin/account': typeof AdminAccountRoute
-  '/admin/comments': typeof AdminCommentsRouteWithChildren
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/sites': typeof AdminSitesRoute
-  '/admin/threads': typeof AdminThreadsRoute
-  '/admin/users': typeof AdminUsersRoute
-  '/login/otp': typeof LoginOtpRoute
-  '/admin/': typeof AdminIndexRoute
-  '/login/': typeof LoginIndexRoute
-  '/account/comments/$commentId': typeof AccountCommentsCommentIdRoute
-  '/admin/comments/$commentId': typeof AdminCommentsCommentIdRoute
-  '/oauth/callback/$provider': typeof OauthCallbackProviderRoute
+  '/account/profile': typeof AccountProfileLazyRoute
+  '/account/security': typeof AccountSecurityLazyRoute
+  '/admin/account': typeof AdminAccountLazyRoute
+  '/admin/comments': typeof AdminCommentsLazyRouteWithChildren
+  '/admin/settings': typeof AdminSettingsLazyRoute
+  '/admin/sites': typeof AdminSitesLazyRoute
+  '/admin/threads': typeof AdminThreadsLazyRoute
+  '/admin/users': typeof AdminUsersLazyRoute
+  '/login/otp': typeof LoginOtpLazyRoute
+  '/admin/': typeof AdminIndexLazyRoute
+  '/login/': typeof LoginIndexLazyRoute
+  '/account/comments/$commentId': typeof AccountCommentsCommentIdLazyRoute
+  '/admin/comments/$commentId': typeof AdminCommentsCommentIdLazyRoute
+  '/oauth/callback/$provider': typeof OauthCallbackProviderLazyRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/account': typeof AccountRouteWithChildren
+  '/': typeof IndexLazyRoute
   '/authorize': typeof AuthorizeRoute
-  '/logout': typeof LogoutRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/account': typeof AccountLazyRouteWithChildren
+  '/logout': typeof LogoutLazyRoute
+  '/reset-password': typeof ResetPasswordLazyRoute
+  '/setup': typeof SetupLazyRoute
   '/account/comments': typeof AccountCommentsRouteWithChildren
-  '/account/profile': typeof AccountProfileRoute
-  '/account/security': typeof AccountSecurityRoute
-  '/admin/account': typeof AdminAccountRoute
-  '/admin/comments': typeof AdminCommentsRouteWithChildren
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/sites': typeof AdminSitesRoute
-  '/admin/threads': typeof AdminThreadsRoute
-  '/admin/users': typeof AdminUsersRoute
-  '/login/otp': typeof LoginOtpRoute
-  '/admin': typeof AdminIndexRoute
-  '/login': typeof LoginIndexRoute
-  '/account/comments/$commentId': typeof AccountCommentsCommentIdRoute
-  '/admin/comments/$commentId': typeof AdminCommentsCommentIdRoute
-  '/oauth/callback/$provider': typeof OauthCallbackProviderRoute
+  '/account/profile': typeof AccountProfileLazyRoute
+  '/account/security': typeof AccountSecurityLazyRoute
+  '/admin/account': typeof AdminAccountLazyRoute
+  '/admin/comments': typeof AdminCommentsLazyRouteWithChildren
+  '/admin/settings': typeof AdminSettingsLazyRoute
+  '/admin/sites': typeof AdminSitesLazyRoute
+  '/admin/threads': typeof AdminThreadsLazyRoute
+  '/admin/users': typeof AdminUsersLazyRoute
+  '/login/otp': typeof LoginOtpLazyRoute
+  '/admin': typeof AdminIndexLazyRoute
+  '/login': typeof LoginIndexLazyRoute
+  '/account/comments/$commentId': typeof AccountCommentsCommentIdLazyRoute
+  '/admin/comments/$commentId': typeof AdminCommentsCommentIdLazyRoute
+  '/oauth/callback/$provider': typeof OauthCallbackProviderLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/account': typeof AccountRouteWithChildren
-  '/admin': typeof AdminRouteWithChildren
+  '/': typeof IndexLazyRoute
   '/authorize': typeof AuthorizeRoute
-  '/login': typeof LoginRouteWithChildren
-  '/logout': typeof LogoutRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/setup': typeof SetupRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/account': typeof AccountLazyRouteWithChildren
+  '/admin': typeof AdminLazyRouteWithChildren
+  '/login': typeof LoginLazyRouteWithChildren
+  '/logout': typeof LogoutLazyRoute
+  '/reset-password': typeof ResetPasswordLazyRoute
+  '/setup': typeof SetupLazyRoute
   '/account/comments': typeof AccountCommentsRouteWithChildren
-  '/account/profile': typeof AccountProfileRoute
-  '/account/security': typeof AccountSecurityRoute
-  '/admin/account': typeof AdminAccountRoute
-  '/admin/comments': typeof AdminCommentsRouteWithChildren
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/sites': typeof AdminSitesRoute
-  '/admin/threads': typeof AdminThreadsRoute
-  '/admin/users': typeof AdminUsersRoute
-  '/login/otp': typeof LoginOtpRoute
-  '/admin/': typeof AdminIndexRoute
-  '/login/': typeof LoginIndexRoute
-  '/account/comments/$commentId': typeof AccountCommentsCommentIdRoute
-  '/admin/comments/$commentId': typeof AdminCommentsCommentIdRoute
-  '/oauth/callback/$provider': typeof OauthCallbackProviderRoute
+  '/account/profile': typeof AccountProfileLazyRoute
+  '/account/security': typeof AccountSecurityLazyRoute
+  '/admin/account': typeof AdminAccountLazyRoute
+  '/admin/comments': typeof AdminCommentsLazyRouteWithChildren
+  '/admin/settings': typeof AdminSettingsLazyRoute
+  '/admin/sites': typeof AdminSitesLazyRoute
+  '/admin/threads': typeof AdminThreadsLazyRoute
+  '/admin/users': typeof AdminUsersLazyRoute
+  '/login/otp': typeof LoginOtpLazyRoute
+  '/admin/': typeof AdminIndexLazyRoute
+  '/login/': typeof LoginIndexLazyRoute
+  '/account/comments/$commentId': typeof AccountCommentsCommentIdLazyRoute
+  '/admin/comments/$commentId': typeof AdminCommentsCommentIdLazyRoute
+  '/oauth/callback/$provider': typeof OauthCallbackProviderLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/authorize'
+    | '/unsubscribe'
     | '/account'
     | '/admin'
-    | '/authorize'
     | '/login'
     | '/logout'
     | '/reset-password'
     | '/setup'
-    | '/unsubscribe'
     | '/account/comments'
     | '/account/profile'
     | '/account/security'
@@ -263,12 +292,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/account'
     | '/authorize'
+    | '/unsubscribe'
+    | '/account'
     | '/logout'
     | '/reset-password'
     | '/setup'
-    | '/unsubscribe'
     | '/account/comments'
     | '/account/profile'
     | '/account/security'
@@ -287,14 +316,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/authorize'
+    | '/unsubscribe'
     | '/account'
     | '/admin'
-    | '/authorize'
     | '/login'
     | '/logout'
     | '/reset-password'
     | '/setup'
-    | '/unsubscribe'
     | '/account/comments'
     | '/account/profile'
     | '/account/security'
@@ -313,16 +342,16 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AccountRoute: typeof AccountRouteWithChildren
-  AdminRoute: typeof AdminRouteWithChildren
+  IndexLazyRoute: typeof IndexLazyRoute
   AuthorizeRoute: typeof AuthorizeRoute
-  LoginRoute: typeof LoginRouteWithChildren
-  LogoutRoute: typeof LogoutRoute
-  ResetPasswordRoute: typeof ResetPasswordRoute
-  SetupRoute: typeof SetupRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
-  OauthCallbackProviderRoute: typeof OauthCallbackProviderRoute
+  AccountLazyRoute: typeof AccountLazyRouteWithChildren
+  AdminLazyRoute: typeof AdminLazyRouteWithChildren
+  LoginLazyRoute: typeof LoginLazyRouteWithChildren
+  LogoutLazyRoute: typeof LogoutLazyRoute
+  ResetPasswordLazyRoute: typeof ResetPasswordLazyRoute
+  SetupLazyRoute: typeof SetupLazyRoute
+  OauthCallbackProviderLazyRoute: typeof OauthCallbackProviderLazyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -331,21 +360,21 @@ declare module '@tanstack/react-router' {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof IndexLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
       id: '/account'
       path: '/account'
       fullPath: '/account'
-      preLoaderRoute: typeof AccountRouteImport
+      preLoaderRoute: typeof AccountLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
       id: '/admin'
       path: '/admin'
       fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+      preLoaderRoute: typeof AdminLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/authorize': {
@@ -359,28 +388,28 @@ declare module '@tanstack/react-router' {
       id: '/login'
       path: '/login'
       fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+      preLoaderRoute: typeof LoginLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logout': {
       id: '/logout'
       path: '/logout'
       fullPath: '/logout'
-      preLoaderRoute: typeof LogoutRouteImport
+      preLoaderRoute: typeof LogoutLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+      preLoaderRoute: typeof ResetPasswordLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/setup': {
       id: '/setup'
       path: '/setup'
       fullPath: '/setup'
-      preLoaderRoute: typeof SetupRouteImport
+      preLoaderRoute: typeof SetupLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/unsubscribe': {
@@ -395,193 +424,197 @@ declare module '@tanstack/react-router' {
       path: '/comments'
       fullPath: '/account/comments'
       preLoaderRoute: typeof AccountCommentsRouteImport
-      parentRoute: typeof AccountRoute
+      parentRoute: typeof AccountLazyRoute
     }
     '/account/profile': {
       id: '/account/profile'
       path: '/profile'
       fullPath: '/account/profile'
-      preLoaderRoute: typeof AccountProfileRouteImport
-      parentRoute: typeof AccountRoute
+      preLoaderRoute: typeof AccountProfileLazyRouteImport
+      parentRoute: typeof AccountLazyRoute
     }
     '/account/security': {
       id: '/account/security'
       path: '/security'
       fullPath: '/account/security'
-      preLoaderRoute: typeof AccountSecurityRouteImport
-      parentRoute: typeof AccountRoute
+      preLoaderRoute: typeof AccountSecurityLazyRouteImport
+      parentRoute: typeof AccountLazyRoute
     }
     '/admin/': {
       id: '/admin/'
       path: '/'
       fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
+      preLoaderRoute: typeof AdminIndexLazyRouteImport
+      parentRoute: typeof AdminLazyRoute
     }
     '/admin/account': {
       id: '/admin/account'
       path: '/account'
       fullPath: '/admin/account'
-      preLoaderRoute: typeof AdminAccountRouteImport
-      parentRoute: typeof AdminRoute
+      preLoaderRoute: typeof AdminAccountLazyRouteImport
+      parentRoute: typeof AdminLazyRoute
     }
     '/admin/comments': {
       id: '/admin/comments'
       path: '/comments'
       fullPath: '/admin/comments'
-      preLoaderRoute: typeof AdminCommentsRouteImport
-      parentRoute: typeof AdminRoute
+      preLoaderRoute: typeof AdminCommentsLazyRouteImport
+      parentRoute: typeof AdminLazyRoute
     }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
       fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof AdminRoute
+      preLoaderRoute: typeof AdminSettingsLazyRouteImport
+      parentRoute: typeof AdminLazyRoute
     }
     '/admin/sites': {
       id: '/admin/sites'
       path: '/sites'
       fullPath: '/admin/sites'
-      preLoaderRoute: typeof AdminSitesRouteImport
-      parentRoute: typeof AdminRoute
+      preLoaderRoute: typeof AdminSitesLazyRouteImport
+      parentRoute: typeof AdminLazyRoute
     }
     '/admin/threads': {
       id: '/admin/threads'
       path: '/threads'
       fullPath: '/admin/threads'
-      preLoaderRoute: typeof AdminThreadsRouteImport
-      parentRoute: typeof AdminRoute
+      preLoaderRoute: typeof AdminThreadsLazyRouteImport
+      parentRoute: typeof AdminLazyRoute
     }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
       fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRoute
+      preLoaderRoute: typeof AdminUsersLazyRouteImport
+      parentRoute: typeof AdminLazyRoute
     }
     '/login/': {
       id: '/login/'
       path: '/'
       fullPath: '/login/'
-      preLoaderRoute: typeof LoginIndexRouteImport
-      parentRoute: typeof LoginRoute
+      preLoaderRoute: typeof LoginIndexLazyRouteImport
+      parentRoute: typeof LoginLazyRoute
     }
     '/login/otp': {
       id: '/login/otp'
       path: '/otp'
       fullPath: '/login/otp'
-      preLoaderRoute: typeof LoginOtpRouteImport
-      parentRoute: typeof LoginRoute
+      preLoaderRoute: typeof LoginOtpLazyRouteImport
+      parentRoute: typeof LoginLazyRoute
     }
     '/account/comments/$commentId': {
       id: '/account/comments/$commentId'
       path: '/$commentId'
       fullPath: '/account/comments/$commentId'
-      preLoaderRoute: typeof AccountCommentsCommentIdRouteImport
+      preLoaderRoute: typeof AccountCommentsCommentIdLazyRouteImport
       parentRoute: typeof AccountCommentsRoute
     }
     '/admin/comments/$commentId': {
       id: '/admin/comments/$commentId'
       path: '/$commentId'
       fullPath: '/admin/comments/$commentId'
-      preLoaderRoute: typeof AdminCommentsCommentIdRouteImport
-      parentRoute: typeof AdminCommentsRoute
+      preLoaderRoute: typeof AdminCommentsCommentIdLazyRouteImport
+      parentRoute: typeof AdminCommentsLazyRoute
     }
     '/oauth/callback/$provider': {
       id: '/oauth/callback/$provider'
       path: '/oauth/callback/$provider'
       fullPath: '/oauth/callback/$provider'
-      preLoaderRoute: typeof OauthCallbackProviderRouteImport
+      preLoaderRoute: typeof OauthCallbackProviderLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 interface AccountCommentsRouteChildren {
-  AccountCommentsCommentIdRoute: typeof AccountCommentsCommentIdRoute
+  AccountCommentsCommentIdLazyRoute: typeof AccountCommentsCommentIdLazyRoute
 }
 
 const AccountCommentsRouteChildren: AccountCommentsRouteChildren = {
-  AccountCommentsCommentIdRoute: AccountCommentsCommentIdRoute,
+  AccountCommentsCommentIdLazyRoute: AccountCommentsCommentIdLazyRoute,
 }
 
 const AccountCommentsRouteWithChildren = AccountCommentsRoute._addFileChildren(
   AccountCommentsRouteChildren,
 )
 
-interface AccountRouteChildren {
+interface AccountLazyRouteChildren {
   AccountCommentsRoute: typeof AccountCommentsRouteWithChildren
-  AccountProfileRoute: typeof AccountProfileRoute
-  AccountSecurityRoute: typeof AccountSecurityRoute
+  AccountProfileLazyRoute: typeof AccountProfileLazyRoute
+  AccountSecurityLazyRoute: typeof AccountSecurityLazyRoute
 }
 
-const AccountRouteChildren: AccountRouteChildren = {
+const AccountLazyRouteChildren: AccountLazyRouteChildren = {
   AccountCommentsRoute: AccountCommentsRouteWithChildren,
-  AccountProfileRoute: AccountProfileRoute,
-  AccountSecurityRoute: AccountSecurityRoute,
+  AccountProfileLazyRoute: AccountProfileLazyRoute,
+  AccountSecurityLazyRoute: AccountSecurityLazyRoute,
 }
 
-const AccountRouteWithChildren =
-  AccountRoute._addFileChildren(AccountRouteChildren)
-
-interface AdminCommentsRouteChildren {
-  AdminCommentsCommentIdRoute: typeof AdminCommentsCommentIdRoute
-}
-
-const AdminCommentsRouteChildren: AdminCommentsRouteChildren = {
-  AdminCommentsCommentIdRoute: AdminCommentsCommentIdRoute,
-}
-
-const AdminCommentsRouteWithChildren = AdminCommentsRoute._addFileChildren(
-  AdminCommentsRouteChildren,
+const AccountLazyRouteWithChildren = AccountLazyRoute._addFileChildren(
+  AccountLazyRouteChildren,
 )
 
-interface AdminRouteChildren {
-  AdminAccountRoute: typeof AdminAccountRoute
-  AdminCommentsRoute: typeof AdminCommentsRouteWithChildren
-  AdminSettingsRoute: typeof AdminSettingsRoute
-  AdminSitesRoute: typeof AdminSitesRoute
-  AdminThreadsRoute: typeof AdminThreadsRoute
-  AdminUsersRoute: typeof AdminUsersRoute
-  AdminIndexRoute: typeof AdminIndexRoute
+interface AdminCommentsLazyRouteChildren {
+  AdminCommentsCommentIdLazyRoute: typeof AdminCommentsCommentIdLazyRoute
 }
 
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminAccountRoute: AdminAccountRoute,
-  AdminCommentsRoute: AdminCommentsRouteWithChildren,
-  AdminSettingsRoute: AdminSettingsRoute,
-  AdminSitesRoute: AdminSitesRoute,
-  AdminThreadsRoute: AdminThreadsRoute,
-  AdminUsersRoute: AdminUsersRoute,
-  AdminIndexRoute: AdminIndexRoute,
+const AdminCommentsLazyRouteChildren: AdminCommentsLazyRouteChildren = {
+  AdminCommentsCommentIdLazyRoute: AdminCommentsCommentIdLazyRoute,
 }
 
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+const AdminCommentsLazyRouteWithChildren =
+  AdminCommentsLazyRoute._addFileChildren(AdminCommentsLazyRouteChildren)
 
-interface LoginRouteChildren {
-  LoginOtpRoute: typeof LoginOtpRoute
-  LoginIndexRoute: typeof LoginIndexRoute
+interface AdminLazyRouteChildren {
+  AdminAccountLazyRoute: typeof AdminAccountLazyRoute
+  AdminCommentsLazyRoute: typeof AdminCommentsLazyRouteWithChildren
+  AdminSettingsLazyRoute: typeof AdminSettingsLazyRoute
+  AdminSitesLazyRoute: typeof AdminSitesLazyRoute
+  AdminThreadsLazyRoute: typeof AdminThreadsLazyRoute
+  AdminUsersLazyRoute: typeof AdminUsersLazyRoute
+  AdminIndexLazyRoute: typeof AdminIndexLazyRoute
 }
 
-const LoginRouteChildren: LoginRouteChildren = {
-  LoginOtpRoute: LoginOtpRoute,
-  LoginIndexRoute: LoginIndexRoute,
+const AdminLazyRouteChildren: AdminLazyRouteChildren = {
+  AdminAccountLazyRoute: AdminAccountLazyRoute,
+  AdminCommentsLazyRoute: AdminCommentsLazyRouteWithChildren,
+  AdminSettingsLazyRoute: AdminSettingsLazyRoute,
+  AdminSitesLazyRoute: AdminSitesLazyRoute,
+  AdminThreadsLazyRoute: AdminThreadsLazyRoute,
+  AdminUsersLazyRoute: AdminUsersLazyRoute,
+  AdminIndexLazyRoute: AdminIndexLazyRoute,
 }
 
-const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
+const AdminLazyRouteWithChildren = AdminLazyRoute._addFileChildren(
+  AdminLazyRouteChildren,
+)
+
+interface LoginLazyRouteChildren {
+  LoginOtpLazyRoute: typeof LoginOtpLazyRoute
+  LoginIndexLazyRoute: typeof LoginIndexLazyRoute
+}
+
+const LoginLazyRouteChildren: LoginLazyRouteChildren = {
+  LoginOtpLazyRoute: LoginOtpLazyRoute,
+  LoginIndexLazyRoute: LoginIndexLazyRoute,
+}
+
+const LoginLazyRouteWithChildren = LoginLazyRoute._addFileChildren(
+  LoginLazyRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AccountRoute: AccountRouteWithChildren,
-  AdminRoute: AdminRouteWithChildren,
+  IndexLazyRoute: IndexLazyRoute,
   AuthorizeRoute: AuthorizeRoute,
-  LoginRoute: LoginRouteWithChildren,
-  LogoutRoute: LogoutRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
-  SetupRoute: SetupRoute,
   UnsubscribeRoute: UnsubscribeRoute,
-  OauthCallbackProviderRoute: OauthCallbackProviderRoute,
+  AccountLazyRoute: AccountLazyRouteWithChildren,
+  AdminLazyRoute: AdminLazyRouteWithChildren,
+  LoginLazyRoute: LoginLazyRouteWithChildren,
+  LogoutLazyRoute: LogoutLazyRoute,
+  ResetPasswordLazyRoute: ResetPasswordLazyRoute,
+  SetupLazyRoute: SetupLazyRoute,
+  OauthCallbackProviderLazyRoute: OauthCallbackProviderLazyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

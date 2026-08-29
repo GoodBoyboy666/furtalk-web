@@ -3,7 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ThreadsPage } from './admin.threads'
+import { ThreadsPage } from '@/pages/admin.threads'
 import type { AdminThread } from '@/lib/api/types'
 import { ApiError } from '@/lib/api/client'
 
@@ -18,9 +18,6 @@ const apiMocks = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
-}))
 vi.mock('@/lib/api/resources', () => ({
   sitesApi: apiMocks.sitesApi,
   threadsApi: apiMocks.threadsApi,

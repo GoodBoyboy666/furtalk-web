@@ -3,7 +3,7 @@ import { StrictMode } from 'react'
 import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { OAuthCallbackPage } from './oauth.callback.$provider'
+import { OAuthCallbackPage } from '@/pages/oauth.callback.$provider'
 import { ApiError } from '@/lib/api/client'
 import type { OAuthCompleteResponse } from '@/lib/api/types'
 
@@ -19,7 +19,7 @@ const apiMocks = vi.hoisted(() => {
 })
 
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ useParams: () => apiMocks.params }),
+  getRouteApi: () => ({ useParams: () => apiMocks.params }),
   useSearch: () => apiMocks.search,
   Link: ({
     to,

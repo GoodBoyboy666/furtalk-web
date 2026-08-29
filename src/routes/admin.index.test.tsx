@@ -11,7 +11,7 @@ import {
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { OverviewPage } from './admin.index'
+import { OverviewPage } from '@/pages/admin.index'
 
 const apiMocks = vi.hoisted(() => ({
   commentsApi: { list: vi.fn(), trend: vi.fn() },
@@ -20,7 +20,6 @@ const apiMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => (options: unknown) => options,
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
   ),

@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ProfilePage } from './account.profile'
+import { ProfilePage } from '@/pages/account.profile'
 import type { Me } from '@/lib/api/types'
 
 const apiMocks = vi.hoisted(() => ({
@@ -11,9 +11,6 @@ const apiMocks = vi.hoisted(() => ({
   updateNotifications: vi.fn(),
 }))
 
-vi.mock('@tanstack/react-router', () => ({
-  createFileRoute: () => () => ({ component: null }),
-}))
 vi.mock('@/lib/api/resources', () => ({ authApi: apiMocks }))
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
