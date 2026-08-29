@@ -90,13 +90,48 @@ describe('SpamProviderSection contract', () => {
     expect(await screen.findByText('已配置 · 已启用')).toBeInTheDocument()
   })
 
-  it('saves a local provider with file path, nickname toggle and action', async () => {
+  it('does not resend a legacy path when toggling a local provider', async () => {
+    apiMocks.list.mockResolvedValue({
+      providers: [
+        {
+          provider_key: 'spam.local',
+          kind: 'spam',
+          configured: true,
+          public_config: {
+            file_path: '/legacy/keywords.txt',
+            check_nickname: true,
+            action: 'pending',
+          },
+        },
+      ],
+    })
+    renderSection()
+    await screen.findByText('本地关键词库')
+    await userEvent.click(
+      screen.getByRole('switch', { name: '启用垃圾检测 spam.local' }),
+    )
+    await waitFor(() => {
+      expect(apiMocks.upsert).toHaveBeenCalledWith(
+        'spam.local',
+        expect.objectContaining({
+          enabled: true,
+          config: { check_nickname: true, action: 'pending' },
+        }),
+      )
+    })
+    expect(JSON.stringify(apiMocks.upsert.mock.calls[0])).not.toContain(
+      'file_path',
+    )
+  })
+
+  it('saves a local provider with fixed-file guidance, nickname toggle and action', async () => {
     renderSection()
     await screen.findByText('本地关键词库')
     const edit = screen.getAllByLabelText('编辑 spam.local')[0]
     await userEvent.click(edit)
-    const path = await screen.findByLabelText('词库文件路径')
-    await userEvent.type(path, '/var/lib/furtalk/keywords.txt')
+    expect(
+      await screen.findByText('固定词库文件：configs/spam/keywords.txt'),
+    ).toBeInTheDocument()
     await userEvent.click(screen.getByLabelText('同时检测昵称'))
     await userEvent.click(screen.getByLabelText('命中动作'))
     await userEvent.click(await screen.findByText('标记为垃圾（spam）'))
@@ -107,25 +142,43 @@ describe('SpamProviderSection contract', () => {
         expect.objectContaining({
           kind: 'spam',
           enabled: false,
-          config: expect.objectContaining({
-            file_path: '/var/lib/furtalk/keywords.txt',
-            check_nickname: true,
-            action: 'spam',
-          }),
+          config: { check_nickname: true, action: 'spam' },
         }),
       )
     })
   })
 
-  it('requires a file path when creating a local provider', async () => {
+  it('does not expose or submit a legacy file path', async () => {
+    apiMocks.list.mockResolvedValue({
+      providers: [
+        {
+          provider_key: 'spam.local',
+          kind: 'spam',
+          configured: true,
+          public_config: {
+            file_path: '/legacy/keywords.txt',
+            check_nickname: true,
+            action: 'pending',
+          },
+        },
+      ],
+    })
     renderSection()
     await screen.findByText('本地关键词库')
     await userEvent.click(screen.getAllByLabelText('编辑 spam.local')[0])
+    expect(screen.queryByLabelText('词库文件路径')).not.toBeInTheDocument()
     await userEvent.click(screen.getByText('保存修改'))
     await waitFor(() => {
-      expect(apiMocks.upsert).not.toHaveBeenCalled()
-      expect(toast.error).toHaveBeenCalledWith('请填写词库文件路径')
+      expect(apiMocks.upsert).toHaveBeenCalledWith(
+        'spam.local',
+        expect.objectContaining({
+          config: { check_nickname: true, action: 'pending' },
+        }),
+      )
     })
+    expect(JSON.stringify(apiMocks.upsert.mock.calls[0])).not.toContain(
+      'file_path',
+    )
   })
 
   it('never submits an existing secret on edit and keeps secret blank to preserve it', async () => {

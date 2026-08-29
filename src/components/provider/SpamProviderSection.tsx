@@ -77,9 +77,15 @@ export function SpamProviderSection() {
 
   const toggle = useMutation({
     mutationFn: (provider: Provider) => {
-      // 开关回传完整公开配置（含布尔字段），省略机密由后端保留语义处理。
-      const config =
-        provider.public_config as unknown as ProviderUpsertPayload['config']
+      // 开关回传公开配置（含布尔字段），省略机密由后端保留语义处理；
+      // 本地渠道只发送固定契约字段，避免旧配置中的路径字段被再次提交。
+      const config: ProviderUpsertPayload['config'] =
+        provider.provider_key === 'spam.local'
+          ? {
+              check_nickname: readBool(provider, 'check_nickname'),
+              action: readString(provider, 'action') || 'pending',
+            }
+          : provider.public_config
       return providersApi.upsert(provider.provider_key, {
         kind: 'spam',
         enabled: !(provider.enabled ?? false),
@@ -239,7 +245,6 @@ function SpamProviderFormDialog({
   const queryClient = useQueryClient()
   const isEdit = Object.keys(provider.public_config).length > 0
 
-  const [filePath, setFilePath] = useState(readString(provider, 'file_path'))
   const [checkNickname, setCheckNickname] = useState(
     readBool(provider, 'check_nickname'),
   )
@@ -260,8 +265,6 @@ function SpamProviderFormDialog({
       const config: ProviderUpsertPayload['config'] = {}
       switch (provider.provider_key) {
         case 'spam.local': {
-          if (!filePath.trim()) throw new Error(t('spamFilePathRequired'))
-          config.file_path = filePath.trim()
           config.check_nickname = checkNickname
           config.action = action
           break
@@ -341,16 +344,12 @@ function SpamProviderFormDialog({
         <div className="grid gap-4 py-2">
           {provider.provider_key === 'spam.local' ? (
             <>
-              <div className="grid gap-2">
-                <Label htmlFor="spam-file-path">{t('spamFilePath')}</Label>
-                <Input
-                  id="spam-file-path"
-                  value={filePath}
-                  onChange={(event) => setFilePath(event.target.value)}
-                  placeholder="/var/lib/furtalk/keywords.txt"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('spamFilePathHint')}
+              <div className="grid gap-1 rounded-md bg-muted/50 px-3 py-2">
+                <p className="m-0 text-sm font-medium">
+                  {t('spamFixedFilePath')}
+                </p>
+                <p className="m-0 text-xs text-muted-foreground">
+                  {t('spamFixedFilePathHint')}
                 </p>
               </div>
               <div className="flex items-center justify-between gap-4">

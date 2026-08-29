@@ -347,8 +347,7 @@ export type ProviderUpsertPayload = {
     site_key?: string
     secret_key?: string
     endpoint?: string
-    /** Spam 本地词库专用：绝对路径与昵称检测开关。 */
-    file_path?: string
+    /** Spam 本地词库专用：昵称检测开关。词库固定读取 configs/spam/keywords.txt。 */
     check_nickname?: boolean
     /** Spam 二元渠道（本地/Akismet）命中动作。 */
     action?: string
