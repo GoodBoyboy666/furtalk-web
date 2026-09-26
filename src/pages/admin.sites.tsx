@@ -32,7 +32,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { PageHeader } from '@/components/PageHeader'
 import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -286,7 +292,6 @@ export function SitesPage() {
             </AlertDialogCancel>
             <AlertDialogAction
               disabled={remove.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => deleteId && remove.mutate(deleteId)}
             >
               {remove.isPending ? <Loader2 className="animate-spin" /> : null}
@@ -360,7 +365,7 @@ function SiteCard({
   }
   return (
     <Card className="h-full border-border/80 bg-card subtle-card-hover">
-      <CardHeader className="flex-row items-start justify-between border-b border-border/60 pb-3">
+      <CardHeader className="border-b border-border/60 pb-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Globe2 className="size-4.5" />
@@ -377,7 +382,8 @@ function SiteCard({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <CardAction className="flex items-center gap-1">
+          <StatusBadge value={site.status} />
           <Button
             variant="ghost"
             size="icon"
@@ -394,15 +400,9 @@ function SiteCard({
           >
             <Trash2 className="size-4 text-destructive" />
           </Button>
-        </div>
+        </CardAction>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            {t('currentStatus')}
-          </span>
-          <StatusBadge value={site.status} />
-        </div>
         <div className="grid gap-2">
           <p className="m-0 text-xs font-medium">{t('allowedOrigins')}</p>
           {site.origins.length ? (
@@ -512,7 +512,6 @@ function SiteCard({
             </AlertDialogCancel>
             <AlertDialogAction
               disabled={remove.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => removingOrigin && remove.mutate(removingOrigin)}
             >
               {remove.isPending ? <Loader2 className="animate-spin" /> : null}

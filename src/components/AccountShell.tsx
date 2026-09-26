@@ -33,13 +33,25 @@ const accountNavigation = [
   { to: '/account/comments', labelKey: 'navigation.myComments' },
 ] as const
 
-function AccountNav({ onNavigate }: { onNavigate?: () => void }) {
+function AccountNav({
+  onNavigate,
+  drawer = false,
+}: {
+  onNavigate?: () => void
+  drawer?: boolean
+}) {
   const { t } = useTranslation('common')
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
   return (
-    <nav className="inline-flex flex-wrap items-center gap-1 rounded-xl border border-border/60 bg-muted/40 p-1">
+    <nav
+      className={
+        drawer
+          ? 'flex w-full flex-col gap-1'
+          : 'inline-flex items-center gap-1 rounded-xl border border-border/60 bg-muted/40 p-1'
+      }
+    >
       {accountNavigation.map((item) => {
         const active = pathname === item.to || pathname.startsWith(item.to)
         return (
@@ -47,9 +59,14 @@ function AccountNav({ onNavigate }: { onNavigate?: () => void }) {
             key={item.to}
             to={item.to}
             onClick={onNavigate}
-            className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all ${
+            aria-current={active ? 'page' : undefined}
+            className={`rounded-lg text-sm font-medium transition-colors ${
+              drawer ? 'block w-full px-3 py-2.5' : 'px-3.5 py-1.5'
+            } ${
               active
-                ? 'bg-background text-foreground shadow-xs'
+                ? drawer
+                  ? 'bg-accent text-accent-foreground'
+                  : 'bg-background text-foreground shadow-xs'
                 : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
             }`}
           >
@@ -125,8 +142,8 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   const isAdmin = user.role === 'admin'
   return (
     <div className="min-h-screen bg-muted/20">
-      <header className="glass-header">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
+      <header className="glass-header sm:border-b-0!">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger
@@ -149,13 +166,13 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
                   </SheetTitle>
                 </SheetHeader>
                 <div className="p-3">
-                  <AccountNav onNavigate={() => setMobileOpen(false)} />
+                  <AccountNav drawer onNavigate={() => setMobileOpen(false)} />
                 </div>
               </SheetContent>
             </Sheet>
             <Link
               to="/account/profile"
-              className="flex min-w-0 items-center gap-3 text-foreground no-underline"
+              className="hidden min-w-0 items-center gap-3 text-foreground no-underline sm:flex"
             >
               <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
                 <BrandMark className="size-4.5" />
@@ -170,7 +187,10 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
               </div>
             </Link>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:block">
+            <AccountNav />
+          </div>
+          <div className="flex items-center gap-2 sm:justify-self-end">
             <LanguageToggle />
             <ThemeToggle />
             <DropdownMenu>
@@ -237,13 +257,8 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
             </DropdownMenu>
           </div>
         </div>
-        <div className="hidden border-t border-border/60 px-4 sm:block sm:px-6">
-          <div className="mx-auto flex h-13 max-w-5xl items-center gap-3">
-            <AccountNav />
-          </div>
-        </div>
       </header>
-      <main className="mx-auto min-h-[calc(100vh-7.5rem)] max-w-5xl p-4 sm:p-6">
+      <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-5xl p-4 sm:p-6">
         {children}
       </main>
     </div>

@@ -134,15 +134,13 @@ describe('NotificationProviderSection fixed eight-slot catalog', () => {
     expect(
       screen.queryByText(/通用 WebHook 允许任意 HTTP\/HTTPS/),
     ).not.toBeInTheDocument()
-    await userEvent.click(
-      screen.getByRole('button', { name: '配置 notification.bark' }),
-    )
+    await userEvent.click(screen.getByRole('button', { name: '配置 Bark' }))
     expect(
       await screen.findByText(/Bark 服务器地址允许任意 HTTP\/HTTPS/),
     ).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: '取消' }))
     await userEvent.click(
-      screen.getByRole('button', { name: '配置 notification.webhook' }),
+      screen.getByRole('button', { name: '配置 通用 WebHook' }),
     )
     expect(
       await screen.findByText(/通用 WebHook 允许任意 HTTP\/HTTPS/),
@@ -167,7 +165,7 @@ describe('NotificationProviderSection fixed eight-slot catalog', () => {
     })
     renderSection()
     const toggle = await screen.findByRole('switch', {
-      name: '启用通知通道 notification.telegram',
+      name: '启用通知通道 Telegram',
     })
     // base-ui Switch 用 aria-disabled 表示禁用态（span 无法携带原生 disabled 属性）。
     expect(toggle).toHaveAttribute('aria-disabled', 'true')
@@ -180,7 +178,7 @@ describe('NotificationProviderSection configure/edit contract', () => {
     await screen.findByText('Telegram')
     const user = userEvent.setup()
     await user.click(
-      await screen.findByRole('button', { name: '配置 notification.telegram' }),
+      await screen.findByRole('button', { name: '配置 Telegram' }),
     )
     await user.type(await screen.findByLabelText('Bot Token *'), '123456:ABC')
     await user.type(screen.getByLabelText('Chat ID *'), '-1001234567890')
@@ -203,7 +201,7 @@ describe('NotificationProviderSection configure/edit contract', () => {
     await screen.findByText('Telegram')
     const user = userEvent.setup()
     await user.click(
-      await screen.findByRole('button', { name: '配置 notification.telegram' }),
+      await screen.findByRole('button', { name: '配置 Telegram' }),
     )
     await user.type(await screen.findByLabelText('Chat ID *'), '-1001')
     await user.click(screen.getByRole('button', { name: '保存修改' }))
@@ -222,7 +220,7 @@ describe('NotificationProviderSection configure/edit contract', () => {
     await screen.findByText('Telegram')
     const user = userEvent.setup()
     await user.click(
-      await screen.findByRole('button', { name: '配置 notification.telegram' }),
+      await screen.findByRole('button', { name: '配置 Telegram' }),
     )
     // 机密字段永不回显；直接保存表示保留现值。
     await user.click(screen.getByRole('button', { name: '保存修改' }))
@@ -247,9 +245,7 @@ describe('NotificationProviderSection configure/edit contract', () => {
     renderSection()
     await screen.findByText('飞书')
     const user = userEvent.setup()
-    await user.click(
-      await screen.findByRole('button', { name: '配置 notification.feishu' }),
-    )
+    await user.click(await screen.findByRole('button', { name: '配置 飞书' }))
     await user.click(await screen.findByLabelText('清除已保存的签名密钥'))
     await user.click(screen.getByRole('button', { name: '保存修改' }))
 
@@ -269,9 +265,7 @@ describe('NotificationProviderSection configure/edit contract', () => {
     renderSection()
     await screen.findByText('钉钉')
     const user = userEvent.setup()
-    await user.click(
-      await screen.findByRole('button', { name: '配置 notification.dingtalk' }),
-    )
+    await user.click(await screen.findByRole('button', { name: '配置 钉钉' }))
     await user.type(
       await screen.findByLabelText('签名密钥（可选）'),
       'SECRET-1',
@@ -298,7 +292,7 @@ describe('NotificationProviderSection toggle/test/delete contract', () => {
     renderSection()
     const user = userEvent.setup()
     const toggle = await screen.findByRole('switch', {
-      name: '启用通知通道 notification.telegram',
+      name: '启用通知通道 Telegram',
     })
     await user.click(toggle)
 
@@ -319,13 +313,13 @@ describe('NotificationProviderSection toggle/test/delete contract', () => {
     const user = userEvent.setup()
     await user.click(
       await screen.findByRole('button', {
-        name: '测试 notification.slack 投递',
+        name: '测试 Slack 投递',
       }),
     )
     // 测试确认框先警告真实投递，确认后才调用接口。
     expect(await screen.findByText('发送测试消息？')).toBeInTheDocument()
     expect(
-      screen.getByText(/将向 notification.slack 发送一条真实测试消息/),
+      screen.getByText(/将向 Slack 发送一条真实测试消息/),
     ).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '发送测试' }))
 
@@ -342,7 +336,7 @@ describe('NotificationProviderSection toggle/test/delete contract', () => {
     const user = userEvent.setup()
     await user.click(
       await screen.findByRole('button', {
-        name: '测试 notification.line 投递',
+        name: '测试 LINE 投递',
       }),
     )
     await user.click(await screen.findByRole('button', { name: '发送测试' }))
@@ -358,7 +352,7 @@ describe('NotificationProviderSection toggle/test/delete contract', () => {
     renderSection()
     const user = userEvent.setup()
     await user.click(
-      await screen.findByRole('button', { name: '删除 notification.webhook' }),
+      await screen.findByRole('button', { name: '删除 通用 WebHook' }),
     )
     await user.click(await screen.findByRole('button', { name: '确认删除' }))
 

@@ -1,6 +1,5 @@
 {
   "profileTitle": "Profile",
-  "profileDescription": "Manage your nickname, website, and notification preferences.",
   "profileLoading": "Loading profile...",
   "profileSaved": "Profile updated",
   "profileSaveFailed": "Failed to save. Please try again later.",
@@ -17,7 +16,6 @@
   "saveNotificationPreferences": "Save notification preferences",
   "preferencesSaved": "Notification preferences updated",
   "securityTitle": "Security",
-  "securityDescription": "Manage your password and sign-in methods.",
   "securityLoading": "Loading security settings...",
   "changePassword": "Change password",
   "setPassword": "Set password",

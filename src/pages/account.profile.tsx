@@ -56,10 +56,7 @@ export function ProfilePage() {
     )
   return (
     <>
-      <PageHeader
-        title={t('profileTitle')}
-        description={t('profileDescription')}
-      />
+      <PageHeader title={t('profileTitle')} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-border/80 bg-card shadow-xs">
           <CardHeader className="border-b border-border/60 pb-3">

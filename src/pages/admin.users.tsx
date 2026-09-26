@@ -94,6 +94,7 @@ const userStatusOptions = [
 
 export function UsersPage() {
   const { t } = useTranslation('admin')
+  const [search, setSearch] = useState('')
   const [q, setQ] = useState('')
   const [sort, setSort] = useState<AdminSort>('desc')
   const [page, setPage] = useState(1)
@@ -212,19 +213,7 @@ export function UsersPage() {
           </Dialog>
         }
       />{' '}
-      <div className="mb-4 flex items-center gap-2">
-        <div className="relative max-w-md flex-1">
-          <Search className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground" />
-          <Input
-            value={q}
-            onChange={(event) => {
-              setQ(event.target.value)
-              setPage(1)
-            }}
-            placeholder={t('searchUserHint')}
-            className="pl-9 bg-card"
-          />
-        </div>
+      <div className="mb-4 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
         <Select
           value={sort}
           onValueChange={(value) => {
@@ -233,7 +222,7 @@ export function UsersPage() {
           }}
           items={selectItems(adminSortOptions, t)}
         >
-          <SelectTrigger className="w-36 bg-card">
+          <SelectTrigger className="w-full sm:w-36 bg-card">
             <SelectValue placeholder={t('sort.desc', { ns: 'enums' })}>
               {adminSortLabel}
             </SelectValue>
@@ -248,8 +237,32 @@ export function UsersPage() {
             </SelectGroup>
           </SelectContent>
         </Select>
+        <div className="relative min-w-0 flex-1 sm:min-w-48">
+          <Search className="pointer-events-none absolute left-3 top-2.5 size-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                setQ(search.trim())
+                setPage(1)
+              }
+            }}
+            placeholder={t('searchUserHint')}
+            className="pl-9 bg-card"
+          />
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setQ(search.trim())
+            setPage(1)
+          }}
+        >
+          {t('action.search', { ns: 'common' })}
+        </Button>
         {users.isSuccess ? (
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-sm font-medium text-muted-foreground sm:ml-auto">
             {t('userCount', { count: users.data.total })}
           </span>
         ) : null}

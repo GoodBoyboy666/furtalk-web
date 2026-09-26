@@ -196,10 +196,7 @@ export function SecurityPage() {
     )
   return (
     <>
-      <PageHeader
-        title={t('securityTitle')}
-        description={t('securityDescription')}
-      />
+      <PageHeader title={t('securityTitle')} />
       <div className="grid gap-6">
         <Card>
           <CardHeader className="border-b border-border/60 pb-3">

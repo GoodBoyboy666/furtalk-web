@@ -1,6 +1,5 @@
 {
   "profileTitle": "个人资料",
-  "profileDescription": "管理昵称、个人网站和通知偏好。",
   "profileLoading": "正在加载资料...",
   "profileSaved": "资料已更新",
   "profileSaveFailed": "保存失败，请稍后重试",
@@ -17,7 +16,6 @@
   "saveNotificationPreferences": "保存通知偏好",
   "preferencesSaved": "通知偏好已更新",
   "securityTitle": "安全设置",
-  "securityDescription": "管理密码与登录方式。",
   "securityLoading": "正在加载安全设置...",
   "changePassword": "修改密码",
   "setPassword": "设置密码",

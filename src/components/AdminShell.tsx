@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   BarChart3,
+  ChevronsUpDown,
   FileText,
   LogOut,
   Menu,
@@ -50,16 +51,7 @@ const primaryNavigation = [
   { to: '/admin/settings', labelKey: 'navigation.settings', icon: Settings },
 ] as const
 
-const secondaryNavigation = [
-  {
-    to: '/account/profile',
-    labelKey: 'navigation.personalCenter',
-    icon: UserRound,
-  },
-] as const
-
-type NavItem =
-  (typeof primaryNavigation)[number] | (typeof secondaryNavigation)[number]
+type NavItem = (typeof primaryNavigation)[number]
 
 function NavItems({
   items,
@@ -110,32 +102,67 @@ function SidebarNavigation({ onNavigate }: { onNavigate?: () => void }) {
         </p>
         <NavItems items={primaryNavigation} onNavigate={onNavigate} />
       </nav>
-      <nav
-        aria-label={t('navigation.personalCenter')}
-        className="mt-auto border-t border-sidebar-border pt-3"
-      >
-        <NavItems items={secondaryNavigation} onNavigate={onNavigate} />
-      </nav>
     </div>
   )
 }
 
-function SidebarUser({ user, initials }: { user: Me; initials: string }) {
+function SidebarUser({
+  user,
+  initials,
+  onProfile,
+  onLogout,
+  logoutPending,
+}: {
+  user: Me
+  initials: string
+  onProfile: () => void
+  onLogout: () => void
+  logoutPending: boolean
+}) {
   const { t } = useTranslation('common')
   return (
-    <div className="flex min-w-0 items-center gap-3 border-t border-sidebar-border px-4 py-3">
-      <UserAvatar
-        avatarUrl={user.avatar_url}
-        name={user.nickname || user.email}
-        fallback={initials}
-        className="size-8 shrink-0"
-      />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">
-          {user.nickname || t('accountMenu.nicknameFallback')}
-        </p>
-        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-      </div>
+    <div className="border-t border-sidebar-border p-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              aria-label={t('accountMenu.label')}
+              className="h-auto w-full justify-start gap-3 px-2 py-2 text-left hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-popup-open:bg-sidebar-accent data-popup-open:text-sidebar-accent-foreground"
+            >
+              <UserAvatar
+                avatarUrl={user.avatar_url}
+                name={user.nickname || user.email}
+                fallback={initials}
+                className="size-8 shrink-0"
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium">
+                  {user.nickname || t('accountMenu.nicknameFallback')}
+                </span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {user.email}
+                </span>
+              </span>
+              <ChevronsUpDown
+                className="ml-auto size-4 shrink-0"
+                aria-hidden="true"
+              />
+            </Button>
+          }
+        />
+        <DropdownMenuContent side="top" align="start" className="w-56">
+          <DropdownMenuItem onClick={onProfile}>
+            <UserRound className="mr-2 size-4" />
+            {t('navigation.personalCenter')}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem disabled={logoutPending} onClick={onLogout}>
+            <LogOut className="mr-2 size-4" />
+            {t('accountMenu.logout')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }
@@ -218,6 +245,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     )
   const user = session.data
   const initials = initialsFrom(user.nickname, user.email)
+  const openProfile = () => {
+    setMobileOpen(false)
+    void navigate({ to: '/account/profile' })
+  }
+  const signOut = () => logout.mutate()
   return (
     <div className="min-h-screen bg-muted/20">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:block">
@@ -236,7 +268,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <SidebarNavigation />
-          <SidebarUser user={user} initials={initials} />
+          <SidebarUser
+            user={user}
+            initials={initials}
+            onProfile={openProfile}
+            onLogout={signOut}
+            logoutPending={logout.isPending}
+          />
         </div>
       </aside>
       <div className="lg:pl-64">
@@ -275,7 +313,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   </SheetTitle>
                 </SheetHeader>
                 <SidebarNavigation onNavigate={() => setMobileOpen(false)} />
-                <SidebarUser user={user} initials={initials} />
+                <SidebarUser
+                  user={user}
+                  initials={initials}
+                  onProfile={openProfile}
+                  onLogout={signOut}
+                  logoutPending={logout.isPending}
+                />
               </SheetContent>
             </Sheet>
             <div className="lg:hidden">
@@ -288,43 +332,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <LanguageToggle />
             <ThemeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    className="gap-2 px-2"
-                    aria-label={t('accountMenu.label')}
-                  >
-                    <UserAvatar
-                      avatarUrl={user.avatar_url}
-                      name={user.nickname || user.email}
-                      fallback={initials}
-                      className="size-7"
-                    />
-                    <span className="hidden max-w-28 truncate text-sm sm:inline">
-                      {user.nickname || user.email}
-                    </span>
-                  </Button>
-                }
-              />
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem
-                  onClick={() => void navigate({ to: '/account/profile' })}
-                >
-                  <UserRound className="mr-2 size-4" />
-                  {t('navigation.personalCenter')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  disabled={logout.isPending}
-                  onClick={() => logout.mutate()}
-                >
-                  <LogOut className="mr-2 size-4" />
-                  {t('accountMenu.logout')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </header>
         <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-7xl p-4 sm:p-6">

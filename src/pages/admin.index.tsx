@@ -38,7 +38,6 @@ import { Label } from '@/components/ui/label'
 import { CardHeaderLead } from '@/components/CardHeaderLead'
 import { PageHeader } from '@/components/PageHeader'
 import { Skeleton } from '@/components/ui/skeleton'
-import { StatusBadge } from '@/components/StatusBadge'
 import { Stagger, StaggerItem } from '@/components/motion'
 import { commentsApi, sitesApi, usersApi } from '@/lib/api/resources'
 import {
@@ -346,21 +345,18 @@ export function OverviewPage() {
                     params={{ commentId: comment.id }}
                     className="block rounded-lg p-3 no-underline transition-colors hover:bg-muted/50 first:pt-3 last:pb-3"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-foreground">
-                          {comment.author_nickname ||
-                            comment.author_email ||
-                            t('anonymousUser')}
-                        </p>
-                        <p
-                          className="mt-1 truncate text-xs leading-relaxed text-muted-foreground"
-                          title={comment.body}
-                        >
-                          {comment.body}
-                        </p>
-                      </div>
-                      <StatusBadge value={comment.status} />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {comment.author_nickname ||
+                          comment.author_email ||
+                          t('anonymousUser')}
+                      </p>
+                      <p
+                        className="mt-1 truncate text-xs leading-relaxed text-muted-foreground"
+                        title={comment.body}
+                      >
+                        {comment.body}
+                      </p>
                     </div>
                   </Link>
                 ))}
@@ -376,7 +372,7 @@ export function OverviewPage() {
               </CardTitle>
             </CardHeaderLead>
           </CardHeader>
-          <CardContent className="grid gap-2">
+          <CardContent className="grid gap-1">
             {[
               { to: '/admin/comments', label: t('reviewComments') },
               { to: '/admin/sites', label: t('configureSites') },
@@ -386,7 +382,7 @@ export function OverviewPage() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="group flex items-center justify-between rounded-xl border border-border/70 bg-card p-3 text-sm font-medium no-underline transition-all hover:border-border hover:bg-muted/50 hover:shadow-xs"
+                className="group flex items-center justify-between rounded-lg px-3 py-3 text-sm font-medium no-underline transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <span>{item.label}</span>
                 <ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />

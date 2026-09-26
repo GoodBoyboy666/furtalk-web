@@ -107,7 +107,7 @@ function CommentsList() {
   return (
     <>
       <PageHeader title={t('commentsTitle')} />
-      <div className="mb-4 flex flex-col gap-3 rounded-xl border border-border/80 bg-card p-3.5 shadow-xs sm:flex-row sm:items-center">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <Select
           value={siteId ?? 'all'}
           onValueChange={(value) =>
@@ -176,7 +176,7 @@ function CommentsList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[50%] min-w-[200px]">
+                <TableHead className="w-[50%] min-w-[200px] pl-4">
                   {t('content')}
                 </TableHead>
                 <TableHead className="w-[20%] min-w-[120px]">
@@ -191,7 +191,7 @@ function CommentsList() {
             <TableBody>
               {list.data.comments.map((comment) => (
                 <TableRow key={comment.id}>
-                  <TableCell className="max-w-xs sm:max-w-md lg:max-w-lg whitespace-normal">
+                  <TableCell className="max-w-xs sm:max-w-md lg:max-w-lg whitespace-normal pl-4">
                     <Link
                       to="/account/comments/$commentId"
                       params={{ commentId: comment.id }}

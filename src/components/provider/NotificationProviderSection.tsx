@@ -24,7 +24,6 @@ import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -281,6 +280,10 @@ export function NotificationProviderSection({
     spec,
     provider: notificationByKey.get(spec.key),
   }))
+  const channelName = (key: string) => {
+    const spec = notificationChannels.find((channel) => channel.key === key)
+    return spec ? t(spec.titleKey) : key
+  }
 
   const invalidate = () =>
     void queryClient.invalidateQueries({
@@ -380,7 +383,7 @@ export function NotificationProviderSection({
                     checked={provider?.enabled ?? false}
                     disabled={!provider?.configured}
                     aria-label={t('enableNotificationChannel', {
-                      key: spec.key,
+                      key: t(spec.titleKey),
                     })}
                     title={
                       provider?.configured
@@ -392,7 +395,9 @@ export function NotificationProviderSection({
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label={t('testNotificationChannel', { key: spec.key })}
+                    aria-label={t('testNotificationChannel', {
+                      key: t(spec.titleKey),
+                    })}
                     disabled={!provider?.configured}
                     onClick={() => provider && setTesting(provider)}
                   >
@@ -402,7 +407,7 @@ export function NotificationProviderSection({
                     variant="ghost"
                     size="icon"
                     aria-label={t('configureNotificationChannel', {
-                      key: spec.key,
+                      key: t(spec.titleKey),
                     })}
                     onClick={() => setEditing({ spec, provider })}
                   >
@@ -412,7 +417,7 @@ export function NotificationProviderSection({
                     variant="ghost"
                     size="icon"
                     aria-label={t('deleteNotificationChannel', {
-                      key: spec.key,
+                      key: t(spec.titleKey),
                     })}
                     disabled={!provider}
                     onClick={() => provider && setDeleting(provider)}
@@ -441,7 +446,9 @@ export function NotificationProviderSection({
             <AlertDialogTitle>{t('notificationTestTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
               {testing
-                ? t('notificationTestHint', { key: testing.provider_key })
+                ? t('notificationTestHint', {
+                    key: channelName(testing.provider_key),
+                  })
                 : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -468,7 +475,9 @@ export function NotificationProviderSection({
             <AlertDialogTitle>{t('notificationDeleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
               {deleting
-                ? t('notificationDeleteHint', { key: deleting.provider_key })
+                ? t('notificationDeleteHint', {
+                    key: channelName(deleting.provider_key),
+                  })
                 : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -564,20 +573,10 @@ function NotificationChannelFormDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {t('notificationEditTitle', { key: channel.key })}
+            {t('notificationEditTitle', { key: t(channel.titleKey) })}
           </DialogTitle>
-          {isEdit ? (
-            <DialogDescription>
-              {t('notificationSecretKeepHint')}
-            </DialogDescription>
-          ) : null}
         </DialogHeader>
         <div className="grid gap-4 py-2">
-          {channel.hintKey ? (
-            <p className="m-0 text-xs text-muted-foreground">
-              {t(channel.hintKey)}
-            </p>
-          ) : null}
           {channel.fields.map((field) => (
             <div className="grid gap-2" key={field.name}>
               <Label htmlFor={`notification-${channel.key}-${field.name}`}>
@@ -652,9 +651,6 @@ function NotificationChannelFormDialog({
               )}
             </p>
           ) : null}
-          <p className="m-0 rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
-            {t('notificationTestRealDeliveryHint')}
-          </p>
           <div className="flex items-center justify-between gap-4">
             <Label className="cursor-pointer">{t('enableLabel')}</Label>
             <Switch checked={enabled} onCheckedChange={setEnabled} />

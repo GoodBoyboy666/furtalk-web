@@ -105,16 +105,13 @@ describe('AdminShell navigation copy', () => {
     expect(screen.queryByRole('link', { name: '评论审核' })).toBeNull()
   })
 
-  it('groups every admin destination above personal center and marks nested routes active', async () => {
+  it('keeps admin destinations in the sidebar and marks nested routes active', async () => {
     routerState.pathname = '/admin/comments/123'
     const { container } = renderShell()
     await screen.findByRole('button', { name: '账户菜单' })
     const sidebar = container.querySelector('aside') as HTMLElement
     const mainNavigation = within(sidebar).getByRole('navigation', {
       name: '工作区',
-    })
-    const secondaryNavigation = within(sidebar).getByRole('navigation', {
-      name: '个人中心',
     })
     expect(
       within(mainNavigation)
@@ -128,19 +125,19 @@ describe('AdminShell navigation copy', () => {
       '/admin/users',
       '/admin/settings',
     ])
-    expect(
-      within(secondaryNavigation).getByRole('link', { name: '个人中心' }),
-    ).toHaveAttribute('href', '/account/profile')
+    expect(within(sidebar).queryByRole('link', { name: '个人中心' })).toBeNull()
     expect(
       within(mainNavigation).getByRole('link', { name: '评论管理' }),
     ).toHaveAttribute('aria-current', 'page')
     expect(
       within(mainNavigation).getByRole('link', { name: '概览' }),
     ).not.toHaveAttribute('aria-current')
-    expect(within(sidebar).getByText('admin@example.com')).toBeInTheDocument()
+    expect(
+      within(sidebar).getByRole('button', { name: '账户菜单' }),
+    ).toHaveTextContent('admin@example.com')
   })
 
-  it('shows the same groups in the mobile sheet and closes after navigation', async () => {
+  it('shows admin destinations in the mobile sheet and closes after opening personal center', async () => {
     renderShell()
     await screen.findByRole('button', { name: '账户菜单' })
     await userEvent.click(screen.getByRole('button', { name: '打开导航' }))
@@ -157,7 +154,12 @@ describe('AdminShell navigation copy', () => {
       '/admin/users',
       '/admin/settings',
     ])
-    await userEvent.click(within(sheet).getByRole('link', { name: '个人中心' }))
+    await userEvent.click(
+      within(sheet).getByRole('button', { name: '账户菜单' }),
+    )
+    await userEvent.click(
+      await screen.findByRole('menuitem', { name: '个人中心' }),
+    )
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 })
@@ -181,18 +183,30 @@ describe('AdminShell language placement', () => {
 
 describe('AdminShell account dropdown', () => {
   it('renders an icon beside the personal-center menu item', async () => {
-    renderShell()
-    const trigger = await screen.findByRole('button', { name: '账户菜单' })
+    const { container } = renderShell()
+    const sidebar = container.querySelector('aside') as HTMLElement
+    const trigger = await within(sidebar).findByRole('button', {
+      name: '账户菜单',
+    })
     await userEvent.click(trigger)
     const item = await screen.findByRole('menuitem', { name: '个人中心' })
     expect(item.querySelector('svg')).not.toBeNull()
   })
 
   it('links the personal-center menu item to /account/profile', async () => {
-    renderShell()
-    const trigger = await screen.findByRole('button', { name: '账户菜单' })
+    const { container } = renderShell()
+    const sidebar = container.querySelector('aside') as HTMLElement
+    const trigger = await within(sidebar).findByRole('button', {
+      name: '账户菜单',
+    })
     await userEvent.click(trigger)
     const item = await screen.findByRole('menuitem', { name: '个人中心' })
     expect(item).toBeInTheDocument()
+    expect(
+      within(container.querySelector('header') as HTMLElement).queryByRole(
+        'button',
+        { name: '账户菜单' },
+      ),
+    ).toBeNull()
   })
 })
