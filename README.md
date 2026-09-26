@@ -11,6 +11,16 @@ pnpm dev
 
 Vite 开发服务器运行在 3000 端口，并将 `/api` 代理到 `VITE_API_PROXY_TARGET`（默认 `http://127.0.0.1:8080`）。可通过 `VITE_API_BASE_URL`（默认 `/api/v1`）为浏览器客户端覆盖 API 源地址。
 
+### MSW 本地模拟模式
+
+无需启动后端即可运行 Web 控制台：
+
+```bash
+pnpm dev:mock
+```
+
+模拟模式从登录页开始。演示管理员账号为 `admin@example.test`，密码为 `Furtalk-Demo-2026!`；邮件验证码流程使用 `123456`。这些账号和数据仅供本地开发。模拟状态保存在当前浏览器会话中，会话结束后重置。
+
 ## 生产构建
 
 ```bash

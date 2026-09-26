@@ -3,4 +3,5 @@ autoInstallPeers: false
 allowBuilds:
   esbuild: true
   lightningcss: true
+  msw: false
   unrs-resolver: true

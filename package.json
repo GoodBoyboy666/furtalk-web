@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "vite dev --port 3000",
+    "dev:mock": "vite dev --mode mock --port 3000",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
@@ -60,6 +61,7 @@
     "@vitejs/plugin-react": "^6.0.5",
     "eslint": "^9.39.5",
     "jsdom": "^30.0.1",
+    "msw": "^2.15.0",
     "prettier": "^3.9.6",
     "typescript": "^6.0.3",
     "vite": "^8.2.0",
@@ -69,6 +71,11 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "lightningcss"
+    ]
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
     ]
   }
 }

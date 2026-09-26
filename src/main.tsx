@@ -10,9 +10,18 @@ import './styles.css'
 
 const queryClient = createQueryClient()
 
-// 在 React 挂载前完成 i18next 初始化，避免翻译键闪烁；
-// HTTP 目录加载完成后才会渲染应用。
-initI18n().then(() => {
+async function startApp() {
+  if (import.meta.env.DEV && import.meta.env.MODE === 'mock') {
+    const { worker } = await import('./mocks/browser')
+    await worker.start({
+      onUnhandledRequest: 'bypass',
+      serviceWorker: { url: '/mockServiceWorker.js' },
+    })
+  }
+
+  // 在 React 挂载前完成 i18next 初始化，避免翻译键闪烁；
+  // HTTP 目录加载完成后才会渲染应用。
+  await initI18n()
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       {/* MotionConfig reducedMotion="user"：尊重 prefers-reduced-motion，
@@ -24,4 +33,6 @@ initI18n().then(() => {
       </MotionConfig>
     </StrictMode>,
   )
-})
+}
+
+void startApp()
