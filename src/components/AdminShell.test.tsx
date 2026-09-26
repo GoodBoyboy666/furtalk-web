@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -10,18 +16,28 @@ const apiMocks = vi.hoisted(() => ({
   me: vi.fn(),
   logout: vi.fn(),
 }))
+const routerState = vi.hoisted(() => ({ pathname: '/admin/comments' }))
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({
     to,
     className,
     children,
+    onClick,
+    'aria-current': ariaCurrent,
   }: {
     to: string
     className?: string
     children: React.ReactNode
+    onClick?: () => void
+    'aria-current'?: 'page'
   }) => (
-    <a href={to} className={className}>
+    <a
+      href={to}
+      className={className}
+      onClick={onClick}
+      aria-current={ariaCurrent}
+    >
       {children}
     </a>
   ),
@@ -31,8 +47,8 @@ vi.mock('@tanstack/react-router', () => ({
   }: {
     select?: (state: { location: { pathname: string } }) => unknown
   }) =>
-    select?.({ location: { pathname: '/admin/comments' } }) ??
-    '/admin/comments',
+    select?.({ location: { pathname: routerState.pathname } }) ??
+    routerState.pathname,
 }))
 vi.mock('@/lib/api/resources', () => ({
   authApi: { me: apiMocks.me, logout: apiMocks.logout },
@@ -78,6 +94,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   apiMocks.me.mockResolvedValue(adminMe)
   apiMocks.logout.mockResolvedValue(undefined)
+  routerState.pathname = '/admin/comments'
 })
 
 describe('AdminShell navigation copy', () => {
@@ -86,6 +103,62 @@ describe('AdminShell navigation copy', () => {
     const link = await screen.findByRole('link', { name: '评论管理' })
     expect(link.getAttribute('href')).toBe('/admin/comments')
     expect(screen.queryByRole('link', { name: '评论审核' })).toBeNull()
+  })
+
+  it('groups every admin destination above personal center and marks nested routes active', async () => {
+    routerState.pathname = '/admin/comments/123'
+    const { container } = renderShell()
+    await screen.findByRole('button', { name: '账户菜单' })
+    const sidebar = container.querySelector('aside') as HTMLElement
+    const mainNavigation = within(sidebar).getByRole('navigation', {
+      name: '工作区',
+    })
+    const secondaryNavigation = within(sidebar).getByRole('navigation', {
+      name: '个人中心',
+    })
+    expect(
+      within(mainNavigation)
+        .getAllByRole('link')
+        .map((link) => link.getAttribute('href')),
+    ).toEqual([
+      '/admin',
+      '/admin/comments',
+      '/admin/threads',
+      '/admin/sites',
+      '/admin/users',
+      '/admin/settings',
+    ])
+    expect(
+      within(secondaryNavigation).getByRole('link', { name: '个人中心' }),
+    ).toHaveAttribute('href', '/account/profile')
+    expect(
+      within(mainNavigation).getByRole('link', { name: '评论管理' }),
+    ).toHaveAttribute('aria-current', 'page')
+    expect(
+      within(mainNavigation).getByRole('link', { name: '概览' }),
+    ).not.toHaveAttribute('aria-current')
+    expect(within(sidebar).getByText('admin@example.com')).toBeInTheDocument()
+  })
+
+  it('shows the same groups in the mobile sheet and closes after navigation', async () => {
+    renderShell()
+    await screen.findByRole('button', { name: '账户菜单' })
+    await userEvent.click(screen.getByRole('button', { name: '打开导航' }))
+    const sheet = await screen.findByRole('dialog')
+    expect(
+      within(within(sheet).getByRole('navigation', { name: '工作区' }))
+        .getAllByRole('link')
+        .map((link) => link.getAttribute('href')),
+    ).toEqual([
+      '/admin',
+      '/admin/comments',
+      '/admin/threads',
+      '/admin/sites',
+      '/admin/users',
+      '/admin/settings',
+    ])
+    await userEvent.click(within(sheet).getByRole('link', { name: '个人中心' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 })
 

@@ -18,6 +18,7 @@ const apiMocks = vi.hoisted(() => {
     emailCodeLogin: vi.fn(),
     passkeyOptions: vi.fn(),
     passkeyVerify: vi.fn(),
+    passkeySupported: vi.fn(() => true),
     captchaConfig: vi.fn(),
     me: vi.fn(),
     providers: vi.fn(),
@@ -65,7 +66,7 @@ vi.mock('@/lib/api/resources', () => ({
   },
 }))
 vi.mock('@/lib/passkey', () => ({
-  isPasskeySupported: () => true,
+  isPasskeySupported: apiMocks.passkeySupported,
   prepareCredentialRequestOptions: (options: unknown) => options,
   serializeCredential: (credential: unknown) => ({ credential }),
 }))
@@ -182,6 +183,7 @@ beforeEach(() => {
     options: {},
   })
   apiMocks.passkeyVerify.mockResolvedValue(undefined)
+  apiMocks.passkeySupported.mockReturnValue(true)
   apiMocks.me.mockResolvedValue(adminMe)
   apiMocks.providers.mockResolvedValue({ providers: [] })
   apiMocks.oauthStart.mockResolvedValue({
@@ -199,12 +201,16 @@ describe('LoginPage default login method', () => {
     renderLogin({ required: false })
     const emailCodeTab = screen.getByRole('tab', { name: '邮箱验证码' })
     const passwordTab = screen.getByRole('tab', { name: '密码登录' })
+    const passkeyTab = screen.getByRole('tab', { name: 'Passkey登录' })
     // 邮箱验证码必须是视觉顺序第一且默认选中。
     expect(emailCodeTab).toHaveAttribute('aria-selected', 'true')
     expect(passwordTab).toHaveAttribute('aria-selected', 'false')
+    expect(passkeyTab).toHaveAttribute('aria-selected', 'false')
     const tabs = screen.getAllByRole('tab')
     expect(tabs[0]).toHaveTextContent('邮箱验证码')
     expect(tabs[1]).toHaveTextContent('密码登录')
+    expect(tabs[2]).toHaveTextContent('Passkey登录')
+    expect(tabs).toHaveLength(3)
     // 首屏直接进入发送验证码流程，密码表单未挂载。
     expect(
       screen.getByRole('button', { name: '发送验证码' }),
@@ -214,6 +220,10 @@ describe('LoginPage default login method', () => {
     )
     expect(document.querySelector('svg.lucide-paw-print')).not.toBeNull()
     expect(screen.queryByLabelText('密码')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: '使用 passkey 登录' }),
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText('或使用其他方式')).not.toBeInTheDocument()
   })
 
   it('keeps the password form usable after switching tabs', async () => {
@@ -261,6 +271,19 @@ describe('LoginPage default login method', () => {
     expect(
       screen.getByRole('checkbox', { name: /我已阅读并同意/ }).closest('div'),
     ).not.toHaveClass('rounded-md', 'border', 'bg-muted/30', 'p-3')
+
+    await user.click(screen.getByRole('tab', { name: 'Passkey登录' }))
+    const passkeySubmit = screen.getByRole('button', {
+      name: '使用 passkey 登录',
+    })
+    const passkeyConsent = screen.getByRole('checkbox', {
+      name: /我已阅读并同意/,
+    })
+    expect(
+      passkeyConsent.compareDocumentPosition(passkeySubmit) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1)
   })
 })
 
@@ -438,6 +461,35 @@ describe('LoginPage role-aware redirect', () => {
 })
 
 describe('LoginPage passkey contract', () => {
+  it('reports unsupported browsers from the passkey tab and leaves other methods available', async () => {
+    apiMocks.passkeySupported.mockReturnValue(false)
+    renderLogin({ required: false })
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: 'Passkey登录' }))
+    await user.click(screen.getByRole('button', { name: '使用 passkey 登录' }))
+    expect(screen.getByText(/当前浏览器不支持 passkey/)).toBeInTheDocument()
+    expect(apiMocks.passkeyOptions).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('tab', { name: '邮箱验证码' }))
+    expect(screen.getByRole('button', { name: '发送验证码' })).toBeEnabled()
+  })
+
+  it('requires legal consent within the passkey tab before offering sign-in', async () => {
+    localStorage.removeItem('furtalk:legal-consent')
+    apiMocks.publicConfig.mockResolvedValue({
+      ...defaultPublicConfig,
+      user_agreement_url: 'https://example.com/terms',
+    })
+    renderLogin({ required: false })
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: 'Passkey登录' }))
+    const signIn = screen.getByRole('button', { name: '使用 passkey 登录' })
+    expect(signIn).toBeDisabled()
+    await user.click(
+      await screen.findByRole('checkbox', { name: /我已阅读并同意/ }),
+    )
+    expect(signIn).toBeEnabled()
+  })
+
   it('passes the full top-level WebAuthn options to navigator.credentials.get', async () => {
     const envelope = {
       publicKey: {
@@ -464,6 +516,9 @@ describe('LoginPage passkey contract', () => {
 
     renderLogin({ required: false })
     const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: 'Passkey登录' }))
+    expect(screen.queryByLabelText('邮箱')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('密码')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '使用 passkey 登录' }))
 
     await waitFor(() => {

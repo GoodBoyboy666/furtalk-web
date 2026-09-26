@@ -140,7 +140,7 @@ export function ResetPasswordPage() {
                       id="reset-email"
                       type="email"
                       autoComplete="email"
-                      className="pl-9"
+                      className="h-9 pr-3 pl-9"
                       placeholder="you@example.com"
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
@@ -153,7 +153,11 @@ export function ResetPasswordPage() {
                     {error}
                   </p>
                 ) : null}
-                <Button type="submit" disabled={requestCode.isPending}>
+                <Button
+                  type="submit"
+                  className="h-9 px-4"
+                  disabled={requestCode.isPending}
+                >
                   {requestCode.isPending ? (
                     <Loader2 className="animate-spin" />
                   ) : null}
@@ -171,7 +175,7 @@ export function ResetPasswordPage() {
                       id="reset-code"
                       inputMode="numeric"
                       autoComplete="one-time-code"
-                      className="pl-9"
+                      className="h-9 pr-3 pl-9"
                       placeholder={t('codePlaceholder')}
                       value={code}
                       onChange={(event) => setCode(event.target.value)}
@@ -187,7 +191,7 @@ export function ResetPasswordPage() {
                       id="reset-password"
                       type="password"
                       autoComplete="new-password"
-                      className="pl-9"
+                      className="h-9 pr-3 pl-9"
                       placeholder={t('newPasswordPlaceholder')}
                       value={newPassword}
                       onChange={(event) => setNewPassword(event.target.value)}
@@ -203,7 +207,7 @@ export function ResetPasswordPage() {
                       id="reset-confirm"
                       type="password"
                       autoComplete="new-password"
-                      className="pl-9"
+                      className="h-9 pr-3 pl-9"
                       placeholder={t('confirmPasswordPlaceholder')}
                       value={confirmPassword}
                       onChange={(event) =>
@@ -218,7 +222,11 @@ export function ResetPasswordPage() {
                     {error}
                   </p>
                 ) : null}
-                <Button type="submit" disabled={confirmReset.isPending}>
+                <Button
+                  type="submit"
+                  className="h-9 px-4"
+                  disabled={confirmReset.isPending}
+                >
                   {confirmReset.isPending ? (
                     <Loader2 className="animate-spin" />
                   ) : null}
@@ -227,6 +235,7 @@ export function ResetPasswordPage() {
                 <Button
                   type="button"
                   variant="ghost"
+                  className="h-9 px-4"
                   onClick={() => {
                     setStage('request')
                     setCode('')
@@ -244,7 +253,10 @@ export function ResetPasswordPage() {
                 <p className="m-0 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm">
                   {t('resetSuccess')}
                 </p>
-                <Button onClick={() => void navigate({ to: '/login' })}>
+                <Button
+                  className="h-9 px-4"
+                  onClick={() => void navigate({ to: '/login' })}
+                >
                   {t('backToLogin')}
                 </Button>
               </div>
@@ -253,6 +265,7 @@ export function ResetPasswordPage() {
         </Card>
       </FadeIn>
       <CaptchaDialog
+        cancelButtonClassName="h-9 px-4"
         open={requestDialogOpen}
         onOpenChange={handleRequestDialogChange}
         config={captcha}

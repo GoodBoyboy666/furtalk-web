@@ -25,6 +25,7 @@ type CaptchaDialogProps = {
   description: string
   onSolved: (token: string) => void
   onError: (message: string) => void
+  cancelButtonClassName?: string
 }
 
 // CaptchaDialog 是 provider-neutral 验证码的对话框宿主。
@@ -39,6 +40,7 @@ export function CaptchaDialog({
   description,
   onSolved,
   onError,
+  cancelButtonClassName,
 }: CaptchaDialogProps) {
   const { t } = useTranslation('auth')
   const challengeRef = useRef<CaptchaChallengeHandle>(null)
@@ -80,7 +82,11 @@ export function CaptchaDialog({
           </div>
         ) : null}
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            className={cancelButtonClassName}
+            onClick={() => onOpenChange(false)}
+          >
             {t('captchaDialogCancel')}
           </Button>
         </DialogFooter>

@@ -42,7 +42,7 @@ import {
 import { defaultPublicConfig, publicConfigQueryKey } from '@/lib/public-config'
 import { useLegalConsent } from '@/lib/legal-consent'
 
-// 两个登录方式的 CAPTCHA 业务 action，与后端策略键一致。
+// 邮箱验证码与密码登录的 CAPTCHA 业务 action，与后端策略键一致。
 const passwordLoginAction = 'password_login'
 const emailCodeAction = 'email_code'
 
@@ -349,12 +349,15 @@ export function LoginPage() {
               </div>
             ) : null}
             <Tabs defaultValue="email-code">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3 group-data-horizontal/tabs:h-9">
                 <TabsTrigger value="email-code">
                   {t('emailCodeTab')}
                 </TabsTrigger>
                 <TabsTrigger value="password">
                   {t('passwordLoginTab')}
+                </TabsTrigger>
+                <TabsTrigger value="passkey">
+                  {t('passkeyLoginTab')}
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="email-code">
@@ -367,7 +370,7 @@ export function LoginPage() {
                         id="email-code-email"
                         type="email"
                         autoComplete="email"
-                        className="pl-9"
+                        className="h-9 pr-3 pl-9"
                         placeholder="you@example.com"
                         value={email}
                         onChange={(event) => updateEmail(event.target.value)}
@@ -387,6 +390,7 @@ export function LoginPage() {
                   <Button
                     type="button"
                     variant="default"
+                    className="h-9 px-4"
                     disabled={sendEmailCode.isPending || authBlocked}
                     onClick={() => {
                       setError('')
@@ -425,7 +429,7 @@ export function LoginPage() {
                         id="email"
                         type="email"
                         autoComplete="email"
-                        className="pl-9"
+                        className="h-9 pr-3 pl-9"
                         placeholder="you@example.com"
                         value={email}
                         onChange={(event) => updateEmail(event.target.value)}
@@ -449,7 +453,7 @@ export function LoginPage() {
                         id="password"
                         type="password"
                         autoComplete="current-password"
-                        className="pl-9"
+                        className="h-9 pr-3 pl-9"
                         placeholder={t('passwordPlaceholder')}
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
@@ -466,7 +470,11 @@ export function LoginPage() {
                     prefix={t('legalConsentPrefix')}
                     conjunction={t('legalConsentAnd')}
                   />
-                  <Button type="submit" disabled={passwordDisabled}>
+                  <Button
+                    type="submit"
+                    className="h-9 px-4"
+                    disabled={passwordDisabled}
+                  >
                     {passwordLogin.isPending ? (
                       <Loader2 className="animate-spin" />
                     ) : null}
@@ -474,28 +482,34 @@ export function LoginPage() {
                   </Button>
                 </form>
               </TabsContent>
+              <TabsContent value="passkey">
+                <div className="grid gap-4 pt-3">
+                  <LegalConsentRow
+                    id="passkey-legal-consent"
+                    links={legalLinks}
+                    accepted={legalConsent.accepted}
+                    disabled={!publicConfig.isSuccess}
+                    onAccepted={legalConsent.setAccepted}
+                    prefix={t('legalConsentPrefix')}
+                    conjunction={t('legalConsentAnd')}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-9 w-full px-4"
+                    disabled={authBlocked || busy}
+                    onClick={usePasskey}
+                  >
+                    {passkeyLogin.isPending ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <Fingerprint />
+                    )}
+                    {t('passkey')}
+                  </Button>
+                </div>
+              </TabsContent>
             </Tabs>
-            <div className="my-5 flex items-center gap-3">
-              <Separator className="flex-1" />
-              <span className="text-xs text-muted-foreground">
-                {t('orUseOtherMethod')}
-              </span>
-              <Separator className="flex-1" />
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              disabled={authBlocked || busy}
-              onClick={usePasskey}
-            >
-              {passkeyLogin.isPending ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <Fingerprint />
-              )}
-              {t('passkey')}
-            </Button>
             {publicProviders.data?.providers.length ? (
               <>
                 <div className="my-5 flex items-center gap-3">
@@ -546,6 +560,7 @@ export function LoginPage() {
         </p>
       </FadeIn>
       <CaptchaDialog
+        cancelButtonClassName="h-9 px-4"
         open={passwordDialogOpen}
         onOpenChange={handlePasswordDialogChange}
         config={captcha}
@@ -556,6 +571,7 @@ export function LoginPage() {
         onError={(message) => setError(message)}
       />
       <CaptchaDialog
+        cancelButtonClassName="h-9 px-4"
         open={sendDialogOpen}
         onOpenChange={handleSendDialogChange}
         config={sendCaptcha}

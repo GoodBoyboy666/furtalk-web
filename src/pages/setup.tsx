@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label'
 import { bootstrapApi } from '@/lib/api/resources'
 import { ApiError } from '@/lib/api/client'
 import { BrandMark } from '@/components/BrandMark'
+import { cn } from '@/lib/utils'
 
 // minPasswordLength 与后端密码策略保持一致，服务端仍是最终权威。
 const minPasswordLength = 8
@@ -99,6 +100,7 @@ function SetupForm() {
         <CardContent className="grid gap-3">
           <Button
             variant="outline"
+            className="h-9 px-4"
             onClick={() => {
               setUnavailable(false)
               setSubmitError('')
@@ -107,7 +109,10 @@ function SetupForm() {
             <RotateCcw />
             {t('refill')}
           </Button>
-          <Link to="/login" className={buttonVariants({ variant: 'ghost' })}>
+          <Link
+            to="/login"
+            className={cn(buttonVariants({ variant: 'ghost' }), 'h-9 px-4')}
+          >
             {t('goToLogin')}
           </Link>
         </CardContent>
@@ -133,7 +138,7 @@ function SetupForm() {
                 id="setup-token"
                 type="password"
                 autoComplete="off"
-                className="pl-9"
+                className="h-9 pr-3 pl-9"
                 placeholder={t('setupTokenPlaceholder')}
                 value={setupToken}
                 onChange={(event) => setSetupToken(event.target.value)}
@@ -153,7 +158,7 @@ function SetupForm() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                className="pl-9"
+                className="h-9 pr-3 pl-9"
                 placeholder="admin@example.com"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
@@ -172,7 +177,7 @@ function SetupForm() {
               <Input
                 id="nickname"
                 autoComplete="nickname"
-                className="pl-9"
+                className="h-9 pr-3 pl-9"
                 placeholder={t('adminNicknamePlaceholder')}
                 value={nickname}
                 onChange={(event) => setNickname(event.target.value)}
@@ -190,6 +195,7 @@ function SetupForm() {
               id="password"
               type="password"
               autoComplete="new-password"
+              className="h-9 px-3"
               placeholder={t('passwordPlaceholderMin', { minPasswordLength })}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -206,6 +212,7 @@ function SetupForm() {
               id="confirm"
               type="password"
               autoComplete="new-password"
+              className="h-9 px-3"
               placeholder={t('confirmPlaceholder')}
               value={confirm}
               onChange={(event) => setConfirm(event.target.value)}
@@ -221,7 +228,11 @@ function SetupForm() {
               {submitError}
             </p>
           ) : null}
-          <Button type="submit" disabled={createAdmin.isPending}>
+          <Button
+            type="submit"
+            className="h-9 px-4"
+            disabled={createAdmin.isPending}
+          >
             {createAdmin.isPending ? (
               <Loader2 className="animate-spin" />
             ) : null}
@@ -272,7 +283,11 @@ export function SetupPage() {
               <CardDescription>{t('cannotConnectDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" onClick={() => void status.refetch()}>
+              <Button
+                variant="outline"
+                className="h-9 px-4"
+                onClick={() => void status.refetch()}
+              >
                 <RotateCcw />
                 {t('action.retry', { ns: 'common' })}
               </Button>
@@ -291,7 +306,10 @@ export function SetupPage() {
             <CardContent>
               <Link
                 to="/login"
-                className={buttonVariants({ variant: 'default' })}
+                className={cn(
+                  buttonVariants({ variant: 'default' }),
+                  'h-9 px-4',
+                )}
               >
                 {t('goToLogin')}
               </Link>

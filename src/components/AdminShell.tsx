@@ -2,7 +2,6 @@ import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   BarChart3,
-  ChevronRight,
   FileText,
   LogOut,
   Menu,
@@ -36,8 +35,9 @@ import ThemeToggle from './ThemeToggle'
 import { StateFade } from '@/components/motion'
 import { authApi } from '@/lib/api/resources'
 import { isUnauthorized } from '@/lib/api/client'
+import type { Me } from '@/lib/api/types'
 
-const navigation = [
+const primaryNavigation = [
   { to: '/admin', labelKey: 'navigation.overview', icon: BarChart3 },
   { to: '/admin/comments', labelKey: 'navigation.comments', icon: FileText },
   {
@@ -48,6 +48,9 @@ const navigation = [
   { to: '/admin/sites', labelKey: 'navigation.sites', icon: SlidersHorizontal },
   { to: '/admin/users', labelKey: 'navigation.users', icon: Users },
   { to: '/admin/settings', labelKey: 'navigation.settings', icon: Settings },
+] as const
+
+const secondaryNavigation = [
   {
     to: '/account/profile',
     labelKey: 'navigation.personalCenter',
@@ -55,38 +58,85 @@ const navigation = [
   },
 ] as const
 
-function NavItems({ onNavigate }: { onNavigate?: () => void }) {
+type NavItem =
+  (typeof primaryNavigation)[number] | (typeof secondaryNavigation)[number]
+
+function NavItems({
+  items,
+  onNavigate,
+}: {
+  items: readonly NavItem[]
+  onNavigate?: () => void
+}) {
   const { t } = useTranslation('common')
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
   return (
-    <nav className="grid gap-1.5">
-      {navigation.map((item) => {
+    <div className="grid gap-0.5">
+      {items.map((item) => {
         const Icon = item.icon
         const active =
           pathname === item.to ||
-          (item.to !== '/admin' && pathname.startsWith(item.to))
+          (item.to !== '/admin' && pathname.startsWith(`${item.to}/`))
         return (
           <Link
             key={item.to}
             to={item.to}
             onClick={onNavigate}
-            className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+            aria-current={active ? 'page' : undefined}
+            className={`group flex min-h-9 items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar ${
               active
-                ? 'bg-primary text-primary-foreground shadow-xs'
-                : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : 'text-muted-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground'
             }`}
           >
-            <Icon className="size-4 shrink-0 transition-transform group-hover:scale-105" />
-            <span className="truncate">{t(item.labelKey)}</span>
-            {active ? (
-              <ChevronRight className="ml-auto size-3.5 opacity-80" />
-            ) : null}
+            <Icon className="size-4 shrink-0" aria-hidden="true" />
+            <span className="min-w-0 truncate">{t(item.labelKey)}</span>
           </Link>
         )
       })}
-    </nav>
+    </div>
+  )
+}
+
+function SidebarNavigation({ onNavigate }: { onNavigate?: () => void }) {
+  const { t } = useTranslation('common')
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-4">
+      <nav aria-label={t('navigation.workspace')}>
+        <p className="mb-2 px-2.5 text-[11px] font-medium text-muted-foreground">
+          {t('navigation.workspace')}
+        </p>
+        <NavItems items={primaryNavigation} onNavigate={onNavigate} />
+      </nav>
+      <nav
+        aria-label={t('navigation.personalCenter')}
+        className="mt-auto border-t border-sidebar-border pt-3"
+      >
+        <NavItems items={secondaryNavigation} onNavigate={onNavigate} />
+      </nav>
+    </div>
+  )
+}
+
+function SidebarUser({ user, initials }: { user: Me; initials: string }) {
+  const { t } = useTranslation('common')
+  return (
+    <div className="flex min-w-0 items-center gap-3 border-t border-sidebar-border px-4 py-3">
+      <UserAvatar
+        avatarUrl={user.avatar_url}
+        name={user.nickname || user.email}
+        fallback={initials}
+        className="size-8 shrink-0"
+      />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">
+          {user.nickname || t('accountMenu.nicknameFallback')}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+      </div>
+    </div>
   )
 }
 
@@ -170,45 +220,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const initials = initialsFrom(user.nickname, user.email)
   return (
     <div className="min-h-screen bg-muted/20">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-border/70 bg-sidebar/95 backdrop-blur-md lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:block">
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center gap-3 border-b border-border/60 px-5">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
-              <BrandMark className="size-4.5" />
+          <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <BrandMark className="size-4" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="m-0 text-sm font-semibold tracking-tight">
                 {t('app.name')}
               </p>
-              <p className="m-0 text-[11px] font-medium text-muted-foreground">
+              <p className="m-0 truncate text-xs text-muted-foreground">
                 {t('app.console')}
               </p>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto px-3.5 py-4">
-            <p className="mb-2 px-3 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground/80">
-              {t('navigation.workspace')}
-            </p>
-            <NavItems />
-          </div>
-          <div className="border-t border-border/60 p-3">
-            <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/40 p-2.5 transition-colors">
-              <UserAvatar
-                avatarUrl={user.avatar_url}
-                name={user.nickname || user.email}
-                fallback={initials}
-                className="size-8"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium">
-                  {user.nickname || t('accountMenu.nicknameFallback')}
-                </p>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-          </div>
+          <SidebarNavigation />
+          <SidebarUser user={user} initials={initials} />
         </div>
       </aside>
       <div className="lg:pl-64">
@@ -227,16 +255,27 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   </Button>
                 }
               />
-              <SheetContent side="left" className="w-72 p-0">
-                <SheetHeader className="border-b px-6 py-5">
-                  <SheetTitle className="flex items-center gap-2">
-                    <BrandMark className="size-4" />
-                    {t('app.name')} {t('app.console')}
+              <SheetContent
+                side="left"
+                className="w-72 max-w-[calc(100vw-1.5rem)] gap-0 bg-sidebar p-0 text-sidebar-foreground"
+              >
+                <SheetHeader className="border-b border-sidebar-border px-4 py-4">
+                  <SheetTitle className="flex items-center gap-3 text-sidebar-foreground">
+                    <span className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                      <BrandMark className="size-4" />
+                    </span>
+                    <span className="min-w-0 text-left">
+                      <span className="block truncate text-sm font-semibold">
+                        {t('app.name')}
+                      </span>
+                      <span className="block truncate text-xs font-normal text-muted-foreground">
+                        {t('app.console')}
+                      </span>
+                    </span>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="p-3">
-                  <NavItems onNavigate={() => setMobileOpen(false)} />
-                </div>
+                <SidebarNavigation onNavigate={() => setMobileOpen(false)} />
+                <SidebarUser user={user} initials={initials} />
               </SheetContent>
             </Sheet>
             <div className="lg:hidden">

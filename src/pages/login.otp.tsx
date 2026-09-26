@@ -354,7 +354,7 @@ export function LoginOtpPage() {
               </div>
               <Button
                 type="button"
-                className="w-full"
+                className="h-9 w-full px-4"
                 disabled={
                   emailCodeLogin.isPending ||
                   loginDialogOpen ||
@@ -399,6 +399,7 @@ export function LoginOtpPage() {
         </Card>
       </FadeIn>
       <CaptchaDialog
+        cancelButtonClassName="h-9 px-4"
         open={sendDialogOpen}
         onOpenChange={handleSendDialogChange}
         config={sendCaptcha}
@@ -409,6 +410,7 @@ export function LoginOtpPage() {
         onError={(message) => setError(message)}
       />
       <CaptchaDialog
+        cancelButtonClassName="h-9 px-4"
         open={loginDialogOpen}
         onOpenChange={handleLoginDialogChange}
         config={loginCaptcha}

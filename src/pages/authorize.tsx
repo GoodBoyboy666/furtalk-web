@@ -219,7 +219,12 @@ export function AuthorizePage() {
                 <p className="m-0 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                   {fatal}
                 </p>
-                <Button type="button" variant="outline" onClick={cancel}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 px-4"
+                  onClick={cancel}
+                >
                   {t('action.close', { ns: 'common' })}
                 </Button>
               </div>
@@ -248,6 +253,7 @@ export function AuthorizePage() {
                 <Button
                   type="button"
                   variant="outline"
+                  className="h-9 px-4"
                   onClick={() => {
                     if (embeddingOrigin) {
                       setContextError(null)
@@ -279,12 +285,18 @@ export function AuthorizePage() {
                   </p>
                 ) : null}
                 <div className="grid grid-cols-2 gap-3">
-                  <Button type="button" variant="outline" onClick={cancel}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-9 px-4"
+                    onClick={cancel}
+                  >
                     <X />
                     {t('action.cancel', { ns: 'common' })}
                   </Button>
                   <Button
                     type="button"
+                    className="h-9 px-4"
                     onClick={() => {
                       setIssueError('')
                       issue.mutate()
